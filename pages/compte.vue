@@ -1,6 +1,6 @@
 <template>
   <private-route>
-    <div class="imageFond"></div>
+<!--    <div class="imageFond"></div>
     <v-container v-if="user" class="ma-1">
       <v-row>
         <v-col cols="12">
@@ -51,7 +51,7 @@
       </v-row>
     </v-container>
     <historique-client :userId="user._id" type="SOUM" />
-    <!--        <HistoriqueClient userId={user._id} type="POT" />-->
+    &lt;!&ndash;        <HistoriqueClient userId={user._id} type="POT" />&ndash;&gt;-->
   </private-route>
 </template>
 
@@ -73,6 +73,9 @@ const confirmpassword: Ref<string> = ref('')
 const errorpassword: Ref<boolean> = ref(false)
 const message: Ref<string> = ref('')
 
+const props = defineProps({
+  authenticate: Boolean,
+})
 
 const majUser = (id: string) => {
   if (typeof id !== "undefined" && id !== "" && id) {

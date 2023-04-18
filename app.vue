@@ -28,7 +28,7 @@
       </v-app-bar>
       <v-main style="min-height: 300px;">
         <suspense>
-          <NuxtPage/>
+          <NuxtPage :authenticate="authenticate"/>
           <template #fallback>
             <div class="imageFondChargement"/>
           </template>
