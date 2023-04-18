@@ -1,0 +1,189 @@
+html {
+  overflow-y: auto
+}
+
+.imageFond {
+  z-index: 5000;
+  position: fixed;
+
+  right: 50px;
+  height: 100px;
+  width: 100px;
+  background-color: transparent;
+  background-image: url("/192.png");
+  background-size: 100px 100px;
+  background-repeat: no-repeat;
+  background-position: center;
+  animation: 5s clignotement linear infinite;
+}
+
+@keyframes clignotement {
+  0% {
+    transform: translate(0px) scaleX(-1);
+    right: 50px;
+    bottom: 50px;
+  }
+
+  38% {
+    transform:  scaleX(-1);
+    right: calc(100% - 290px - 160px);
+    bottom: 50px;
+  }
+
+  40% {
+    transform:  scaleX(-1);
+    right: calc(100% - 290px - 150px);
+    bottom: 70px;
+  }
+
+  42% {
+    transform:  scaleX(-1);
+    right: calc(100% - 290px - 140px);
+    bottom: 30px;
+  }
+
+  44% {
+    transform:  scaleX(-1);
+    right: calc(100% - 290px -  130px);
+    bottom: 50px;
+  }
+
+  50% {
+    transform:  scaleX(-1);
+    right: calc(100% - 290px -  100px);
+    bottom: 50px;
+  }
+  50.01% {
+    transform: scaleX(1);
+    right: calc(100% - 290px - 100px);
+    bottom: 50px;
+  }
+
+  80% {
+    transform:  scaleX(1);
+    right: 160px;
+    bottom: 50px;
+  }
+
+  82% {
+    transform:  scaleX(1);
+    right: 150px;
+    bottom: 30px;
+  }
+
+  84% {
+    transform:  scaleX(1);
+    right: 140px;
+    bottom: 70px;
+  }
+
+  86% {
+    transform:  scaleX(1);
+    right: 130px;
+    bottom: 50px;
+  }
+
+  100% {
+    transform: scaleX(1);
+    right: 50px;
+    bottom: 50px;
+  }
+
+}
+
+@media screen and (max-width: 960px) {
+  .imageFond {
+    bottom: 25px;
+    right: 25px;
+    height: 50px;
+    width: 50px;
+    background-size: 50px 50px;
+  }
+
+
+  @keyframes clignotement {
+    0% {
+      transform: translate(0px) scaleX(-1);
+      right: 25px;
+      bottom: 25px;
+    }
+
+    38% {
+      transform:  scaleX(-1);
+      right: calc(100% - 160px);
+      bottom: 25px;
+    }
+
+    40% {
+      transform:  scaleX(-1);
+      right: calc(100% - 150px);
+      bottom: 45px;
+    }
+
+    42% {
+      transform:  scaleX(-1);
+      right: calc(100% - 140px);
+      bottom: 5px;
+    }
+
+    44% {
+      transform:  scaleX(-1);
+      right: calc(100% - 130px);
+      bottom: 25px;
+    }
+
+    50% {
+      transform:  scaleX(-1);
+      right: calc(100% - 75px);
+      bottom: 25px;
+    }
+    50.01% {
+      transform: scaleX(1);
+      right: calc(100% - 75px);
+      bottom: 25px;
+    }
+
+    65.01% {
+      transform: scaleX(1) rotate(0deg);
+      right: calc(100% / 2);
+      bottom: 25px;
+    }
+
+    70.01% {
+      transform: scaleX(1) rotate(360deg);
+      right: calc(100% / 3 );
+      bottom: 25px;
+    }
+
+
+    80% {
+      transform:  scaleX(1) rotate(360deg);
+      right:  calc(100% / 7 );
+      bottom: 25px;
+    }
+
+    82% {
+      transform:  scaleX(1) rotate(360deg);
+      right:  calc(100% / 8 );
+      bottom: 5px;
+    }
+
+    84% {
+      transform:  scaleX(1) rotate(360deg);
+      right:  calc(100% / 9 );
+      bottom: 45px;
+    }
+
+    86% {
+      transform:  scaleX(1) rotate(360deg);
+      right:  calc(100% / 10 );
+      bottom: 25px;
+    }
+
+    100% {
+      transform: scaleX(1) rotate(360deg);
+      right: 25px;
+      bottom: 25px;
+    }
+  }
+}
