@@ -63,151 +63,218 @@
       </v-row>
     </v-container>
 
-<!--    {
-    openDialog &&
-    <Dialog
-        open={openDialog}
-        onClose={handleClose}
-        scroll={"paper"}
-        aria-labelledby="scroll-dialog-title"
-        aria-describedby="scroll-dialog-description"
-    >
-      <DialogTitle id="scroll-dialog-title">Détail commande</DialogTitle>
-      <DialogContent dividers={true}>
+  <v-dialog v-model="openDialog" class="v-container">
+    <v-card v-if="commande !== null">
+      <v-card-title>Détail commande</v-card-title>
+      <v-container v-if="type==='SOUM'">
+        <v-row>
+          <v-col sm="3">Barman</v-col>
+          <v-col sm="9">{{commande.barman.nom}} {{commande.barman.prenom}}</v-col>
+          <v-col sm="3">Date:</v-col>
+          <v-col sm="9">{{ new Date(commande.date).toLocaleString() }}</v-col>
+          <v-divider/>
+        </v-row>
 
-        <Grid container>
+        <v-row v-if="commande.historique.length > 0">
+          <v-col sm="12">Articles</v-col>
+          <ligne-article :items="commande.historique"/>
+          <v-divider/>
+        </v-row>
+        <v-row>
+          <v-col sm="12">Paiement</v-col>
+        </v-row>
+        <v-row v-if="commande.paiementCompte">
+          <v-col sm="6">Compte</v-col>
+          <v-col sm="6">{{commande.paiementCompte}} BN</v-col>
+        </v-row>
+        <v-row v-if="commande.paiementEspece">
+          <v-col sm="6">Espèce</v-col>
+          <v-col sm="6">{{commande.paiementEspece}} €</v-col>
+        </v-row>
+        <v-row v-if="commande.paiementCheque">
+          <v-col sm="6">Espèce</v-col>
+          <v-col sm="6">{{commande.paiementCheque}} €</v-col>
+        </v-row>
+        <v-row v-if="commande.paiementVirement">
+          <v-col sm="6">Espèce</v-col>
+          <v-col sm="6">{{commande.paiementVirement}} €</v-col>
+        </v-row>
+        <v-row>
+          <v-col sm="6">Monnaie rendue</v-col>
+          <v-col sm="6">{{commande.rendreMonnaie}} €</v-col>
+        </v-row>
+        <v-divider/>
+        <v-row>
+          <v-col sm="6">Ancien solde</v-col>
+          <v-col sm="6">{{commande.ancienSolde}} BN</v-col>
+        </v-row>
+        <v-row>
+          <v-col sm="6">Nouveau solde</v-col>
+          <v-col sm="6">{{commande.nouveauSolde}} BN</v-col>
+        </v-row>
+        <v-row v-if="commande.commentaires">
+          <v-col sm="6">Commentaires</v-col>
+          <v-col sm="6">{{commande.commentaires}}</v-col>
+        </v-row>
 
-          {type === 'SOUM' &&
-          <React.Fragment>
-
-            <Grid item xs={3}>Barman</Grid>
-            <Grid item xs={9}>{this.state.commande.barman.nom} {this.state.commande.barman.prenom}</Grid>
-            <Grid item xs={3}>Date:</Grid>
-            <Grid item xs={9}> {new Date(this.state.commande.date).toLocaleString()}</Grid>
-            <Grid item xs={12}><Divider /></Grid>
-
-            {this.state.commande.historique.length > 0 &&
-            <React.Fragment>
-
-              <Grid item xs={12}>Articles</Grid>
-              {
-              getLigneArticle(this.state.commande.historique)
-              }
-
-              <Grid item xs={12}><Divider /></Grid>
-
-              <Grid item xs={12}>Paiement</Grid>
-
-              {
-              this.state.commande.paiementCompte > 0 &&
-              <React.Fragment>
-                <Grid item xs={6}>Compte</Grid>
-                <Grid item xs={6}>{this.state.commande.paiementCompte} BN</Grid>
-              </React.Fragment>
-              }
-
-              {
-              this.state.commande.paiementEspece > 0 &&
-              <React.Fragment>
-                <Grid item xs={6}>Espèce</Grid>
-                <Grid item xs={6}>{this.state.commande.paiementEspece} €</Grid>
-              </React.Fragment>
-              }
-
-              {
-              this.state.commande.paiementCheque > 0 &&
-              <React.Fragment>
-                <Grid item xs={6}>Chèque</Grid>
-                <Grid item xs={6}>{this.state.commande.paiementCheque} €</Grid>
-              </React.Fragment>
-              }
-
-              {
-              this.state.commande.paiementVirement > 0 &&
-              <React.Fragment>
-                <Grid item xs={6}>Virement</Grid>
-                <Grid item xs={6}>{this.state.commande.paiementVirement} €</Grid>
-              </React.Fragment>
-              }
-
-              <Grid item xs={6}>Monnaie rendue</Grid>
-              <Grid item xs={6}>{this.state.commande.rendreMonnaie} €</Grid>
-
-              <Grid item xs={12}><Divider /></Grid>
+        <v-row v-if="type==='POT'">
+          <v-col sm="3">Date:</v-col>
+          <v-col sm="9">{{new Date(commande.date).toLocaleString()}}</v-col>
+          <v-col sm="3">Nom:</v-col>
+          <v-col sm="9">{{commande.nom}}</v-col>
+          <v-col sm="3">Participants:</v-col>
+<!--          <v-col sm="9">{{commande.participants.map((value, index) =>
+              (<Chip key={index + "participant"} size="small" label={value.nom + " " + value.prenom} />)}}</v-col>-->
+<!--          TODO::a modifier après vérification sur l'application en prod, participant n'existe pas dans commande-->
+          <v-row v-if="commande.historique.length > 0">
+            <v-col sm="12">Articles</v-col>
+            <ligne-article :items="commande.historique"/>
+            <v-divider/>
+          </v-row>
+          <v-row>
+            <v-col sm="12">Paiement</v-col>
+          </v-row>
+          <v-row v-if="commande.paiementCompte">
+            <v-col sm="6">Compte</v-col>
+            <v-col sm="6">{{commande.paiementCompte}} BN</v-col>
+          </v-row>
+          <v-row v-if="commande.paiementEspece">
+            <v-col sm="6">Espèce</v-col>
+            <v-col sm="6">{{commande.paiementEspece}} €</v-col>
+          </v-row>
+          <v-row v-if="commande.paiementCheque">
+            <v-col sm="6">Espèce</v-col>
+            <v-col sm="6">{{commande.paiementCheque}} €</v-col>
+          </v-row>
+          <v-row v-if="commande.paiementVirement">
+            <v-col sm="6">Espèce</v-col>
+            <v-col sm="6">{{commande.paiementVirement}} €</v-col>
+          </v-row>
+          <v-row>
+            <v-col sm="6">Monnaie rendue</v-col>
+            <v-col sm="6">{{commande.rendreMonnaie}} €</v-col>
+          </v-row>
+        </v-row>
+      </v-container>
+      <v-card-actions class="justify-end">
+        <v-btn @click="handleClose" color="primary">Fermer</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 
 
-            </React.Fragment>
-            }
+<!--              <Grid item xs={12}>Paiement</Grid>-->
 
-            <Grid item xs={6}>Ancien solde</Grid>
-            <Grid item xs={6}>{this.state.commande.ancienSolde} BN</Grid>
+<!--              {-->
+<!--              this.state.commande.paiementCompte > 0 &&-->
+<!--              <React.Fragment>-->
+<!--                <Grid item xs={6}>Compte</Grid>-->
+<!--                <Grid item xs={6}>{this.state.commande.paiementCompte} BN</Grid>-->
+<!--              </React.Fragment>-->
+<!--              }-->
 
-            <Grid item xs={6}>Nouveau solde</Grid>
-            <Grid item xs={6}>{this.state.commande.nouveauSolde} BN</Grid>
+<!--              {-->
+<!--              this.state.commande.paiementEspece > 0 &&-->
+<!--              <React.Fragment>-->
+<!--                <Grid item xs={6}>Espèce</Grid>-->
+<!--                <Grid item xs={6}>{this.state.commande.paiementEspece} €</Grid>-->
+<!--              </React.Fragment>-->
+<!--              }-->
 
-            {this.state.commande.commentaires &&
-            <React.Fragment>
-              <Grid item xs={6}>Commentaires</Grid>
-              <Grid item xs={6}>{this.state.commande.commentaires}</Grid>
-            </React.Fragment>
-            }
-          </React.Fragment>
-          }
+<!--              {-->
+<!--              this.state.commande.paiementCheque > 0 &&-->
+<!--              <React.Fragment>-->
+<!--                <Grid item xs={6}>Chèque</Grid>-->
+<!--                <Grid item xs={6}>{this.state.commande.paiementCheque} €</Grid>-->
+<!--              </React.Fragment>-->
+<!--              }-->
 
-          {
-          type === 'POT' &&
-          <React.Fragment>
-            <Grid item xs={3}>Date:</Grid>
-            <Grid item xs={9}> {new Date(this.state.commande.date).toLocaleString()}</Grid>
+<!--              {-->
+<!--              this.state.commande.paiementVirement > 0 &&-->
+<!--              <React.Fragment>-->
+<!--                <Grid item xs={6}>Virement</Grid>-->
+<!--                <Grid item xs={6}>{this.state.commande.paiementVirement} €</Grid>-->
+<!--              </React.Fragment>-->
+<!--              }-->
 
-            <Grid item xs={3}>Nom:</Grid>
-            <Grid item xs={9}> {this.state.commande.nom}</Grid>
+<!--              <Grid item xs={6}>Monnaie rendue</Grid>-->
+<!--              <Grid item xs={6}>{this.state.commande.rendreMonnaie} €</Grid>-->
 
-            <Grid item xs={12} md={3}>Participants:</Grid>
-            <Grid item xs={12} md={9}> {
-              this.state.commande.participants.map((value, index) => (
-              <Chip key={index + "participant"} size="small" label={value.nom + " " + value.prenom} />
-              ))
-              }</Grid>
+<!--              <Grid item xs={12}><Divider /></Grid>-->
 
-            {this.state.commande.historique.length > 0 &&
-            <React.Fragment>
-              <Grid item xs={12}><Divider /></Grid>
-              <Grid item xs={12}>Articles</Grid>
-              <Grid item xs={12}><Divider /></Grid>
-              {
-              getLigneArticle(this.state.commande.historique)
-              }
-            </React.Fragment>
-            }
-            {this.state.commande.rendreMonnaie >= 0 &&
-            <React.Fragment>
 
-              <Grid item xs={12}><Divider /></Grid>
+<!--            </React.Fragment>-->
+<!--            }-->
 
-              <Grid item xs={6}>Espèce</Grid>
-              <Grid item xs={6}>{this.state.commande.paiementEspece} €</Grid>
+<!--            <Grid item xs={6}>Ancien solde</Grid>-->
+<!--            <Grid item xs={6}>{this.state.commande.ancienSolde} BN</Grid>-->
 
-              <Grid item xs={6}>Chèque</Grid>
-              <Grid item xs={6}>{this.state.commande.paiementCheque} €</Grid>
+<!--            <Grid item xs={6}>Nouveau solde</Grid>-->
+<!--            <Grid item xs={6}>{this.state.commande.nouveauSolde} BN</Grid>-->
 
-              <Grid item xs={6}>Virement</Grid>
-              <Grid item xs={6}>{this.state.commande.paiementVirement} €</Grid>
+<!--            {this.state.commande.commentaires &&-->
+<!--            <React.Fragment>-->
+<!--              <Grid item xs={6}>Commentaires</Grid>-->
+<!--              <Grid item xs={6}>{this.state.commande.commentaires}</Grid>-->
+<!--            </React.Fragment>-->
+<!--            }-->
+<!--          </React.Fragment>-->
+<!--          }-->
 
-              <Grid item xs={6}>Monnaie rendue</Grid>
-              <Grid item xs={6}>{this.state.commande.rendreMonnaie} €</Grid>
-            </React.Fragment>
-            }
-          </React.Fragment>
+<!--          {-->
+<!--          type === 'POT' &&-->
+<!--          <React.Fragment>-->
+<!--            <Grid item xs={3}>Date:</Grid>-->
+<!--            <Grid item xs={9}> {new Date(this.state.commande.date).toLocaleString()}</Grid>-->
 
-          }
-        </Grid>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={handleClose} color="primary">Fermer</Button>
-      </DialogActions>
-    </Dialog>
-    }-->
+<!--            <Grid item xs={3}>Nom:</Grid>-->
+<!--            <Grid item xs={9}> {this.state.commande.nom}</Grid>-->
+
+<!--            <Grid item xs={12} md={3}>Participants:</Grid>-->
+<!--            <Grid item xs={12} md={9}> {-->
+<!--              this.state.commande.participants.map((value, index) => (-->
+<!--              <Chip key={index + "participant"} size="small" label={value.nom + " " + value.prenom} />-->
+<!--              ))-->
+<!--              }</Grid>-->
+
+<!--            {this.state.commande.historique.length > 0 &&-->
+<!--            <React.Fragment>-->
+<!--              <Grid item xs={12}><Divider /></Grid>-->
+<!--              <Grid item xs={12}>Articles</Grid>-->
+<!--              <Grid item xs={12}><Divider /></Grid>-->
+<!--              {-->
+<!--              getLigneArticle(this.state.commande.historique)-->
+<!--              }-->
+<!--            </React.Fragment>-->
+<!--            }-->
+<!--            {this.state.commande.rendreMonnaie >= 0 &&-->
+<!--            <React.Fragment>-->
+
+<!--              <Grid item xs={12}><Divider /></Grid>-->
+
+<!--              <Grid item xs={6}>Espèce</Grid>-->
+<!--              <Grid item xs={6}>{this.state.commande.paiementEspece} €</Grid>-->
+
+<!--              <Grid item xs={6}>Chèque</Grid>-->
+<!--              <Grid item xs={6}>{this.state.commande.paiementCheque} €</Grid>-->
+
+<!--              <Grid item xs={6}>Virement</Grid>-->
+<!--              <Grid item xs={6}>{this.state.commande.paiementVirement} €</Grid>-->
+
+<!--              <Grid item xs={6}>Monnaie rendue</Grid>-->
+<!--              <Grid item xs={6}>{this.state.commande.rendreMonnaie} €</Grid>-->
+<!--            </React.Fragment>-->
+<!--            }-->
+<!--          </React.Fragment>-->
+
+<!--          }-->
+<!--        </Grid>-->
+<!--      </DialogContent>-->
+<!--      <DialogActions>-->
+<!--        <Button onClick={handleClose} color="primary">Fermer</Button>-->
+<!--      </DialogActions>-->
+<!--    </Dialog>-->
+<!--    }-->
 </template>
 
 <script setup lang="ts">
@@ -216,6 +283,8 @@ import Fetch from "~/services/FetchService";
 import {onMounted, watch} from "#imports";
 import HistoriqueInterface from "~/interfaces/HistoriqueInterface";
 import HistoriqueLigneInterface from "~/interfaces/HistoriqueLigneInterface";
+import HistoriqueLigneResponseInterface from "~/interfaces/HistoriqueLigneResponseInterface";
+import LigneArticle from "~/components/LigneArticle.vue";
 
 const loading: Ref<boolean>  = ref(true)
 const openDialog: Ref<boolean> = ref(false)
@@ -224,8 +293,7 @@ const total: Ref<number> = ref(0)
 const page: Ref<number> = ref(1)
 const paginationSize: Ref<number> = ref(1)
 const historique: Ref<Array<HistoriqueLigneInterface> | null> = ref(null)
-const commande: Ref<string> = ref('')
-
+const commande: Ref<HistoriqueLigneInterface | null> = ref(null)
 
 const props = defineProps({
   userId: {type: String, required: true},
@@ -257,9 +325,9 @@ onMounted(()=>{
 watch(page, () => majUser())
 
 const afficherDetail = (identifiantHistorique: string) => {
-  Fetch.requete({ url: `/historique/${identifiantHistorique}`, method: 'GET' }, resultat => {
-    openDialog.value = true
+  Fetch.requete({ url: `/historique/${identifiantHistorique}`, method: 'GET' }, (resultat: HistoriqueLigneResponseInterface) => {
     commande.value = resultat.doc
+    openDialog.value = true
   })
 }
 

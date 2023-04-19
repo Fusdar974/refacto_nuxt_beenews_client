@@ -1,3 +1,5 @@
+import HistoriqueDetailInterface from "~/interfaces/HistoriqueDetailInterface";
+
 interface HistoriqueLigneInterface{
     ancienSolde: number,
     barman: {
@@ -18,6 +20,8 @@ interface HistoriqueLigneInterface{
     paiementVirement: number,
     rendreMonnaie: string,
     type: string,
+    historique?: Array<HistoriqueDetailInterface>,
+    commentaires?: string,
     _id: string,
 }
 
