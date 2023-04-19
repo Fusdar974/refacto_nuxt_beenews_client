@@ -1,6 +1,6 @@
 <template>
   <private-route>
-<!--    <div class="imageFond"></div>
+    <div class="imageFond"></div>
     <v-container v-if="user" class="ma-1">
       <v-row>
         <v-col cols="12">
@@ -50,8 +50,8 @@
         </v-col>
       </v-row>
     </v-container>
-    <historique-client :userId="user._id" type="SOUM" />
-    &lt;!&ndash;        <HistoriqueClient userId={user._id} type="POT" />&ndash;&gt;-->
+    <historique-client  v-if="user" :userId="user._id" type="SOUM" />
+    <!--        <HistoriqueClient userId={user._id} type="POT" />-->
   </private-route>
 </template>
 
@@ -80,8 +80,8 @@ const props = defineProps({
 const majUser = (id: string) => {
   if (typeof id !== "undefined" && id !== "" && id) {
     Fetch.requete({url: `/users/${id}`, method: 'GET'}, (resultUser: UserResponseInterface) => {
-      user.value = resultUser.user;
-    });
+      user.value = resultUser.user
+    })
   }
 }
 
