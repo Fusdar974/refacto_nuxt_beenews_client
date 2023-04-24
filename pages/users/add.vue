@@ -1,11 +1,14 @@
 <template>
-
+  <div>
+    <users-form action="create" user-id=""/>
+  </div>
 </template>
 
-<script>
-export default {
-  name: "add"
-}
+<script setup lang="ts">
+
+import UsersForm from "~/forms/UsersForm.vue";
+
+
 </script>
 
 <style scoped>

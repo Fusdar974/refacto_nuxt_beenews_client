@@ -73,62 +73,6 @@
         </v-container>
       </div>
 
-
-<!--      <br />-->
-<!--      <Grid item xs={12}>-->
-<!--        <ButtonGroup>-->
-<!--          {this.createLien()}-->
-<!--        </ButtonGroup>-->
-<!--        <Select-->
-<!--            native-->
-<!--            value={this.state.nombreParPage}-->
-<!--            onChange={handleChangeSelect}-->
-<!--            inputProps={{-->
-<!--            name: 'nombreParPage',-->
-<!--        id: 'nombreParPage',-->
-<!--        }}-->
-<!--        >-->
-
-<!--        <option value={10}>10</option>-->
-<!--        <option value={20}>20</option>-->
-<!--        <option value={30}>30</option>-->
-<!--        <option value={'all'}>Tous</option>-->
-<!--        </Select>-->
-<!--      </Grid>-->
-<!--    </div>-->
-<!--      }-->
-<!--      {-->
-<!--      loading &&-->
-<!--      <Grid container spacing={2} alignItems="center">-->
-<!--        <Grid item>-->
-<!--          <CircularProgress />-->
-<!--        </Grid>-->
-<!--        <Grid item xs>-->
-<!--          Chargement ...-->
-<!--        </Grid>-->
-<!--        {this.recharger()}-->
-<!--      </Grid>-->
-<!--      }-->
-<!--    </div>-->
-<!--    }-->
-<!--    {actionUtilisateur && <ActionsUsers onClose={this.closeAction} params={this.state.action} />}-->
-<!--    <Snackbar-->
-<!--        autoHideDuration={1000}-->
-<!--        onClose={this.handleClose}-->
-<!--        open={open}-->
-<!--    >-->
-<!--      <Alert onClose={this.handleClose} severity="success">{message}</Alert>-->
-<!--    </Snackbar>-->
-
-<!--    {-->
-<!--    openDialog && <ModalConfirmation-->
-<!--      handleClose={handleCloseSupprimer}-->
-<!--      confirmer={confirmerSuppression}-->
-<!--      open={openDialog}-->
-<!--      titre={"Confirmation de suppression"} question={"Voulez vous supprimer cet utilisateur ?"} />-->
-<!--    }-->
-
-<!--    </div >-->
   </private-route>
 </template>
 
@@ -208,6 +152,7 @@
     actionUtilisateur.value = true
     action.value = "add"
     identifiant.value = identifiant
+    navigateTo("/users/add")
   }
 
   onMounted(()=>{
