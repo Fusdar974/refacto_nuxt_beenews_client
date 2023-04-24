@@ -9,10 +9,9 @@
             </v-col>
             <v-row>
               <v-col>
-                <v-text-field label=""
+                <v-text-field
                               name="champderecherche"
                               v-model="champRecherche"
-                              @change="recharger"
                               append-inner-icon="mdi:mdi-magnify"/>
                 <v-btn variant="tonal"
                        color="primary"
@@ -44,8 +43,8 @@
                   <td class="align-center">{{user.profils.map(item => item.nom).join(',')}}</td>
                   <td class="align-center">
                     <v-btn-group variant="tonal">
-                      <v-btn @click="modifier(user.id)"><v-icon icon="mdi mdi_small mdi-pencil"></v-icon></v-btn>
-                      <v-btn v-if="user.supprimable" @click="supprimer(user.id)"><v-icon icon="mdi mdi_small mdi-delete"></v-icon></v-btn>
+                      <v-btn @click="modifier(user._id)"><v-icon icon="mdi mdi_small mdi-pencil"></v-icon></v-btn>
+                      <v-btn v-if="user.supprimable" @click="supprimer(user._id)"><v-icon icon="mdi mdi_small mdi-delete"></v-icon></v-btn>
                     </v-btn-group>
                   </td>
                 </tr>
@@ -69,10 +68,40 @@
 
           </div>
         <v-container v-if="loading" class="align-center">
-
+          <v-row>
+              <v-col>
+                  <v-progress-circular model-value="20"></v-progress-circular>
+              </v-col>
+          </v-row>
+            <v-col>Chargement...</v-col>
+            {{recharger}}
         </v-container>
+        <modal-confirmation v-model="openDialog"
+                            :titre="'Confirmation de suppression'"
+                            :question="'Voulez vous supprimer cet utilisateur ?'"
+                            @confirmer="confirmerSuppression">
+        </modal-confirmation>
       </div>
 
+
+<!--    {actionUtilisateur && <ActionsUsers onClose={this.closeAction} params={this.state.action} />}-->
+<!--    <Snackbar-->
+<!--        autoHideDuration={1000}-->
+<!--        onClose={this.handleClose}-->
+<!--        open={open}-->
+<!--    >-->
+<!--      <Alert onClose={this.handleClose} severity="success">{message}</Alert>-->
+<!--    </Snackbar>-->
+
+<!--    {-->
+<!--    openDialog && <ModalConfirmation-->
+<!--      handleClose={handleCloseSupprimer}-->
+<!--      confirmer={confirmerSuppression}-->
+<!--      open={openDialog}-->
+<!--      titre={"Confirmation de suppression"} question={"Voulez vous supprimer cet utilisateur ?"} />-->
+<!--    }-->
+
+<!--    </div >-->
   </private-route>
 </template>
 
@@ -98,7 +127,7 @@
   const actionUtilisateur: Ref<boolean> = ref(false)
   const action: Ref<string> = ref("")
   const identifiant: Ref<any> = ref("")
-  const identifiantASupp: Ref<any> = ref("")
+  const identifiantASupp: Ref<string> = ref("")
   const champRecherche: Ref<string> = ref("")
   const message: Ref<string> = ref("")
 
@@ -137,7 +166,7 @@
     identifiant.value = identifiant
   }
 
-  const supprimer = (identifiant: any) => {
+  const supprimer = (identifiant: string) => {
     openDialog.value = true
     identifiantASupp.value =  identifiant
   }
@@ -152,7 +181,6 @@
     actionUtilisateur.value = true
     action.value = "add"
     identifiant.value = identifiant
-    navigateTo("/users/add")
   }
 
   onMounted(()=>{
@@ -173,6 +201,7 @@
 
   watch(page, () => recharger())
   watch(nombreParPage, () => recharger())
+  watch(champRecherche, () => recharger())
 
   const closeAction = (messageAfficher : string) => {
     if (messageAfficher) {
@@ -193,12 +222,8 @@
     open.value = false
   }
 
-  const handleCloseSupprimer = () => {
-    openDialog.value = false
-  }
-
   const confirmerSuppression = () => {
-    Fetch.requete({ url: `/users/${identifiantASupp}`, method: 'DELETE' }, () => {
+    Fetch.requete({ url: `/users/${identifiantASupp.value}`, method: 'DELETE' }, () => {
       closeAction('SUPPRESSION ok');
       openDialog.value = false
     });
