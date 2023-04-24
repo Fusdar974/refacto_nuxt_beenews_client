@@ -1,7 +1,7 @@
 <template>
   <div>
-    <h2> {title} </h2 > <!-- là tu affiches {title} ;) -->
-    <v-form v-if="mode === SHOW"> <!-- liste moi les différences entre les 2 forms créé. Conclusion? -->
+    <h2> {title} </h2 > <!-- TODO: là tu affiches {title} ;) -->
+    <v-form v-if="mode === SHOW"> <!-- TODO: liste moi les différences entre les 2 forms créé. Conclusion? -->
       <v-text-field v-model="user" type="text" readonly label="nom"/> <!-- user.nom? -->
       <v-text-field type="text" readonly label="prenom" v-model="user.prenom" />
       <v-text-field type="text" readonly label="surnom" v-model="user.surnom"/>
@@ -13,7 +13,7 @@
             @change="deselectionnerDroit(profil.value)"
             disabled/>
       </div>
-      <span>Profils</span><!-- Titre après la liste? -->
+      <span>Profils</span><!-- TODO: Titre après la liste? -->
       <v-checkbox type="checkbox"
                   label="Compte désactivé"
                   v-model="user.value.isDesactive"
@@ -156,7 +156,7 @@
   const titre: Ref<string> = ref("Aucun titre")
 
   const props = defineProps({
-    userId: {type: String, required: true},/* required true? a voir pour le create */
+    userId: {type: String, required: true},/* TODO: required true? a voir pour le create */
     action: {type: String, required: true},
   })
 
@@ -266,7 +266,7 @@
     }, (reussite: PasswordChangeResponseInterface) => {
 
       if (reussite.data === 'ok') {
-          /* a partir d'ici ya un soucis c'est un objet ou des intructions ?*/
+          /* TODO: a partir d'ici ya un soucis c'est un objet ou des intructions ?*/
           open.value = false,
           openDefault.value = false,
           openSnack.value = true,
@@ -298,7 +298,7 @@
   }
 
   const desactiverCompte = () => {
-    //   tu peux simplifier le code en dessous ? 1 ligne suffit
+    //TODO:   tu peux simplifier le code en dessous ? 1 ligne suffit
     if(user.value!.isDesactive === true){
       user.value!.isDesactive = false
     }
