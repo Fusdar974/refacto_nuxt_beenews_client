@@ -1,8 +1,8 @@
 <template>
   <div>
-    <h2> {title} </h2 >
-    <v-form v-if="mode === SHOW">
-      <v-text-field v-model="user" type="text" readonly label="nom"/>
+    <h2> {title} </h2 > <!-- là tu affiches {title} ;) -->
+    <v-form v-if="mode === SHOW"> <!-- liste moi les différences entre les 2 forms créé. Conclusion? -->
+      <v-text-field v-model="user" type="text" readonly label="nom"/> <!-- user.nom? -->
       <v-text-field type="text" readonly label="prenom" v-model="user.prenom" />
       <v-text-field type="text" readonly label="surnom" v-model="user.surnom"/>
       <v-text-field type="text" readonly label="mail" v-model="user.mail" :error="erreurMail.value"/>
@@ -13,7 +13,7 @@
             @change="deselectionnerDroit(profil.value)"
             disabled/>
       </div>
-      <span>Profils</span>
+      <span>Profils</span><!-- Titre après la liste? -->
       <v-checkbox type="checkbox"
                   label="Compte désactivé"
                   v-model="user.value.isDesactive"
@@ -156,7 +156,7 @@
   const titre: Ref<string> = ref("Aucun titre")
 
   const props = defineProps({
-    userId: {type: String, required: true},
+    userId: {type: String, required: true},/* required true? a voir pour le create */
     action: {type: String, required: true},
   })
 
@@ -245,8 +245,8 @@
 
   const modifier = () => {
     if (user !== null){
-      const newUser = user.value
-      user.value!.profils = user.value!.profils.filter(item => item.isValid)
+      const newUser = user.value /* apparement pas utilisé */
+      user.value!.profils = user.value!.profils.filter(item => item.isValid) /* ! ou ? */
       Fetch.requete({ url: `/users/${user.value!._id}`, data: { user }, method: 'PUT' }, () => {
         fermer('Modification OK');
       });
@@ -266,6 +266,7 @@
     }, (reussite: PasswordChangeResponseInterface) => {
 
       if (reussite.data === 'ok') {
+          /* a partir d'ici ya un soucis c'est un objet ou des intructions ?*/
           open.value = false,
           openDefault.value = false,
           openSnack.value = true,
@@ -297,6 +298,7 @@
   }
 
   const desactiverCompte = () => {
+    //   tu peux simplifier le code en dessous ? 1 ligne suffit
     if(user.value!.isDesactive === true){
       user.value!.isDesactive = false
     }
