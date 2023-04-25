@@ -33,7 +33,7 @@
               </thead>
               <tbody v-if="users !== null">
                 <tr v-for="(user, index) in users"
-                    :key="index">
+                    :key="index" @click="consulter(user._id)">
                   <td class="align-center">
                     <v-icon v-if="user.isDesactive" icon="mdi:mdi_small" color="red"/>
                     {{user.nom}}
@@ -92,16 +92,6 @@
 <!--    >-->
 <!--      <Alert onClose={this.handleClose} severity="success">{message}</Alert>-->
 <!--    </Snackbar>-->
-
-<!--    {-->
-<!--    openDialog && <ModalConfirmation-->
-<!--      handleClose={handleCloseSupprimer}-->
-<!--      confirmer={confirmerSuppression}-->
-<!--      open={openDialog}-->
-<!--      titre={"Confirmation de suppression"} question={"Voulez vous supprimer cet utilisateur ?"} />-->
-<!--    }-->
-
-<!--    </div >-->
   </private-route>
 </template>
 
@@ -125,8 +115,8 @@
   const open: Ref<boolean> = ref(false)
   const openDialog: Ref<boolean> = ref(false)
   const actionUtilisateur: Ref<boolean> = ref(false)
-  const action: Ref<string> = ref("")
-  const identifiant: Ref<any> = ref("")
+  const action: Ref<ActionInterface |null> = ref(null)
+  const identifiant: Ref<string> = ref("")
   const identifiantASupp: Ref<string> = ref("")
   const champRecherche: Ref<string> = ref("")
   const message: Ref<string> = ref("")
@@ -160,27 +150,32 @@
       Fetch.requete({ url: '/users', data: { page: page.value, nombre: nombreParPage.value ,recherche: champRecherche.value } }, setUsers);
     }
 
-  const modifier = (identifiant: any) => {
+  const modifier = (id: string) => {
     actionUtilisateur.value = true
-    action.value = "edit"
-    identifiant.value = identifiant
+    identifiant.value = id
+    let newAction: ActionInterface
+    newAction = {action : "edit", id : identifiant }
+    action.value = newAction
   }
 
-  const supprimer = (identifiant: string) => {
+  const supprimer = (id: string) => {
     openDialog.value = true
-    identifiantASupp.value =  identifiant
+    identifiantASupp.value =  id
   }
 
-  const consulter = (identifiant : any) => {
+  const consulter = (id : string) => {
+    console.log(id)
     actionUtilisateur.value = true
-    action.value = "show"
-    identifiant.value = identifiant
+    let newAction: ActionInterface
+    newAction = {action : "edit", id : identifiant }
+    action.value = newAction
+    identifiant.value = id
+    navigateTo(`/users/show/${identifiant.value}`)
   }
 
   const ajouter = () => {
     actionUtilisateur.value = true
-    action.value = "add"
-    identifiant.value = identifiant
+    navigateTo('/users/add')
   }
 
   onMounted(()=>{

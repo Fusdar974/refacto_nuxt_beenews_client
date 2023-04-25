@@ -1,42 +1,38 @@
 <template>
   <div>
-    <h2> {title} </h2 > <!-- TODO: là tu affiches {title} ;) -->
-    <v-form v-if="mode === SHOW"> <!-- TODO: liste moi les différences entre les 2 forms créé. Conclusion? -->
-      <v-text-field v-model="user" type="text" readonly label="nom"/> <!-- user.nom? -->
-      <v-text-field type="text" readonly label="prenom" v-model="user.prenom" />
-      <v-text-field type="text" readonly label="surnom" v-model="user.surnom"/>
-      <v-text-field type="text" readonly label="mail" v-model="user.mail" :error="erreurMail.value"/>
-      <div v-for="(profil, index) in user.profils" :key="index" >
-        <v-checkbox
-            type="checkbox"
-            :label="profil.value"
-            @change="deselectionnerDroit(profil.value)"
-            disabled/>
-      </div>
-      <span>Profils</span><!-- TODO: Titre après la liste? -->
-      <v-checkbox type="checkbox"
-                  label="Compte désactivé"
-                  v-model="user.value.isDesactive"
-                  disabled/>
-    </v-form>
-    <v-form v-else>
-      <v-text-field v-model="user" type="text"  label="nom"/>
-      <v-text-field type="text" label="prenom" v-model="user.prenom" />
+    <h2> {{ titre }} </h2 >
+    <v-form v-if="user" :disabled="mode === SHOW">
+      <v-text-field v-model="user.nom" type="text" label="nom" :rules="[v => !!v || 'Veuillez rentrer un nom']" required/>
+      <v-text-field type="text" label="prenom" v-model="user.prenom" :rules="[v => !!v || 'Veuillez rentrer un prénom']"/>
       <v-text-field type="text" label="surnom" v-model="user.surnom"/>
-      <v-text-field type="text" label="mail" v-model="user.mail" :error="erreurMail.value"/>
+      <v-text-field type="text" label="mail" v-model="user.mail" :error="erreurMail.value" :rules="[v => !!v || 'Veuillez rentrer un mail']"/>
+      <div v-if="mode === EDIT">
+        <v-btn @click="demandeConfirmation" variant="outlined" color="primary">Envoyer nouveau mot de passe</v-btn>
+        <v-btn @click="demandeConfirmationDefaut" variant="outlined" color="primary">Mot de passe par défaut</v-btn>
+      </div>
+      <h4>Profils</h4>
       <div v-for="(profil, index) in user.profils" :key="index" >
         <v-checkbox
-            type="checkbox"
-            :label="profil.value"
-            @change="deselectionnerDroit(profil.value)"
-            />
+            :label="profil.nom"
+            v-model="profil.isValid"
+            ></v-checkbox>
       </div>
-      <span>Profils</span>
-      <v-checkbox type="checkbox"
-                  label="Compte désactivé"
-                  v-model="user.value.isDesactive"
-                  />
+      <v-checkbox label="Compte désactivé"
+                  v-model="user.isDesactive"
+                  ></v-checkbox>
     </v-form>
+    <historique-client v-if="userId" :user-id="userId" type="SOUM"></historique-client>
+    <historique-client v-if="userId" :user-id="userId" type="POT"></historique-client>
+    <ModalConfirmation v-model="open"
+                       @confirmer="envoyerNouveauPwd"
+                       titre="Envoyer nouveau mot de passe"
+                       question="Voulez-vous envoyer un mot de passe ?"
+    />
+    <ModalConfirmation v-model="openDefault"
+                       @confirmer="envoyerNouveauPwdDefaut"
+                       titre="Remise à zéro du mot de passe"
+                       question="Voulez-vous mettre le mot de passe par défaut ?"
+    />
 
 <!--
 
@@ -48,27 +44,7 @@
           }
         </td>
       </tr>
-      <tr>
-        <td>
-          <span>Profils</span>
-        </td>
-        <td>
-          {
-          user.profils.map((item) => (
-          <div key={item._id}>{item.nom}
-            <Checkbox
-                type="checkbox"
-                key={item._id}
-                value={item._id}
-                disabled={mode === this.SHOW}
-            onChange={() => desectionnerDroit(item._id)}
-            checked={item.isValid} />
-          </div>
-          ))
-          }
-        </td>
 
-      </tr>
       <tr>
         <td>
           <span>Compte desactivé</span>
@@ -142,6 +118,9 @@
   import Fetch from "~/services/FetchService";
   import UsersResponseInterface from "~/interfaces/UsersResponseInterface";
   import PasswordChangeResponseInterface from "~/interfaces/PasswordChangeResponseInterface";
+  import ProfilInterface from "~/interfaces/ProfilInterface";
+  import UserResponseInterface from "~/interfaces/UserResponseInterface";
+  import ProfilsResponseInterface from "~/interfaces/ProfilsResponseInterface";
 
   const SHOW ='show'
   const EDIT = 'edit';
@@ -156,7 +135,7 @@
   const titre: Ref<string> = ref("Aucun titre")
 
   const props = defineProps({
-    userId: {type: String, required: true},/* TODO: required true? a voir pour le create */
+    userId: {type: String},
     action: {type: String, required: true},
   })
 
@@ -185,11 +164,14 @@
         break;
       default:
         title = "Informations client"
-        mode.value= SHOW;
+        mode.value = SHOW;
         break;
     }
       if (mode.value !== CREATE) {
-        Fetch.requete({ url: `/users/${props.userId}`, method: 'GET' }, user);
+        Fetch.requete({url: `/users/${props.userId}`, method: 'GET'}, (resultUser: UserResponseInterface) => {
+          user.value = resultUser.user
+        })
+
       } else {
         user.value = {
           isDesactive: false,
@@ -203,6 +185,14 @@
           supprimable: true,
           _id: "",
         }
+        Fetch.requete({ url: `/users/profils`, method: 'POST' }, (profiles: ProfilsResponseInterface) =>{;
+        const profilsPossede = user.value!.profils || [];
+        const profilsAfficher = profiles.profils.map(item => {
+          item.isValid = typeof profilsPossede.find(item2 => item2._id === item._id) !== 'undefined';
+          return item;
+        })
+        user.value!.profils = profilsAfficher;
+        })
       }
       titre.value = title
   })
@@ -266,10 +256,9 @@
     }, (reussite: PasswordChangeResponseInterface) => {
 
       if (reussite.data === 'ok') {
-          /* TODO: a partir d'ici ya un soucis c'est un objet ou des intructions ?*/
-          open.value = false,
-          openDefault.value = false,
-          openSnack.value = true,
+          open.value = false
+          openDefault.value = false
+          openSnack.value = true
           messageSnack.value = 'Mot de passe remis à zéro'
       }
     });
@@ -286,26 +275,17 @@
 
       if (reussite.data === 'ok') {
         open.value = false,
-            openSnack.value = true,
+            openSnack.value = true
             messageSnack.value = 'Mot de passe remis à zéro'
       } else {
-          erreurMail.value = true,
+          erreurMail.value = true
           open.value = false,
-          openSnack.value = true,
+          openSnack.value = true
           messageSnack.value = 'Veuillez saisir une bonne adresse email'
       }
     });
   }
 
-  const desactiverCompte = () => {
-    //TODO:   tu peux simplifier le code en dessous ? 1 ligne suffit
-    if(user.value!.isDesactive === true){
-      user.value!.isDesactive = false
-    }
-    else{
-      user.value!.isDesactive = true
-    }
-  }
 </script>
 
 <style scoped>

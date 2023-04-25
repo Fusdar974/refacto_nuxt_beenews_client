@@ -1,6 +1,6 @@
 <template>
   <div>
-    <users-form action="create" user-id=""/>
+    <users-form action="add" user-id=""/>
   </div>
 </template>
 
