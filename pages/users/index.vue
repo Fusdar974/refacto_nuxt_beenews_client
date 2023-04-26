@@ -1,6 +1,6 @@
 <template>
   <private-route>
-    <div v-if="!actionUtilisateur">
+    <div>
         <v-container class="maxW800 align-center align-content-lg-space-between ma-3">
           <v-row>
             <v-col>
@@ -82,7 +82,7 @@
                             @confirmer="confirmerSuppression">
         </modal-confirmation>
       </div>
-
+    <v-snackbar v-model="open" timeout="1000"><v-alert type="success">{{message}}</v-alert></v-snackbar>
 
 <!--    {actionUtilisateur && <ActionsUsers onClose={this.closeAction} params={this.state.action} />}-->
 <!--    <Snackbar-->
@@ -156,6 +156,7 @@
     let newAction: ActionInterface
     newAction = {action : "edit", id : identifiant }
     action.value = newAction
+    navigateTo(`/users/edit/${identifiant.value}`)
   }
 
   const supprimer = (id: string) => {
@@ -210,22 +211,11 @@
     recharger();
   }
 
-  const handleClose = (reason : string) => {
-    if (reason === 'clickaway') {
-      return;
-    }
-    open.value = false
-  }
-
   const confirmerSuppression = () => {
     Fetch.requete({ url: `/users/${identifiantASupp.value}`, method: 'DELETE' }, () => {
       closeAction('SUPPRESSION ok');
       openDialog.value = false
     });
-  }
-
-  const recherche = () => {
-    recharger();
   }
 
   const handleChangeSelect = (e: any) => {

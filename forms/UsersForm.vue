@@ -2,7 +2,7 @@
   <div>
     <h2> {{ titre }} </h2 >
     <v-form v-if="user" :disabled="mode === SHOW">
-      <v-text-field v-model="user.nom" type="text" label="nom" :rules="[v => !!v || 'Veuillez rentrer un nom']" required/>
+      <v-text-field v-model="user.nom" type="text" label="nom" :rules="[v => !!v || 'Veuillez rentrer un nom']"/>
       <v-text-field type="text" label="prenom" v-model="user.prenom" :rules="[v => !!v || 'Veuillez rentrer un prénom']"/>
       <v-text-field type="text" label="surnom" v-model="user.surnom"/>
       <v-text-field type="text" label="mail" v-model="user.mail" :error="erreurMail.value" :rules="[v => !!v || 'Veuillez rentrer un mail']"/>
@@ -15,12 +15,15 @@
         <v-checkbox
             :label="profil.nom"
             v-model="profil.isValid"
+
             ></v-checkbox>
       </div>
       <v-checkbox label="Compte désactivé"
                   v-model="user.isDesactive"
-                  ></v-checkbox>
+                  color="red"
+      ></v-checkbox>
     </v-form>
+
     <historique-client v-if="userId" :user-id="userId" type="SOUM"></historique-client>
     <historique-client v-if="userId" :user-id="userId" type="POT"></historique-client>
     <ModalConfirmation v-model="open"
@@ -33,82 +36,13 @@
                        titre="Remise à zéro du mot de passe"
                        question="Voulez-vous mettre le mot de passe par défaut ?"
     />
-
-<!--
-
-          {mode === this.EDIT &&
-          <React.Fragment>
-            <Button onClick={demandeConfirmation} variant="contained" color="primary">Envoyer nouveau mot de passe</Button>
-            <Button onClick={demandeConfirmationDefaut} variant="contained" color="primary">Mot de passe par défaut</Button>
-          </React.Fragment>
-          }
-        </td>
-      </tr>
-
-      <tr>
-        <td>
-          <span>Compte desactivé</span>
-        </td>
-        <td>
-          <Checkbox
-              type="checkbox"
-              value={user.isDesactive}
-              disabled={mode === this.SHOW}
-          onChange={desactiverCompte}
-          checked={user.isDesactive} />
-        </td>
-      </tr>
-      </tbody>
-    </table>
-
-
-    {
-    user._id &&
-    <React.Fragment>
-      <HistoriqueClient userId={user._id} type="SOUM" />
-      <HistoriqueClient userId={user._id} type="POT" />
-    </React.Fragment>
-    }
-
-    {
-    open &&
-    <ModalConfirmation
-        handleClose={handleClose}
-        confirmer={envoyerNouveauPwd}
-        open={open}
-        titre={"Envoyer nouveau mot de passe"}
-    question={"Voulez-vous envoyer un mot de passe"}
-    />
-    }
-
-    {
-    openDefaut &&
-
-    <ModalConfirmation
-        handleClose={handleCloseDefaut}
-        confirmer={envoyerNouveauPwdDefaut}
-        open={openDefaut}
-        titre={"Remise à zéro du mot de passe"}
-    question={"Voulez-vous mettre le mot de passe par défaut ?"}
-    />
-
-    }
-
-    {
-    openSnack &&
-    <Snackbar
-        autoHideDuration={4000}
-        onClose={this.handleCloseSnack}
-        open={openSnack}
-    >
-      <Alert onClose={this.handleCloseSnack} severity={this.state.severity}>{messageSnack}</Alert>
-    </Snackbar>
-
-    }
-
     <div>
-      {this.getBouton()}
-    </div>-->
+      <v-btn v-if="mode === SHOW" color="primary" class="ma-1" variant="outlined" key="edit" @click="retourModifier">Modifier</v-btn>
+      <v-btn v-if="mode === EDIT" color="primary" class="ma-1" variant="outlined" key="edit" @click="modifier">Valider</v-btn>
+      <v-btn v-if="mode === CREATE" color="primary" class="ma-1" variant="outlined" key="create" @click="creer">Créer</v-btn>
+      <v-btn color="primary" class="ma-1" variant="outlined" key="create" @click="fermer">Fermer</v-btn>
+    </div>
+    <v-snackbar v-if="openSnack" v-model="openSnack" timeout="4000"><v-alert :type="severity">{{messageSnack}}</v-alert></v-snackbar>
   </div >
 </template>
 
@@ -121,6 +55,7 @@
   import ProfilInterface from "~/interfaces/ProfilInterface";
   import UserResponseInterface from "~/interfaces/UserResponseInterface";
   import ProfilsResponseInterface from "~/interfaces/ProfilsResponseInterface";
+  import router from "#app/plugins/router";
 
   const SHOW ='show'
   const EDIT = 'edit';
@@ -133,19 +68,45 @@
   const messageSnack: Ref<string> = ref("")
   const mode: Ref<string> = ref("")
   const titre: Ref<string> = ref("Aucun titre")
+  const severity: Ref<string> = ref("")
 
   const props = defineProps({
     userId: {type: String},
     action: {type: String, required: true},
   })
 
+  //const emits = defineEmits(['update:modelValue', "message"])
+
   const fermer = (messageAfficher: string) => {
     if (messageAfficher) {
-      onUnmounted(() => {
-
-      })
+      //emits("message", messageAfficher)
     }
+    navigateTo('/users')
   }
+
+  /*export default {
+    setup () {
+      return { v$: useVuelidate() }
+    },
+    data () {
+      return {
+        firstName: '',
+        lastName: '',
+        contact: {
+          email: ''
+        }
+      }
+    },
+    validations () {
+      return {
+        firstName: { required }, // Matches this.firstName
+        lastName: { required }, // Matches this.lastName
+        contact: {
+          email: { required, email } // Matches this.contact.email
+        }
+      }
+    }
+  }*/
 
   onBeforeMount(() => {
     let title: string;
@@ -226,7 +187,7 @@
     if (user !== null){
       const newUser = user.value;
       newUser!.profils = user.value!.profils.filter(item => item.isValid)
-      Fetch.requete({ url: '/users/create', method: 'POST', data: { user } }, () => {
+      Fetch.requete({ url: '/users/create', method: 'POST', data: { newUser } }, () => {
         fermer('Création OK')
         open.value = false
       });
@@ -236,17 +197,12 @@
   const modifier = () => {
     if (user !== null){
       const newUser = user.value /* apparement pas utilisé */
-      user.value!.profils = user.value!.profils.filter(item => item.isValid) /* ! ou ? */
-      Fetch.requete({ url: `/users/${user.value!._id}`, data: { user }, method: 'PUT' }, () => {
+      newUser!.profils = newUser!.profils.filter(item => item.isValid) /* ! ou ? */
+      Fetch.requete({ url: `/users/${user.value!._id}`, data: { newUser }, method: 'PUT' }, () => {
         fermer('Modification OK');
       });
     }
 
-  }
-
-  const deselectionnerDroit = (valeur : number) => {
-    let droit = user.value!.profils.find(item => item._id === valeur);
-    droit!.isValid = !droit!.isValid;
   }
 
   const envoyerNouveauPwdDefaut = () => {
@@ -256,6 +212,7 @@
     }, (reussite: PasswordChangeResponseInterface) => {
 
       if (reussite.data === 'ok') {
+          severity.value = "success"
           open.value = false
           openDefault.value = false
           openSnack.value = true
@@ -274,12 +231,14 @@
     }, (reussite: PasswordChangeResponseInterface) => {
 
       if (reussite.data === 'ok') {
-        open.value = false,
+        severity.value = "success"
+        open.value = false
             openSnack.value = true
             messageSnack.value = 'Mot de passe remis à zéro'
       } else {
+        severity.value = "error"
           erreurMail.value = true
-          open.value = false,
+          open.value = false
           openSnack.value = true
           messageSnack.value = 'Veuillez saisir une bonne adresse email'
       }
