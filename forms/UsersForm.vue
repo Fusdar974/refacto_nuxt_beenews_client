@@ -1,25 +1,25 @@
 <template>
   <div>
     <h2> {{ titre }} </h2 >
-    <v-form v-if="user" :disabled="mode === SHOW">
-      <v-text-field v-model="user.nom" type="text" label="nom" :rules="[v => !!v || 'Veuillez rentrer un nom']"/>
-      <v-text-field type="text" label="prenom" v-model="user.prenom" :rules="[v => !!v || 'Veuillez rentrer un prénom']"/>
-      <v-text-field type="text" label="surnom" v-model="user.surnom"/>
-      <v-text-field type="text" label="mail" v-model="user.mail" :error="erreurMail.value" :rules="[v => !!v || 'Veuillez rentrer un mail']"/>
+    <v-form v-if="selectedUser" :disabled="mode === SHOW">
+      <v-text-field v-model="selectedUser.nom" type="text" label="nom" :rules="[v => !!v || 'Veuillez rentrer un nom']"/>
+      <v-text-field type="text" label="prenom" v-model="selectedUser.prenom" :rules="[v => !!v || 'Veuillez rentrer un prénom']"/>
+      <v-text-field type="text" label="surnom" v-model="selectedUser.surnom"/>
+      <v-text-field type="text" label="mail" v-model="selectedUser.mail" :error="erreurMail.value" :rules="[v => !!v || 'Veuillez rentrer un mail']"/>
       <div v-if="mode === EDIT">
         <v-btn @click="demandeConfirmation" variant="outlined" color="primary">Envoyer nouveau mot de passe</v-btn>
         <v-btn @click="demandeConfirmationDefaut" variant="outlined" color="primary">Mot de passe par défaut</v-btn>
       </div>
       <h4>Profils</h4>
-      <div v-for="(profil, index) in user.profils" :key="index" >
+      <div v-for="(profil, index) in selectedUser.profils" :key="index" >
         <v-checkbox
             :label="profil.nom"
             v-model="profil.isValid"
-
+            color="indigo"
             ></v-checkbox>
       </div>
       <v-checkbox label="Compte désactivé"
-                  v-model="user.isDesactive"
+                  v-model="selectedUser.isDesactive"
                   color="red"
       ></v-checkbox>
     </v-form>
@@ -56,11 +56,12 @@
   import UserResponseInterface from "~/interfaces/UserResponseInterface";
   import ProfilsResponseInterface from "~/interfaces/ProfilsResponseInterface";
   import router from "#app/plugins/router";
+  import profilInterface from "~/interfaces/ProfilInterface";
 
   const SHOW ='show'
   const EDIT = 'edit';
   const CREATE = 'create';
-  const user: Ref<UserInterface | null> = ref(null)
+  const selectedUser: Ref<UserInterface | null> = ref(null)
   const open: Ref<boolean> = ref(false)
   const openDefault: Ref<boolean> = ref(false)
   const openSnack: Ref<boolean> = ref(false)
@@ -69,19 +70,41 @@
   const mode: Ref<string> = ref("")
   const titre: Ref<string> = ref("Aucun titre")
   const severity: Ref<string> = ref("")
+  const profils: Ref<Array<ProfilInterface> | null> = ref(null)
 
   const props = defineProps({
     userId: {type: String},
     action: {type: String, required: true},
   })
 
-  //const emits = defineEmits(['update:modelValue', "message"])
-
-  const fermer = (messageAfficher: string) => {
-    if (messageAfficher) {
-      //emits("message", messageAfficher)
+  const objetTest = {
+    nom:"laurent",
+    type:{
+      nom:"humain",
+      genre:{
+        nom: "homme"
+      }
     }
-    navigateTo('/users')
+  }
+
+  const reachDepth = (attrLink: string, object: any) : any => {
+    let attrSLink: string[] = attrLink.split(".")
+    if (attrSLink.length === 1) {
+      return object[attrSLink[0]]
+    }
+    else {
+      let newAttrLink: string
+      newAttrLink = ""
+
+      for(let i = 1; i < attrSLink.length; i++) {
+        if (i === attrSLink.length-1) {
+          newAttrLink = newAttrLink.concat(attrSLink[i])
+        } else {
+          newAttrLink = newAttrLink.concat(attrSLink[i], ".")
+        }
+      }
+      return reachDepth(newAttrLink, object[attrSLink[0]])
+    }
   }
 
   /*export default {
@@ -107,6 +130,24 @@
       }
     }
   }*/
+  //const emits = defineEmits(['update:modelValue', "message"])
+
+  const fermer = (messageAfficher: string) => {
+    if (messageAfficher) {
+      //emits("message", messageAfficher)
+    }
+    navigateTo('/users')
+  }
+
+  const setUser = (userP: UserInterface | null, profilsP: ProfilsResponseInterface) => {
+    const profilsPossede = userP!.profils || [];
+    const profilsAfficher = profilsP.profils.map((item: profilInterface) => {
+      item.isValid = typeof profilsPossede.find(item2 => item2._id === item._id) !== 'undefined';
+      return item;
+    })
+    userP!.profils = profilsAfficher;
+    selectedUser.value = userP
+  }
 
   onBeforeMount(() => {
     let title: string;
@@ -130,11 +171,15 @@
     }
       if (mode.value !== CREATE) {
         Fetch.requete({url: `/users/${props.userId}`, method: 'GET'}, (resultUser: UserResponseInterface) => {
-          user.value = resultUser.user
+          selectedUser.value = resultUser.user
         })
-
+        Fetch.requete({ url: `/users/profils`, method: 'POST' }, (profiles: ProfilsResponseInterface) => {
+          if (selectedUser !== null){
+            setUser(selectedUser.value, profiles)
+          }
+        })
       } else {
-        user.value = {
+        selectedUser.value = {
           isDesactive: false,
           nom: "",
           prenom: "",
@@ -146,13 +191,10 @@
           supprimable: true,
           _id: "",
         }
-        Fetch.requete({ url: `/users/profils`, method: 'POST' }, (profiles: ProfilsResponseInterface) =>{;
-        const profilsPossede = user.value!.profils || [];
-        const profilsAfficher = profiles.profils.map(item => {
-          item.isValid = typeof profilsPossede.find(item2 => item2._id === item._id) !== 'undefined';
-          return item;
-        })
-        user.value!.profils = profilsAfficher;
+        Fetch.requete({ url: `/users/profils`, method: 'POST' }, (profiles: ProfilsResponseInterface) =>{
+          if (selectedUser !== null){
+            setUser(selectedUser.value, profiles)
+          }
         })
       }
       titre.value = title
@@ -184,10 +226,11 @@
   }
 
   const creer = () => {
-    if (user !== null){
-      const newUser = user.value;
-      newUser!.profils = user.value!.profils.filter(item => item.isValid)
-      Fetch.requete({ url: '/users/create', method: 'POST', data: { newUser } }, () => {
+    if (selectedUser !== null){
+      const user = selectedUser.value;
+      user!.profils = selectedUser.value!.profils.filter(item => item.isValid)
+      console.log(user)
+      Fetch.requete({ url: '/users/create', method: 'POST', data: { user } }, () => {
         fermer('Création OK')
         open.value = false
       });
@@ -195,10 +238,10 @@
   }
 
   const modifier = () => {
-    if (user !== null){
-      const newUser = user.value /* apparement pas utilisé */
-      newUser!.profils = newUser!.profils.filter(item => item.isValid) /* ! ou ? */
-      Fetch.requete({ url: `/users/${user.value!._id}`, data: { newUser }, method: 'PUT' }, () => {
+    if (selectedUser !== null){
+      const user = selectedUser.value
+      user!.profils = selectedUser.value!.profils.filter(item => item.isValid) /* ! ou ? */
+      Fetch.requete({ url: `/users/${selectedUser.value!._id}`, data: { user: user }, method: 'PUT' }, () => {
         fermer('Modification OK');
       });
     }
@@ -207,7 +250,7 @@
 
   const envoyerNouveauPwdDefaut = () => {
     Fetch.requete({
-      url: `/users/passwordDefault/${user.value!._id}`,
+      url: `/users/passwordDefault/${selectedUser.value!._id}`,
       method: 'POST',
     }, (reussite: PasswordChangeResponseInterface) => {
 
@@ -223,10 +266,10 @@
 
   const envoyerNouveauPwd = () => {
     Fetch.requete({
-      url: `/users/genererNewPwd/${user.value!._id}`,
+      url: `/users/genererNewPwd/${selectedUser.value!._id}`,
       method: 'POST',
       data: {
-        mail: user.value!.mail
+        mail: selectedUser.value!.mail
       }
     }, (reussite: PasswordChangeResponseInterface) => {
 

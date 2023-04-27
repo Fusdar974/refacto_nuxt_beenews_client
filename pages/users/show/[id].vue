@@ -7,7 +7,6 @@
 <script setup lang="ts">
 
 const props = defineProps({
-  userId: {type: String, required: true},
 })
 
 import UsersForm from "~/forms/UsersForm.vue";

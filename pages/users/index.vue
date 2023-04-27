@@ -21,7 +21,7 @@
           </v-row>
         </v-container>
           <div v-if="!loading" class="maxW800" >
-            <v-table density="comfortable">
+            <v-table density="comfortable" hover>
               <thead>
               <tr>
                 <th class="align-center">Nom</th>
@@ -135,16 +135,6 @@
     loading.value = false
     actionUtilisateur.value = false
   }
-    // const obtenirRecheche =() => {
-    //   let retour = "";
-    //   try {
-    //     retour = champRecherche.value;
-    //   }
-    //   catch (err) {
-    //     retour = "";
-    //   }
-    //   return retour;
-    // }
 
     const recharger = () => {
       Fetch.requete({ url: '/users', data: { page: page.value, nombre: nombreParPage.value ,recherche: champRecherche.value } }, setUsers);
