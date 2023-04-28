@@ -43,8 +43,8 @@
                   <td class="align-center">{{user.profils.map(item => item.nom).join(',')}}</td>
                   <td class="align-center">
                     <v-btn-group variant="tonal">
-                      <v-btn @click="modifier(user._id)"><v-icon icon="mdi mdi_small mdi-pencil"></v-icon></v-btn>
-                      <v-btn v-if="user.supprimable" @click="supprimer(user._id)"><v-icon icon="mdi mdi_small mdi-delete"></v-icon></v-btn>
+                      <v-btn @click="modifier($event,user._id)"><v-icon icon="mdi mdi_small mdi-pencil"></v-icon></v-btn>
+                      <v-btn v-if="user.supprimable" @click="supprimer($event, user._id)"><v-icon icon="mdi mdi_small mdi-delete"></v-icon></v-btn>
                     </v-btn-group>
                   </td>
                 </tr>
@@ -140,22 +140,26 @@
       Fetch.requete({ url: '/users', data: { page: page.value, nombre: nombreParPage.value ,recherche: champRecherche.value } }, setUsers);
     }
 
-  const modifier = (id: string) => {
+  const modifier = (event: Event,id: string) => {
+    event.stopPropagation()
     actionUtilisateur.value = true
     identifiant.value = id
     let newAction: ActionInterface
     newAction = {action : "edit", id : identifiant }
     action.value = newAction
+    message.value = "modification OK"
     navigateTo(`/users/edit/${identifiant.value}`)
   }
 
-  const supprimer = (id: string) => {
+  const supprimer = (event: Event ,id: string) => {
+    event.stopPropagation()
     openDialog.value = true
     identifiantASupp.value =  id
+    open.value = true
+    message.value = "Suppression ok"
   }
 
   const consulter = (id : string) => {
-    console.log(id)
     actionUtilisateur.value = true
     let newAction: ActionInterface
     newAction = {action : "edit", id : identifiant }
@@ -166,23 +170,24 @@
 
   const ajouter = () => {
     actionUtilisateur.value = true
+    message.value = "modification OK"
     navigateTo('/users/add')
   }
 
   onMounted(()=>{
-    const chaineDecoupe = location.pathname.split('/');
-    if (chaineDecoupe.length >= 3) {
-      const [, , action, identifiant] = chaineDecoupe;
-      switch (action) {
-        case "show": consulter(identifiant); break;
-        case "edit": modifier(identifiant); break;
-        case "add": ajouter(); break;
-        default:
-          recharger();
-      }
-    } else {
+    // const chaineDecoupe = location.pathname.split('/');
+    // if (chaineDecoupe.length >= 3) {
+    //   const [, , action, identifiant] = chaineDecoupe;
+    //   switch (action) {
+    //     case "show": consulter(identifiant); break;
+    //     case "edit": modifier(identifiant); break;
+    //     case "add": ajouter(); break;
+    //     default:
+    //       recharger();
+    //   }
+    // } else {
       recharger();
-    }
+    // }
   })
 
   watch(page, () => recharger())

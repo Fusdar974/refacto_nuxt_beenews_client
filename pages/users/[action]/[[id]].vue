@@ -1,15 +1,14 @@
 <template>
-  <div>
-    <users-form action="show" :user-id="$route.params.id"/>
-  </div>
+<div>
+  <users-form :action="action" :user-id="id"/>
+</div>
 </template>
 
 <script setup lang="ts">
 
-const props = defineProps({
-})
-
 import UsersForm from "~/forms/UsersForm.vue";
+
+const {action,id} = useRoute().params
 
 </script>
 
