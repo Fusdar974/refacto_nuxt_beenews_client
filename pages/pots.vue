@@ -7,7 +7,9 @@
 import ArticlePotInterface from "~/interfaces/ArticlePotInterface";
 import ProduitInterface from "~/interfaces/ProduitInterface";
 import Fetch from "~/services/FetchService";
-
+import VueDatePicker from '@vuepic/vue-datepicker';
+import PotsForm from "~/forms/PotsForm.vue";
+const date: Ref<string> = ref('')
 const loading: Ref<boolean> = ref(false)
 const pots: Ref<any> = ref([])
 const nombreParPage: Ref<number> = ref(10)

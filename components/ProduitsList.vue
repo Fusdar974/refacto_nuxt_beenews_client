@@ -75,5 +75,10 @@ onBeforeMount(()=>{
 </script>
 
 <style scoped>
-
+.produit-card-container{
+    display: grid;
+    grid-template-columns: repeat(auto-fill,110px);
+    grid-gap: 1rem;
+    justify-content: space-between;
+}
 </style>
