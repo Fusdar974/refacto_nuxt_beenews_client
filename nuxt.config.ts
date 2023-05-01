@@ -11,7 +11,7 @@ export default defineNuxtConfig({
         '@fortawesome/fontawesome-free/css/all.css',
         '@/assets/css/main.scss',], // vuetify ships precompiled css, no need to import sass
     build: {
-        transpile: ['vuetify'],
+        transpile: ['vuetify', '@vuepic/vue-datepicker'],
     },
     vite: {
         // @ts-ignore

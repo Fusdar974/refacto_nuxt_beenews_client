@@ -1,8 +1,8 @@
 <template>
     <h2>{{ pot.title }}</h2>
     <v-container>
-        <v-row>
-            <v-col sm="12" :lg="pot?.articles?.length > 0?9:12">
+        <v-row class="mb-4">
+            <v-col sm="12" :lg="pot?.articles?.length > 0 ? 9 : 12">
                 <v-container>
                     <v-row>
                         <v-col sm="12" md="8">
@@ -120,7 +120,7 @@
                 </v-table>
             </v-col>
         </v-row>
-        <v-btn-group>
+        <v-btn-group class="btn-group">
             <v-btn v-if="mode === EDIT"
                    color="primary"
                    key="edit"
@@ -151,34 +151,35 @@
 
 <script setup lang="ts">
 import UserInterface from "~/interfaces/UserInterface";
-import TypeProduitInterface from "~/interfaces/TypeProduitInterface";
 import ProduitInterface from "~/interfaces/ProduitInterface";
 import Fetch from "~/services/FetchService";
-import ArticlePotInterface from "~/interfaces/ArticlePotInterface";
-import VueDatePicker from '@vuepic/vue-datepicker';
 import PotInterface from "~/interfaces/PotInterface";
 import UsersResponseInterface from "~/interfaces/UsersResponseInterface";
-import ValeurBNResponseInterface from "~/interfaces/ValeurBNResponseInterface";
-import {ComputedRef} from "vue";
-import potInterface from "~/interfaces/PotInterface";
 
 const SHOW = 'show'
 const EDIT = 'edit'
 const CREATE = 'create'
 
-const pot: Ref<PotInterface> = ref({} as PotInterface)
+const pot: Ref<PotInterface> = ref({
+    titre: '',
+    participants: [],
+    date: '',
+    articles: [],
+    etat: ''
+} as PotInterface)
 const users: Ref<Array<UserInterface>> = ref([] as Array<UserInterface>)
-const articlesPots: Ref<Array<ArticlePotInterface> | []> = ref([])
 const produitToScreen: Ref<Array<ProduitInterface>> = ref([] as Array<ProduitInterface>)
 const filtre: Ref<string> = ref('Bières')
 const valeurPoint: Ref<number> = ref(0)
 const show: Ref<boolean> = ref(false)
 const openDialogValidation: Ref<boolean> = ref(false)
-const mode: Ref<string> = ref('')
+const mode: Ref<string> = ref(CREATE)
+const total: Ref<number> = ref(0)
+const totalParParticipant: Ref<number> = ref(0)
 
-
+watch(pot.value, nv => console.log(nv))
 const creer = () => {
-    if (pot.value.participants.length > 0) {
+    if (pot.value.participants && pot.value.participants.length > 0) {
         Fetch.requete({url: '/pots/create', method: 'POST', data: {pot: pot.value}}, () => {
             fermer('Création OK');
         });
@@ -188,9 +189,11 @@ const creer = () => {
 }
 
 const modifier = () => {
-    Fetch.requete({url: `/pots/${pot.value._id}`, data: {pot: pot.value}, method: 'PUT'}, () => {
-        fermer('Modification OK');
-    });
+    if(pot.value._id){
+        Fetch.requete({url: `/pots/${pot.value._id}`, data: {pot: pot.value}, method: 'PUT'}, () => {
+            fermer('Modification OK');
+        });
+    }
 }
 
 const demanderEncaisser = () => {
@@ -216,16 +219,49 @@ const fermer = (t: string) => {
 
 const confirmerEncaisser = () => {
     const potTemp = {...pot.value, etat: 'Paiement', dateEncaissement: new Date()}
+    calcul();
+    calculPaimentPot(totalParParticipant.value);
 
-    const retour = calcul();
-    calculPaimentPot(retour.totalParParticipant);
-
-    Fetch.requete({url: `/pots/${pot.value._id}`, data: {pot: pot.value}, method: 'PUT'}, () => {
-        pot.value.etat = "Paiement";
-        retour.pot = {...pot.value}
-        retour.openDialog = false;
-        return retour;
+    Fetch.requete({
+        url: `/pots/${pot.value._id}`,
+        data: {pot: pot.value},
+        method: 'PUT'
+    }, () => {
+        pot.value = potTemp
+        openDialog.value = false
     });
+}
+
+const calcul = () => {
+    let totalTemp = 0
+    pot.value.articles.forEach(element =>
+        totalTemp += element.prixEuros * element.quantite + element.prix * element.quantite * valeurPoint.value)
+    if (pot.value.participants.length > 0) {
+        totalParParticipant.value = parseFloat((totalTemp / pot.value.participants.length)
+            .toFixed(2))
+    }
+    total.value = parseFloat(totalTemp.toFixed(2))
+}
+
+const payer = (identifiant: string) => {
+    const potTemp = {...pot.value}
+    const participant = potTemp.participants.find(item => item._id === identifiant)
+    if(participant){
+        participant.paye = true
+        participant.datePaiement = new Date()
+    }
+    const paye = pot.value.participants.map(item => item.paye).reduce((a, b) => a && b);
+
+    if (paye) {
+        potTemp.etat = "Payé"
+    }
+
+    Fetch.requete({
+        url: `/pots/${pot.value._id}`,
+        data: { pot: potTemp },
+        method: 'PUT' }, () => {
+        pot.value = potTemp
+    })
 }
 
 const calculPaimentPot = (totalParParticipant: number) => {
@@ -252,5 +288,11 @@ onMounted(() => {
 </script>
 
 <style scoped>
-
+.btn-group{
+    position: fixed;
+    bottom: 10px;
+    left: 10px;
+    background-color: white;
+    box-shadow: 0 1px 2px grey;
+}
 </style>

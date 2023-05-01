@@ -8,5 +8,6 @@ interface ParticipantPotInterface{
     renduMonnaie: number
     peutEtrePaye?:boolean
     paye: boolean
+    datePaiement?:Date
 }
 export default ParticipantPotInterface

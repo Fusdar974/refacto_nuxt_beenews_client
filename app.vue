@@ -134,7 +134,7 @@ onMounted(() => {
     }
 })
 </script>
-<style scoped>
+<style>
 .root {
     display: flex;
     height: 100vh;
