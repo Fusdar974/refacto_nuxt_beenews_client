@@ -3,16 +3,16 @@
     <v-layout v-if="authenticate" class="root">
       <drawer v-model="mobileOpen">
         <v-list>
-                  <v-list-item v-for="(menu, index) in menus"
-                               :key="index"
-                               :value="menu"
-                               @click="handleOnClick(menu)"
-                               :class="isClickedBtn(menu.to) ? 'current-route' : ''">
-                    <template v-slot:prepend>
-                      <v-icon v-if="menu.icone" :icon="menu.icone.replace(' ',':')"></v-icon>
-                    </template>
-                    <v-list-item-title v-if="menu.libelle" v-text="menu.libelle"></v-list-item-title>
-                  </v-list-item>
+          <v-list-item v-for="(menu, index) in menus"
+                       :key="index"
+                       :value="menu"
+                       @click="handleOnClick(menu)"
+                       :class="isClickedBtn(menu.to) ? 'current-route' : ''">
+            <template v-slot:prepend>
+              <v-icon v-if="menu.icone" :icon="menu.icone.replace(' ',':')"></v-icon>
+            </template>
+            <v-list-item-title v-if="menu.libelle" v-text="menu.libelle"></v-list-item-title>
+          </v-list-item>
         </v-list>
       </drawer>
       <v-app-bar color="primary" class="appBar">
@@ -33,29 +33,32 @@
             <div class="imageFondChargement"/>
           </template>
         </suspense>
-    </v-main>
+      </v-main>
+      <v-snackbar v-model="snackbarStoreOpen" timeout="4000">
+        <v-alert type="success">{{ snackbarStoreMessage }}</v-alert>
+      </v-snackbar>
     </v-layout>
     <v-layout v-else class="rootDeco">
-        <v-container class="container-deco">
-          <v-row class="flex-grow-0">
-            <v-col class="imageAccueil"></v-col>
-          </v-row>
+      <v-container class="container-deco">
+        <v-row class="flex-grow-0">
+          <v-col class="imageAccueil"></v-col>
+        </v-row>
 
-          <v-row class="flex-grow-0">
-            <v-col class="divAccueilConnexion">
-              Bienvenue sur votre application du SOUM
-            </v-col>
-          </v-row>
-          <v-row  class="flex-grow-0">
-            <login-form :submit="login"/>
-          </v-row>
-        </v-container>
+        <v-row class="flex-grow-0">
+          <v-col class="divAccueilConnexion">
+            Bienvenue sur votre application du SOUM
+          </v-col>
+        </v-row>
+        <v-row class="flex-grow-0">
+          <login-form :submit="login"/>
+        </v-row>
+      </v-container>
     </v-layout>
   </NuxtLayout>
 </template>
 
 <script setup lang="ts">
-import jwtDecode, {JwtPayload} from "jwt-decode";
+import jwtDecode from "jwt-decode";
 import {useRouter} from "#app";
 import {onMounted} from "#imports";
 import MenuInterface from "~/interfaces/MenuInterface";
@@ -64,19 +67,24 @@ import DisconnectButton from "~/components/DisconnectButton.vue";
 import Drawer from "~/components/Drawer.vue"
 import LoginForm from "~/components/LoginForm.vue";
 import {useDisplay} from "vuetify";
+import {useSnackbarStore} from "~/stores/snackbarStore";
+import {storeToRefs} from "pinia";
 
 const konamiChaine1 = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65].join('/')
 const konamiChaine2 = [38, 38, 40, 40, 37, 39, 37, 39, 98, 97].join('/')
-const initMenu: Array<MenuInterface> = [{ _id: 1, to: "/", libelle: 'Accueil', auth: false }]
+const initMenu: Array<MenuInterface> = [{_id: 1, to: "/", libelle: 'Accueil', auth: false}]
 
 const menus: Ref<Array<MenuInterface>> = ref(initMenu)
-const mobileOpen: Ref<boolean> =  ref(false)
+const mobileOpen: Ref<boolean> = ref(false)
 const authenticate: Ref<boolean> = ref(false)
 const title: Ref<string> = ref(initMenu[0].libelle)
 const lettres: Ref<Array<number>> = ref([])
 const konami: Ref<boolean> = ref(false)
 
 const {mdAndUp} = useDisplay()
+
+const {open: snackbarStoreOpen, message: snackbarStoreMessage} = storeToRefs(useSnackbarStore())
+
 
 const handleDrawerToggle = () => {
   mobileOpen.value = !mobileOpen.value
@@ -110,14 +118,14 @@ const logout = () => {
   localStorage.clear();
 }
 
-const isClickedBtn = (path : string) => useRouter().currentRoute.value.path === path
+const isClickedBtn = (path: string) => useRouter().currentRoute.value.path === path
 
-const handleKeyUp = (e: any) =>{
-  if(lettres.value.push(e.keyCode) > 10){
+const handleKeyUp = (e: any) => {
+  if (lettres.value.push(e.keyCode) > 10) {
     lettres.value = lettres.value.slice(1)
   }
   const joinedLetters: string = lettres.value.join('/')
-  if( joinedLetters === konamiChaine1 || joinedLetters === konamiChaine2){
+  if (joinedLetters === konamiChaine1 || joinedLetters === konamiChaine2) {
     lettres.value = []
     konami.value = true
   }
@@ -142,17 +150,18 @@ onMounted(() => {
   display: flex;
   height: 100vh;
 }
-.appBar{
+
+.appBar {
   width: 100%;
 }
 
 .rootDeco {
-  background-color: rgba(255,181,81,0.1);
-  box-shadow: 0 0 30px rgba(255,181,81,0.8) inset;
+  background-color: rgba(255, 181, 81, 0.1);
+  box-shadow: 0 0 30px rgba(255, 181, 81, 0.8) inset;
   height: 100vh;
 }
 
-.container-deco{
+.container-deco {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -162,7 +171,7 @@ onMounted(() => {
 .divAccueilConnexion {
   padding-top: 10px;
   padding-bottom: 20px;
-  font-family: "Roboto",serif;
+  font-family: "Roboto", serif;
   font-weight: bold;
   text-align: center;
 }
@@ -177,15 +186,15 @@ onMounted(() => {
   background-position: center;
 }
 
-.current-route{
-  background-color: rgb(50,50,50,0.1);
+.current-route {
+  background-color: rgb(50, 50, 50, 0.1);
 }
 
 .imageFondChargement {
   z-index: 0;
   position: absolute;
-  bottom: calc(100%/2 - 100px);
-  right: calc(100%/2 - 240px + 100px);
+  bottom: calc(100% / 2 - 100px);
+  right: calc(100% / 2 - 240px + 100px);
   height: 200px;
   width: 200px;
   background-image: url('/192.png');

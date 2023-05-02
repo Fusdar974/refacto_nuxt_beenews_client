@@ -11,7 +11,7 @@ interface UserInterface {
     profils: Array<ProfilInterface>
     supprimable: boolean
     surnom: string
-    _id: string
+    _id?: string
 }
 
 export default UserInterface

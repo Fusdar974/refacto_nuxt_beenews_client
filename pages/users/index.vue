@@ -83,15 +83,6 @@
         </modal-confirmation>
       </div>
     <v-snackbar v-model="open" timeout="1000"><v-alert type="success">{{message}}</v-alert></v-snackbar>
-
-<!--    {actionUtilisateur && <ActionsUsers onClose={this.closeAction} params={this.state.action} />}-->
-<!--    <Snackbar-->
-<!--        autoHideDuration={1000}-->
-<!--        onClose={this.handleClose}-->
-<!--        open={open}-->
-<!--    >-->
-<!--      <Alert onClose={this.handleClose} severity="success">{message}</Alert>-->
-<!--    </Snackbar>-->
   </private-route>
 </template>
 
