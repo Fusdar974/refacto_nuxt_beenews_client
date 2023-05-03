@@ -14,7 +14,7 @@
                         <v-col sm="12" md="4">
                             <v-text-field label="Jour événement"
                                           name="date"
-                                          v-model="pot.date"
+                                          v-model="formatedDate"
                                           type="date"/>
                         </v-col>
                     </v-row>
@@ -29,19 +29,14 @@
                     </v-row>
                     <v-row v-if="action !== SHOW && pot.etat === 'Créé'">
                         <v-col>
-                            <v-tabs
+                            <v-tabs v-model="filtre"
                                     center-active
                                     color="primary"
                                     slider-color="secondary"
                                     align-tabs="center"
-                                    v-model="filtre"
                             >
-                                <v-tab value="Bières">
-                                    Bières
-                                </v-tab>
-                                <v-tab value="Boissons">
-                                    Boissons
-                                </v-tab>
+                                <v-tab value="Bières">Bières</v-tab>
+                                <v-tab value="Boissons">Boissons</v-tab>
                             </v-tabs>
                         </v-col>
                     </v-row>
@@ -51,15 +46,15 @@
                             <div v-else>
                                 <produits-list v-model="pot.articles"
                                                filter-by="type.nom"
-                                               :filter-value="filtre"
-                                               :produits-dispo-list="produitToScreen"/>
+                                               :filter-value="filtre as string"
+                                               :produits-dispo-list="produitToScreen as ProduitInterface[]"/>
                             </div>
                         </v-col>
                     </v-row>
                 </v-container>
             </v-col>
             <v-col v-if="pot.articles?.length > 0" sm="12" lg="3">
-                <pot-recap-tab :pot="pot"/>
+                <pot-recap-tab :pot="pot as PotInterface"/>
             </v-col>
             <v-col v-if="pot.etat === 'Paiement' || pot.etat === 'Payé'">
                 <v-table density="compact">
@@ -69,11 +64,10 @@
                         <th class="pa-0">Espèce</th>
                         <th class="pa-0">Chèque</th>
                         <th class="pa-0">Virement</th>
-
                     </tr>
                     </thead>
                     <tbody>
-                    <tr v-for="(participant, index) in pot.participants"
+                    <tr v-for="(participant, index) in pot.participants as ParticipantPotInterface[]"
                         :key="'paiement' + index">
                         <td class="pa-0">
                             {{ participant.nom }} {{ participant.prenom }}
@@ -124,13 +118,13 @@
             <v-btn v-if="action === EDIT"
                    color="primary"
                    key="edit"
-                   @click="modifier"
+                   @click="handleClickPot"
                    class="ma-2">Modifier
             </v-btn>
             <v-btn v-else-if="action === CREATE"
                    color="primary"
                    key="create"
-                   @click="creer"
+                   @click="handleClickPot"
                    class="ma-2">Créer
             </v-btn>
             <v-btn color="primary"
@@ -155,17 +149,18 @@ import ProduitInterface from "~/interfaces/ProduitInterface";
 import Fetch from "~/services/FetchService";
 import PotInterface from "~/interfaces/PotInterface";
 import UsersResponseInterface from "~/interfaces/UsersResponseInterface";
+import ParticipantPotInterface from "~/interfaces/ParticipantPotInterface";
 
 definePageMeta({
     validate: async (route) => {
         // Check if the id is made up of digits
-        return ['show','edit'].includes(route.params.action as string)
+        return ['show', 'edit'].includes(route.params.action as string)
             && /[0-9a-zA-Z]{16}/.test(route.params.id as string)
-            || route.params.action === 'add' && route.params.id ===''
+            || route.params.action === 'add' && route.params.id === ''
     }
 })
 
-const {action,id} = useRoute().params
+const {action, id} = useRoute().params
 
 const SHOW = 'show'
 const EDIT = 'edit'
@@ -176,8 +171,8 @@ const TITLE = action === 'show' && "Informations pot"
     || action === 'add' && "Ajouter pot"
     || "Informations pot"
 
-const isIdValid = ['show','edit'].includes(action as string)
-&& /[0-9a-zA-Z]{16}/.test(id as string)
+const isIdValid = ['show', 'edit'].includes(action as string)
+    && /[0-9a-zA-Z]{16}/.test(id as string)
 
 const pot: Ref<PotInterface> = ref({
     titre: '',
@@ -195,22 +190,31 @@ const openDialogValidation: Ref<boolean> = ref(false)
 const total: Ref<number> = ref(0)
 const totalParParticipant: Ref<number> = ref(0)
 
-watch(pot.value, nv => console.log(nv))
-const creer = () => {
+watch(()=>pot.value.date, nv => console.log(nv))
+
+const formatedDate = computed({
+    get: () => {
+        const dateToFormat = new Date(pot.value.date)
+        const day = dateToFormat.getDate()
+        const month = dateToFormat.getMonth() + 1
+        const year = dateToFormat.getFullYear()
+
+        return `${year}-${month<10?'0':''}${month}-${day<10?'0':''}${day}`
+    },
+    set: newDateFromTextField => {
+        pot.value.date = new Date(newDateFromTextField).toISOString()
+    }
+})
+const handleClickPot = () => {
     if (pot.value.participants && pot.value.participants.length > 0) {
-        Fetch.requete({url: '/pots/create', method: 'POST', data: {pot: pot.value}}, () => {
-            fermer('Création OK');
-        });
+        const data = pot.value._id ?
+            { url: `/pots/${pot.value._id}`, data: { pot: pot.value }, method: 'PUT' }
+             :
+            { url: '/pots/create', data: { pot: pot.value }, method: 'POST' }
+        const message = pot.value._id ?'Modification OK':'Création OK'
+        Fetch.requete(data, () => fermer(message))
     } else {
         alert("Il n'y a pas de participant")
-    }
-}
-
-const modifier = () => {
-    if(pot.value._id){
-        Fetch.requete({url: `/pots/${pot.value._id}`, data: {pot: pot.value}, method: 'PUT'}, () => {
-            fermer('Modification OK');
-        });
     }
 }
 
@@ -246,7 +250,7 @@ const confirmerEncaisser = () => {
         method: 'PUT'
     }, () => {
         pot.value = potTemp
-        openDialog.value = false
+        openDialogValidation.value = false
     });
 }
 
@@ -264,7 +268,7 @@ const calcul = () => {
 const payer = (identifiant: string) => {
     const potTemp = {...pot.value}
     const participant = potTemp.participants.find(item => item._id === identifiant)
-    if(participant){
+    if (participant) {
         participant.paye = true
         participant.datePaiement = new Date()
     }
@@ -276,8 +280,9 @@ const payer = (identifiant: string) => {
 
     Fetch.requete({
         url: `/pots/${pot.value._id}`,
-        data: { pot: potTemp },
-        method: 'PUT' }, () => {
+        data: {pot: potTemp},
+        method: 'PUT'
+    }, () => {
         pot.value = potTemp
     })
 }
@@ -303,10 +308,10 @@ onMounted(() => {
         users.value = resultUtil.documents
     })
     if (isIdValid) {
-        Fetch.requete({ url: `/pots/${id}`, method: 'GET' }, (resultPot:{pot: PotInterface}) => {
-            if(resultPot.pot !== null){
+        Fetch.requete({url: `/pots/${id}`, method: 'GET'}, (resultPot: { pot: PotInterface }) => {
+            if (resultPot.pot !== null) {
                 pot.value = resultPot.pot
-            }else console.error('pas de pot correspondant à : '+id)
+            } else console.error('pas de pot correspondant à : ' + id)
             // this.setPot(resultPot, produits, clients, title, mode, resultBN.valeur);
         })
     }
@@ -314,7 +319,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.btn-group{
+.btn-group {
     position: fixed;
     bottom: 10px;
     left: 10px;
