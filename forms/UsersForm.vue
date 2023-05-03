@@ -36,9 +36,9 @@
         <v-btn v-if="mode === SHOW" color="primary" class="ma-1" variant="outlined" key="edit" @click="retourModifier">
           Modifier
         </v-btn>
-        <v-btn v-if="mode === EDIT" color="primary" class="ma-1" variant="outlined" key="edit" @click="v$.$validate && modifier">Valider
+        <v-btn v-if="mode === EDIT" color="primary" class="ma-1" variant="outlined" key="edit" @click="modifier">Valider
         </v-btn>
-        <v-btn v-if="mode === CREATE" color="primary" class="ma-1" variant="outlined" key="create" @click="v$.$validate && creer">Créer
+        <v-btn v-if="mode === CREATE" color="primary" class="ma-1" variant="outlined" key="create" @click="creer">Créer
         </v-btn>
         <v-btn color="primary" class="ma-1" variant="outlined" key="create" @click="fermer(null)">Fermer</v-btn>
       </div>
@@ -204,25 +204,29 @@ const demandeConfirmationDefaut = () => {
 }
 
 const creer = () => {
-  if (selectedUser !== null) {
-    const user = selectedUser.value;
-    user!.profils = selectedUser.value!.profils.filter(item => item.isValid)
-    Fetch.requete({url: '/users/create', method: 'POST', data: {user}}, () => {
-      fermer('Création OK')
-
-    });
-  }
+  v$.value.$validate()
+      .then( result => {
+        if (result && selectedUser !== null) {
+          const user = selectedUser.value;
+          user!.profils = selectedUser.value!.profils.filter(item => item.isValid)
+          Fetch.requete({url: '/users/create', method: 'POST', data: {user}}, () => {
+            fermer('Création OK')
+          });
+        }}
+      )
 }
 
 const modifier = () => {
-  if (selectedUser !== null) {
-    const user = selectedUser.value
-    user!.profils = selectedUser.value!.profils.filter(item => item.isValid) /* ! ou ? */
-    Fetch.requete({url: `/users/${selectedUser.value!._id}`, data: {user: user}, method: 'PUT'}, () => {
-      fermer('Modification OK');
-    });
-  }
-
+  v$.value.$validate()
+      .then( result => {
+      if (result && selectedUser !== null) {
+        const user = selectedUser.value
+        user!.profils = selectedUser.value!.profils.filter(item => item.isValid) /* ! ou ? */
+        Fetch.requete({url: `/users/${selectedUser.value!._id}`, data: {user: user}, method: 'PUT'}, () => {
+          fermer('Modification OK');
+        });
+      }
+      })
 }
 
 const envoyerNouveauPwdDefaut = () => {

@@ -20,7 +20,7 @@
             </v-row>
           </v-row>
         </v-container>
-          <div v-if="!loading" class="maxW800" >
+          <div v-if="!loading" class="maxW1000" >
             <v-table density="comfortable" hover>
               <thead>
               <tr>
@@ -43,8 +43,8 @@
                   <td class="align-center">{{user.profils.map(item => item.nom).join(',')}}</td>
                   <td class="align-center">
                     <v-btn-group variant="tonal">
-                      <v-btn @click="modifier($event,user._id)"><v-icon icon="mdi mdi_small mdi-pencil"></v-icon></v-btn>
-                      <v-btn v-if="user.supprimable" @click="supprimer($event, user._id)"><v-icon icon="mdi mdi_small mdi-delete"></v-icon></v-btn>
+                      <v-btn @click="modifier($event,user._id)" class="ma-1"><v-icon icon="mdi mdi_small mdi-pencil"></v-icon></v-btn>
+                      <v-btn v-if="user.supprimable" @click="supprimer($event, user._id)" class="ma-1"><v-icon icon="mdi mdi_small mdi-delete"></v-icon></v-btn>
                     </v-btn-group>
                   </td>
                 </tr>
@@ -146,8 +146,6 @@
     event.stopPropagation()
     openDialog.value = true
     identifiantASupp.value =  id
-    open.value = true
-    message.value = "Suppression ok"
   }
 
   const consulter = (id : string) => {
