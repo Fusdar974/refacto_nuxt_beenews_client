@@ -27,7 +27,7 @@
                 <th class="align-center">Nom</th>
                 <th class="align-center">Prenom</th>
                 <th class="align-center">BN</th>
-                <th class="align-center">Profils</th>
+                <th class="align-center hidden-md-and-down">Profils</th>
                 <th class="align-center">Actions</th>
               </tr>
               </thead>
@@ -40,11 +40,11 @@
                   </td>
                   <td class="align-center">{{user.prenom}}</td>
                   <td class="align-center">{{user.compte}}</td>
-                  <td class="align-center">{{user.profils.map(item => item.nom).join(',')}}</td>
+                  <td class="align-center hidden-md-and-down">{{user.profils.map(item => item.nom).join(',')}}</td>
                   <td class="align-center">
                     <v-btn-group variant="tonal">
-                      <v-btn @click="modifier($event,user._id)" class="ma-1"><v-icon icon="mdi mdi_small mdi-pencil"></v-icon></v-btn>
-                      <v-btn v-if="user.supprimable" @click="supprimer($event, user._id)" class="ma-1"><v-icon icon="mdi mdi_small mdi-delete"></v-icon></v-btn>
+                      <v-btn @click="handleModifier($event,user._id)" class="ma-1"><v-icon icon="mdi mdi_small mdi-pencil"></v-icon></v-btn>
+                      <v-btn v-if="user.supprimable" @click="handleSupprimer($event, user._id)" class="ma-1"><v-icon icon="mdi mdi_small mdi-delete"></v-icon></v-btn>
                     </v-btn-group>
                   </td>
                 </tr>
@@ -111,13 +111,17 @@
   const identifiantASupp: Ref<string> = ref("")
   const champRecherche: Ref<string> = ref("")
   const message: Ref<string> = ref("")
-
-  const champRechercheRef =  ref()
-
+  /**
+   * authenticate, booleén qui permet de savoir si l'utilisateur est authentifié
+   */
   const props = defineProps({
     authenticate: Boolean,
   })
 
+  /**
+   * Initialise ou met à jour la liste d'utilisateurs en props et met à jour le total d'utilisateurs et ceux qui doivent être affichés par pages
+   * @param usersP La liste d'utilisateur renvoyée par le back
+   */
   const setUsers = (usersP : UsersResponseInterface) => {
     paginationSize.value = Math.ceil(usersP.total / parseInt(nombreParPage.value));
     users.value = usersP.documents
@@ -127,22 +131,35 @@
     actionUtilisateur.value = false
   }
 
+  /**
+   * Recharge la page en envoyant une requète vers le back, si celle-ci réussie,
+   * la liste des utilisateurs est mises à jour ainsi que la pagination
+   */
     const recharger = () => {
       Fetch.requete({ url: '/users', data: { page: page.value, nombre: nombreParPage.value ,recherche: champRecherche.value } }, setUsers);
     }
 
-  const modifier = (event: Event,id: string) => {
+  /**
+   * envoie sur le composant de modification d'utilisateur
+   * @param event ici le click sur le bouton
+   * @param id l'identifiant de l'utilisateur sélectionné
+   */
+  const handleModifier = (event: Event, id: string) => {
     event.stopPropagation()
     actionUtilisateur.value = true
     identifiant.value = id
     let newAction: ActionInterface
     newAction = {action : "edit", id : identifiant }
     action.value = newAction
-    message.value = "modification OK"
     navigateTo(`/users/edit/${identifiant.value}`)
   }
 
-  const supprimer = (event: Event ,id: string) => {
+  /**
+   *
+   * @param event ici le click sur le bouton
+   * @param id l'identifiant de l'utilisateur sélectionné
+   */
+  const handleSupprimer = (event: Event , id: string) => {
     event.stopPropagation()
     openDialog.value = true
     identifiantASupp.value =  id

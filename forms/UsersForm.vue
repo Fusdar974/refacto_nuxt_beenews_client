@@ -21,10 +21,11 @@
         <v-btn @click="demandeConfirmationDefaut" variant="outlined" color="primary">Mot de passe par défaut</v-btn>
       </div>
       <h4>Profils</h4>
-      <div v-for="(profil, index) in selectedUser.profils" :key="index">
+      <div v-for="(profil, index) in profils" :key="index">
         <v-checkbox
+            v-model="selectedUser.profils"
             :label="profil.nom"
-            v-model="profil.isValid"
+            :value="profil"
             color="indigo"
         ></v-checkbox>
       </div>
@@ -76,6 +77,9 @@ import {useSnackbarStore} from "~/stores/snackbarStore";
 import { useVuelidate } from '@vuelidate/core'
 import { required, email } from '@vuelidate/validators'
 import userInterface from "~/interfaces/UserInterface";
+import {SymbolKind} from "vscode-languageserver-types";
+import Array = SymbolKind.Array;
+import {$} from "vue/macros";
 
 
 
@@ -91,7 +95,7 @@ const messageSnack: Ref<string> = ref("")
 const mode: Ref<string> = ref("")
 const titre: Ref<string> = ref("Aucun titre")
 const severity: Ref<string> = ref("")
-const profils: Ref<Array<ProfilInterface> | null> = ref(null)
+const profils: Ref<Array<ProfilInterface>> = ref([] as Array<ProfilInterface>)
 
 const {open: snackbarStoreOpen, message: snackbarStoreMessage} = storeToRefs(useSnackbarStore())
 
@@ -118,16 +122,6 @@ const fermer = (messageAfficher: string) => {
   }
 }
 
-const setUser = (userP: UserInterface, profilsP: ProfilsResponseInterface) => {
-  const profilsPossede = userP!.profils || [];
-  const profilsAfficher = profilsP.profils.map((item: profilInterface) => {
-    item.isValid = typeof profilsPossede.find(item2 => item2._id === item._id) !== 'undefined';
-    return item;
-  })
-  userP!.profils = profilsAfficher;
-  selectedUser.value = userP
-}
-
 onBeforeMount(() => {
   let title: string;
   switch (props.action) {
@@ -152,11 +146,7 @@ onBeforeMount(() => {
     Fetch.requete({url: `/users/${props.userId}`, method: 'GET'}, (resultUser: UserResponseInterface) => {
       selectedUser.value = resultUser.user
     })
-    Fetch.requete({url: `/users/profils`, method: 'POST'}, (profiles: ProfilsResponseInterface) => {
-      if (selectedUser !== null) {
-        setUser(selectedUser.value, profiles)
-      }
-    })
+
   } else {
     selectedUser.value = {
       isDesactive: false,
@@ -169,12 +159,12 @@ onBeforeMount(() => {
       password: "",
       supprimable: true,
     }
-    Fetch.requete({url: `/users/profils`, method: 'POST'}, (profiles: ProfilsResponseInterface) => {
-      if (selectedUser !== null) {
-        setUser(selectedUser.value, profiles)
-      }
-    })
   }
+  Fetch.requete({url: `/users/profils`, method: 'POST'}, (resultProfils: ProfilsResponseInterface) => {
+    if (selectedUser !== null) {
+      profils.value = resultProfils.profils.map(profil => ({...profil, isValid:true}))
+    }
+  })
   titre.value = title
 })
 
@@ -206,10 +196,8 @@ const demandeConfirmationDefaut = () => {
 const creer = () => {
   v$.value.$validate()
       .then( result => {
-        if (result && selectedUser !== null) {
-          const user = selectedUser.value;
-          user!.profils = selectedUser.value!.profils.filter(item => item.isValid)
-          Fetch.requete({url: '/users/create', method: 'POST', data: {user}}, () => {
+        if (result && selectedUser.value !== null) {
+          Fetch.requete({url: '/users/create', method: 'POST', data: {user: selectedUser.value}}, () => {
             fermer('Création OK')
           });
         }}
@@ -219,10 +207,11 @@ const creer = () => {
 const modifier = () => {
   v$.value.$validate()
       .then( result => {
-      if (result && selectedUser !== null) {
-        const user = selectedUser.value
-        user!.profils = selectedUser.value!.profils.filter(item => item.isValid) /* ! ou ? */
-        Fetch.requete({url: `/users/${selectedUser.value!._id}`, data: {user: user}, method: 'PUT'}, () => {
+      if (result && selectedUser.value !== null) {
+        Fetch.requete({
+          url: `/users/${selectedUser.value._id}`,
+          data: { user: selectedUser.value },
+          method: 'PUT'}, () => {
           fermer('Modification OK');
         });
       }
