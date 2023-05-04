@@ -7,18 +7,18 @@
                     required
                     @input="v$.nom.$touch"
                     @blur="v$.nom.$touch"/>
-      <v-text-field type="text" label="prenom" v-model="selectedUser.prenom"
+      <v-text-field v-model="selectedUser.prenom" type="text" label="prenom"
                     :error-messages="v$.prenom.$errors.map(e => e.$message)"
                     required
                     @blur="v$.prenom.$touch"/>
-      <v-text-field type="text" label="surnom" v-model="selectedUser.surnom"/>
-      <v-text-field type="text" label="mail" v-model="selectedUser.mail" :error="erreurMail.value"
+      <v-text-field v-model="selectedUser.surnom" type="text" label="surnom" />
+      <v-text-field v-model="selectedUser.mail" type="text" label="mail"  :error="erreurMail.value"
                     :error-messages="v$.mail.$errors.map(e => e.$message)"
                     required
                     @blur="v$.mail.$touch"/>
       <div v-if="mode === EDIT">
-        <v-btn @click="demandeConfirmation" variant="outlined" color="primary">Envoyer nouveau mot de passe</v-btn>
-        <v-btn @click="demandeConfirmationDefaut" variant="outlined" color="primary">Mot de passe par défaut</v-btn>
+        <v-btn @click="openConfirmationDialog = true" variant="outlined" color="primary">Envoyer nouveau mot de passe</v-btn>
+        <v-btn @click="handleDemandeConfirmationDefaut" variant="outlined" color="primary">Mot de passe par défaut</v-btn>
       </div>
       <h4>Profils</h4>
       <div v-for="(profil, index) in profils" :key="index">
@@ -34,7 +34,7 @@
                   color="red"
       ></v-checkbox>
       <div>
-        <v-btn v-if="mode === SHOW" color="primary" class="ma-1" variant="outlined" key="edit" @click="retourModifier">
+        <v-btn v-if="mode === SHOW" color="primary" class="ma-1" variant="outlined" key="edit" @click="mode = EDIT">
           Modifier
         </v-btn>
         <v-btn v-if="mode === EDIT" color="primary" class="ma-1" variant="outlined" key="edit" @click="modifier">Valider
@@ -47,18 +47,18 @@
 
     <historique-client v-if="userId" :user-id="userId" type="SOUM"></historique-client>
     <historique-client v-if="userId" :user-id="userId" type="POT"></historique-client>
-    <ModalConfirmation v-model="open"
+    <ModalConfirmation v-model="openConfirmationDialog"
                        @confirmer="envoyerNouveauPwd"
                        titre="Envoyer nouveau mot de passe"
                        question="Voulez-vous envoyer un mot de passe ?"
     />
-    <ModalConfirmation v-model="openDefault"
+    <ModalConfirmation v-model="openConfirmationDefaultDialog"
                        @confirmer="envoyerNouveauPwdDefaut"
                        titre="Remise à zéro du mot de passe"
                        question="Voulez-vous mettre le mot de passe par défaut ?"
     />
-    <v-snackbar v-if="openSnack" v-model="openSnack" timeout="4000">
-      <v-alert :type="severity">{{ messageSnack }}</v-alert>
+    <v-snackbar v-if="openSnackUserForm" v-model="openSnackUserForm" timeout="4000">
+      <v-alert :type="severity">{{ messageSnackUserForm }}</v-alert>
     </v-snackbar>
   </div>
 </template>
@@ -81,47 +81,44 @@ import {SymbolKind} from "vscode-languageserver-types";
 import Array = SymbolKind.Array;
 import {$} from "vue/macros";
 
-
-
 const SHOW = 'show'
 const EDIT = 'edit';
 const CREATE = 'create';
 const selectedUser: Ref<UserInterface> = ref({} as userInterface)
-const open: Ref<boolean> = ref(false)
-const openDefault: Ref<boolean> = ref(false)
-const openSnack: Ref<boolean> = ref(false)
+const openConfirmationDialog: Ref<boolean> = ref(false)
+const openConfirmationDefaultDialog: Ref<boolean> = ref(false)
+const openSnackUserForm: Ref<boolean> = ref(false)
 const erreurMail: Ref<boolean> = ref(false)
-const messageSnack: Ref<string> = ref("")
+const messageSnackUserForm: Ref<string> = ref("")
 const mode: Ref<string> = ref("")
 const titre: Ref<string> = ref("Aucun titre")
 const severity: Ref<string> = ref("")
 const profils: Ref<Array<ProfilInterface>> = ref([] as Array<ProfilInterface>)
-
 const {open: snackbarStoreOpen, message: snackbarStoreMessage} = storeToRefs(useSnackbarStore())
-
-const props = defineProps({
-  userId: {type: String},
-  action: {type: String, required: true},
-})
-
 const rules = {
   nom: {required}, // Matches state.firstName
   prenom: {required}, // Matches state.lastName
   mail: {required, email} // Matches state.contact.email
 }
 
-const v$ = useVuelidate(rules, selectedUser)
-const fermer = (messageAfficher: string) => {
-  if (messageAfficher) {
-    snackbarStoreMessage.value = messageAfficher
-    snackbarStoreOpen.value = true
-    navigateTo(`/users`)
-  }
-  else{
-    navigateTo('/users')
-  }
-}
+const v$ = useVuelidate(rules, selectedUser)//valide si les propriétées de selectedUser respectent les règles
 
+
+/**
+ * userId : l'id de l'utilisateur à consulter/modifier
+ * action : string qui détermine le mode du UserForm
+ */
+const props = defineProps({
+  userId: {type: String},
+  action: {type: String, required: true},
+})
+
+/**
+ * avant que la page soit créée:
+ * détermine en quel mode est le formulaire
+ * si il n'est pas en mode création, charge l'utilisateur sélectionné
+ * sinon, créé un utilisateur vide
+ */
 onBeforeMount(() => {
   let title: string;
   switch (props.action) {
@@ -146,7 +143,6 @@ onBeforeMount(() => {
     Fetch.requete({url: `/users/${props.userId}`, method: 'GET'}, (resultUser: UserResponseInterface) => {
       selectedUser.value = resultUser.user
     })
-
   } else {
     selectedUser.value = {
       isDesactive: false,
@@ -164,35 +160,34 @@ onBeforeMount(() => {
     if (selectedUser !== null) {
       profils.value = resultProfils.profils.map(profil => ({...profil, isValid:true}))
     }
-  })
+  }, )
   titre.value = title
 })
 
-const retourModifier = () => {
-  mode.value = EDIT
+/**
+ * ferme le formulaire et renvoie sur la page des clients, si un message est passé en paramètre
+ * celui-ci est stocké dans le store ainsi qu'un booléen qui permet d'activer le snackbar de la page principale est afficher le message
+ * @param messageAfficher message à afficher
+ */
+const fermer = (messageAfficher: string) => {
+  if (messageAfficher) {
+    snackbarStoreMessage.value = messageAfficher
+    snackbarStoreOpen.value = true
+  }
+  navigateTo('/users')
 }
 
-const handleClose = () => {
-  open.value = false
+/**
+ * Ouvre le dialog de confirmation de mot de passe
+ */
+const handleDemandeConfirmationDefaut = () => {
+  openConfirmationDefaultDialog.value = true
+  openConfirmationDialog.value = false
 }
 
-const handleCloseDefaut = () => {
-  openDefault.value = false
-}
-
-const handleCloseSnack = () => {
-  openSnack.value = false
-}
-
-const demandeConfirmation = () => {
-  open.value = true
-}
-
-const demandeConfirmationDefaut = () => {
-  openDefault.value = true
-  open.value = false
-}
-
+/**
+ * Envoie une requete de création d'utilisateur dans le back et ferme le formulaire
+ */
 const creer = () => {
   v$.value.$validate()
       .then( result => {
@@ -204,6 +199,9 @@ const creer = () => {
       )
 }
 
+/**
+ * Envoie une requete de modification d'utilisateur dans le back et ferme le formulaire
+ */
 const modifier = () => {
   v$.value.$validate()
       .then( result => {
@@ -218,6 +216,9 @@ const modifier = () => {
       })
 }
 
+/**
+ * Envoie une requete de modification de mot de passe avec celui par défaut dans le back, ferme le dialog et active le snackbar du form
+ */
 const envoyerNouveauPwdDefaut = () => {
   Fetch.requete({
     url: `/users/passwordDefault/${selectedUser.value!._id}`,
@@ -226,14 +227,17 @@ const envoyerNouveauPwdDefaut = () => {
 
     if (reussite.data === 'ok') {
       severity.value = "success"
-      open.value = false
-      openDefault.value = false
-      openSnack.value = true
-      messageSnack.value = 'Mot de passe remis à zéro'
+      openConfirmationDialog.value = false
+      openConfirmationDefaultDialog.value = false
+      openSnackUserForm.value = true
+      messageSnackUserForm.value = 'Mot de passe remis à zéro'
     }
   });
 }
 
+/**
+ * Envoie une requete de modification de mot de passe dans le back, ferme le dialog et active le snackbar du form
+ */
 const envoyerNouveauPwd = () => {
   Fetch.requete({
     url: `/users/genererNewPwd/${selectedUser.value!._id}`,
@@ -245,15 +249,15 @@ const envoyerNouveauPwd = () => {
 
     if (reussite.data === 'ok') {
       severity.value = "success"
-      open.value = false
-      openSnack.value = true
-      messageSnack.value = 'Mot de passe remis à zéro'
+      openConfirmationDialog.value = false
+      openSnackUserForm.value = true
+      messageSnackUserForm.value = 'Mot de passe remis à zéro'
     } else {
       severity.value = "error"
       erreurMail.value = true
-      open.value = false
-      openSnack.value = true
-      messageSnack.value = 'Veuillez saisir une bonne adresse email'
+      openConfirmationDialog.value = false
+      openSnackUserForm.value = true
+      messageSnackUserForm.value = 'Veuillez saisir une bonne adresse email'
     }
   });
 }

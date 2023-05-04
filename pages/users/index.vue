@@ -79,7 +79,7 @@
         <modal-confirmation v-model="openDialog"
                             :titre="'Confirmation de suppression'"
                             :question="'Voulez vous supprimer cet utilisateur ?'"
-                            @confirmer="confirmerSuppression">
+                            @confirmer="handleConfirmerSuppression">
         </modal-confirmation>
       </div>
     <v-snackbar v-model="open" timeout="1000"><v-alert type="success">{{message}}</v-alert></v-snackbar>
@@ -101,8 +101,6 @@
   const total: Ref<number> = ref(0)
   const page: Ref<number> = ref(1)
   const paginationSize: Ref<number> = ref(1)
-  const vertical: Ref<string> = ref('top')
-  const horizontal: Ref<string> = ref('center')
   const open: Ref<boolean> = ref(false)
   const openDialog: Ref<boolean> = ref(false)
   const actionUtilisateur: Ref<boolean> = ref(false)
@@ -118,25 +116,30 @@
     authenticate: Boolean,
   })
 
+  watch(page, () => recharger())
+  watch(nombreParPage, () => recharger())
+  watch(champRecherche, () => recharger())
+
   /**
-   * Initialise ou met à jour la liste d'utilisateurs en props et met à jour le total d'utilisateurs et ceux qui doivent être affichés par pages
-   * @param usersP La liste d'utilisateur renvoyée par le back
+   * recharge la liste des utilisateurs lorsque la page est créée
    */
-  const setUsers = (usersP : UsersResponseInterface) => {
-    paginationSize.value = Math.ceil(usersP.total / parseInt(nombreParPage.value));
-    users.value = usersP.documents
-    total.value = usersP.total
-    page.value = usersP.page > paginationSize.value ? paginationSize.value: usersP.page
-    loading.value = false
-    actionUtilisateur.value = false
-  }
+  onMounted(()=>{
+    recharger();
+  })
 
   /**
    * Recharge la page en envoyant une requète vers le back, si celle-ci réussie,
    * la liste des utilisateurs est mises à jour ainsi que la pagination
    */
     const recharger = () => {
-      Fetch.requete({ url: '/users', data: { page: page.value, nombre: nombreParPage.value ,recherche: champRecherche.value } }, setUsers);
+      loading.value = true
+      Fetch.requete({ url: '/users', data: { page: page.value, nombre: nombreParPage.value ,recherche: champRecherche.value } }, (result : UsersResponseInterface) => {
+        paginationSize.value = Math.ceil(result.total / parseInt(nombreParPage.value));
+        users.value = result.documents
+        total.value = result.total
+        page.value = result.page > paginationSize.value ? paginationSize.value: result.page
+        loading.value = false
+        actionUtilisateur.value = false}, () => {loading.value = false} );
     }
 
   /**
@@ -155,7 +158,7 @@
   }
 
   /**
-   *
+   * Active le dialog de confirmation de suppression de client
    * @param event ici le click sur le bouton
    * @param id l'identifiant de l'utilisateur sélectionné
    */
@@ -165,6 +168,10 @@
     identifiantASupp.value =  id
   }
 
+  /**
+   * envoie sur le composant de consultation d'utilisateur
+   * @param id l'identifiant de l'utilisateur sélectionné
+   */
   const consulter = (id : string) => {
     actionUtilisateur.value = true
     let newAction: ActionInterface
@@ -174,32 +181,19 @@
     navigateTo(`/users/show/${identifiant.value}`)
   }
 
+  /**
+   * envoie sur le composant de création d'utilisateur
+   */
   const ajouter = () => {
     actionUtilisateur.value = true
     message.value = "modification OK"
     navigateTo('/users/add')
   }
 
-  onMounted(()=>{
-    // const chaineDecoupe = location.pathname.split('/');
-    // if (chaineDecoupe.length >= 3) {
-    //   const [, , action, identifiant] = chaineDecoupe;
-    //   switch (action) {
-    //     case "show": consulter(identifiant); break;
-    //     case "edit": modifier(identifiant); break;
-    //     case "add": ajouter(); break;
-    //     default:
-    //       recharger();
-    //   }
-    // } else {
-      recharger();
-    // }
-  })
-
-  watch(page, () => recharger())
-  watch(nombreParPage, () => recharger())
-  watch(champRecherche, () => recharger())
-
+  /**
+   * Affiche un message dans un snackbar lors de la fermeture d'un dialog
+   * @param messageAfficher message à afficher
+   */
   const closeAction = (messageAfficher : string) => {
     if (messageAfficher) {
       actionUtilisateur.value = false
@@ -212,13 +206,20 @@
     recharger();
   }
 
-  const confirmerSuppression = () => {
+  /**
+   * Supprime l'utilisateur , affiche un message de confirmation dans une snackbar et ferme le dialog
+   */
+  const handleConfirmerSuppression = () => {
     Fetch.requete({ url: `/users/${identifiantASupp.value}`, method: 'DELETE' }, () => {
       closeAction('SUPPRESSION ok');
       openDialog.value = false
     });
   }
 
+  /**
+   * Change le nombre d'utilisateurs affichés par pages lorsque la valeur du select est modifiée
+   * @param e
+   */
   const handleChangeSelect = (e: any) => {
     const valeur = e.target;
       nombreParPage.value = valeur.value;

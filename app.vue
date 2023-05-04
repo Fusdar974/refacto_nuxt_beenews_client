@@ -69,6 +69,7 @@ import LoginForm from "~/components/LoginForm.vue";
 import {useDisplay} from "vuetify";
 import {useSnackbarStore} from "~/stores/snackbarStore";
 import {storeToRefs} from "pinia";
+import Fetch from "~/services/FetchService";
 
 const konamiChaine1 = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65].join('/')
 const konamiChaine2 = [38, 38, 40, 40, 37, 39, 37, 39, 98, 97].join('/')
@@ -84,7 +85,6 @@ const konami: Ref<boolean> = ref(false)
 const {mdAndUp} = useDisplay()
 
 const {open: snackbarStoreOpen, message: snackbarStoreMessage} = storeToRefs(useSnackbarStore())
-
 
 const handleDrawerToggle = () => {
   mobileOpen.value = !mobileOpen.value
@@ -117,6 +117,8 @@ const logout = () => {
   useRouter().push('/');
   localStorage.clear();
 }
+
+Fetch.setFonctionDeco(logout);
 
 const isClickedBtn = (path: string) => useRouter().currentRoute.value.path === path
 
