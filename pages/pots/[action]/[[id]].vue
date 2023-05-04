@@ -8,12 +8,14 @@
                         <v-col sm="12" md="8">
                             <v-text-field label="Titre"
                                           name="titre"
+                                          :disabled="action === SHOW"
                                           v-model="pot.titre"
                                           type="text"/>
                         </v-col>
                         <v-col sm="12" md="4">
                             <v-text-field label="Jour événement"
                                           name="date"
+                                          :disabled="action === SHOW"
                                           v-model="formatedDate"
                                           type="date"/>
                         </v-col>
@@ -22,6 +24,7 @@
                         <v-select v-model="pot.participants"
                                   :items="users as UserInterface[]"
                                   :item-title="(user) => `${user.nom}  ${user.prenom}`"
+                                  :disabled="action === SHOW"
                                   return-object
                                   multiple
                                   chips
@@ -40,7 +43,7 @@
                             </v-tabs>
                         </v-col>
                     </v-row>
-                    <v-row>
+                    <v-row v-if="action !== SHOW && pot.etat === 'Créé'">
                         <v-col>
                             <div v-if="produitToScreen.length === 0" class="imageFondChargement"/>
                             <div v-else>
@@ -54,65 +57,16 @@
                 </v-container>
             </v-col>
             <v-col v-if="pot.articles?.length > 0" sm="12" lg="3">
-                <pot-recap-tab :pot="pot as PotInterface"/>
+                <pot-recap-tab :pot="pot as PotInterface"
+                               :valeur-point="valeurPoint as number"
+                               :total-par-participant="totalParParticipant"
+                               :total="total"/>
             </v-col>
-            <v-col v-if="pot.etat === 'Paiement' || pot.etat === 'Payé'">
-                <v-table density="compact">
-                    <thead>
-                    <tr>
-                        <th class="pa-0">Nom</th>
-                        <th class="pa-0">Espèce</th>
-                        <th class="pa-0">Chèque</th>
-                        <th class="pa-0">Virement</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr v-for="(participant, index) in pot.participants as ParticipantPotInterface[]"
-                        :key="'paiement' + index">
-                        <td class="pa-0">
-                            {{ participant.nom }} {{ participant.prenom }}
-                        </td>
-                        <td class="pa-0">
-                            <v-text-field v-model="participant.paiementEspece"
-                                          :disabled="participant.paye || action === SHOW"
-                                          type="number"
-                                          step="0.25"
-                                          :id="'paiementEspece_' + participant._id"/>
-                        </td>
-                        <td class="pa-0">
-                            <v-text-field v-model="participant.paiementCheque"
-                                          :disabled="participant.paye || action === SHOW"
-                                          type="number"
-                                          step="0.25"
-                                          :id="'paiementCheque_' + participant._id"/>
-                        </td>
-                        <td class="pa-0">
-                            <v-text-field v-model="participant.paiementVirement"
-                                          :disabled="participant.paye || action === SHOW"
-                                          type="number"
-                                          step="0.25"
-                                          :id="'paiementVirement_' + participant._id"/>
-                        </td>
-                        <td class="pa-0">
-                            <v-alert v-if="!participant.peutEtrePaye"
-                                     icon="false"
-                                     type="warning">Manque {{ (participant.renduMonnaie * -1).toFixed(2) }} €
-                            </v-alert>
-                            <v-alert v-if="participant.peutEtrePaye && !participant.paye"
-                                     icon="false"
-                                     type="error">Rendre {{ participant.renduMonnaie.toFixed(2) }} €
-                                <v-btn color="primary"
-                                       @click="() => payer(participant._id)"> Payer
-                                </v-btn>
-                            </v-alert>
-                            <v-alert v-if="participant.paye"
-                                     type="success">Payé - Rendue {{ participant.renduMonnaie.toFixed(2) }} €
-                            </v-alert>
-                        </td>
-                    </tr>
-                    </tbody>
-                </v-table>
-            </v-col>
+            <pot-paiement-tab v-if="pot.etat === 'Paiement' || pot.etat === 'Payé'"
+                              :participants="pot.participants"
+                              :is-disable="action === SHOW"
+                              :total-par-participant="totalParParticipant"
+                              :payer="payer"/>
         </v-row>
         <v-btn-group class="btn-group">
             <v-btn v-if="action === EDIT"
@@ -150,6 +104,9 @@ import Fetch from "~/services/FetchService";
 import PotInterface from "~/interfaces/PotInterface";
 import UsersResponseInterface from "~/interfaces/UsersResponseInterface";
 import ParticipantPotInterface from "~/interfaces/ParticipantPotInterface";
+import {ComputedRef} from "vue";
+import ValeurBNResponseInterface from "~/interfaces/ValeurBNResponseInterface";
+import PotPaiementTab from "~/components/PotPaiementTab.vue";
 
 definePageMeta({
     validate: async (route) => {
@@ -177,20 +134,31 @@ const isIdValid = ['show', 'edit'].includes(action as string)
 const pot: Ref<PotInterface> = ref({
     titre: '',
     participants: [],
-    date: '',
+    date: (new Date).toDateString(),
     articles: [],
-    etat: ''
+    etat: 'Créé'
 } as PotInterface)
-const users: Ref<Array<UserInterface>> = ref([] as Array<UserInterface>)
+const users: Ref<Array<ParticipantPotInterface>> = ref([] as Array<ParticipantPotInterface>)
 const produitToScreen: Ref<Array<ProduitInterface>> = ref([] as Array<ProduitInterface>)
 const filtre: Ref<string> = ref('Bières')
 const valeurPoint: Ref<number> = ref(0)
 const show: Ref<boolean> = ref(false)
 const openDialogValidation: Ref<boolean> = ref(false)
-const total: Ref<number> = ref(0)
-const totalParParticipant: Ref<number> = ref(0)
 
-watch(()=>pot.value.date, nv => console.log(nv))
+
+const total = computed(()=>{
+    let result = 0
+    pot.value?.articles
+        .map(article => article.prixEuros * article.quantite + article.prix * article.quantite * valeurPoint.value)
+        .forEach(valeurEuros => result+=valeurEuros)
+    return Number(result)
+})
+
+const totalParParticipant: ComputedRef<string> = computed(()=>{
+    if(pot.value.participants && pot.value.participants.length!==0) {
+        return (total.value / pot.value.participants.length).toFixed(2)
+    }else return ''
+})
 
 const formatedDate = computed({
     get: () => {
@@ -199,19 +167,20 @@ const formatedDate = computed({
         const month = dateToFormat.getMonth() + 1
         const year = dateToFormat.getFullYear()
 
-        return `${year}-${month<10?'0':''}${month}-${day<10?'0':''}${day}`
+        return `${year}-${month < 10 ? '0' : ''}${month}-${day < 10 ? '0' : ''}${day}`
     },
     set: newDateFromTextField => {
         pot.value.date = new Date(newDateFromTextField).toISOString()
     }
 })
+
 const handleClickPot = () => {
     if (pot.value.participants && pot.value.participants.length > 0) {
         const data = pot.value._id ?
-            { url: `/pots/${pot.value._id}`, data: { pot: pot.value }, method: 'PUT' }
-             :
-            { url: '/pots/create', data: { pot: pot.value }, method: 'POST' }
-        const message = pot.value._id ?'Modification OK':'Création OK'
+            {url: `/pots/${pot.value._id}`, data: {pot: pot.value}, method: 'PUT'}
+            :
+            {url: '/pots/create', data: {pot: pot.value}, method: 'POST'}
+        const message = pot.value._id ? 'Modification OK' : 'Création OK'
         Fetch.requete(data, () => fermer(message))
     } else {
         alert("Il n'y a pas de participant")
@@ -238,11 +207,9 @@ const demanderEncaisser = () => {
 
 const fermer = (t: string) => {
 }
-
+watch(()=>pot, nV => console.log(nV))
 const confirmerEncaisser = () => {
     const potTemp = {...pot.value, etat: 'Paiement', dateEncaissement: new Date()}
-    calcul();
-    calculPaimentPot(totalParParticipant.value);
 
     Fetch.requete({
         url: `/pots/${pot.value._id}`,
@@ -254,20 +221,8 @@ const confirmerEncaisser = () => {
     });
 }
 
-const calcul = () => {
-    let totalTemp = 0
-    pot.value.articles.forEach(element =>
-        totalTemp += element.prixEuros * element.quantite + element.prix * element.quantite * valeurPoint.value)
-    if (pot.value.participants.length > 0) {
-        totalParParticipant.value = parseFloat((totalTemp / pot.value.participants.length)
-            .toFixed(2))
-    }
-    total.value = parseFloat(totalTemp.toFixed(2))
-}
-
 const payer = (identifiant: string) => {
-    const potTemp = {...pot.value}
-    const participant = potTemp.participants.find(item => item._id === identifiant)
+    const participant = pot.value.participants.find(item => item._id === identifiant)
     if (participant) {
         participant.paye = true
         participant.datePaiement = new Date()
@@ -275,44 +230,47 @@ const payer = (identifiant: string) => {
     const paye = pot.value.participants.map(item => item.paye).reduce((a, b) => a && b);
 
     if (paye) {
-        potTemp.etat = "Payé"
+        pot.value.etat = "Payé"
     }
 
     Fetch.requete({
         url: `/pots/${pot.value._id}`,
-        data: {pot: potTemp},
+        data: {pot: pot.value},
         method: 'PUT'
     }, () => {
-        pot.value = potTemp
-    })
-}
-
-const calculPaimentPot = (totalParParticipant: number) => {
-    pot.value.participants.forEach(participant => {
-        let pc = participant.paiementCheque
-        let pe = participant.paiementEspece
-        let pv = participant.paiementVirement
-        participant.renduMonnaie = (pc + pe + pv) - totalParParticipant;
-        participant.peutEtrePaye = (pc >= 0 && pe >= 0 && pv >= 0) && participant.renduMonnaie >= 0
+        console.log('reussite')
     })
 }
 
 onMounted(() => {
+    Fetch.requete({ url: '/parametre/valeurBN', method: 'GET' }, (resultBN: ValeurBNResponseInterface) => {
+        valeurPoint.value = resultBN.valeur
+    })
     Fetch.requete({url: '/pots/produits', method: 'POST'}, (resultProduits: { produits: Array<ProduitInterface> }) => {
         produitToScreen.value = resultProduits.produits
-    })
-    Fetch.requete({
-        url: '/users',
-        data: {page: 1, nombre: 1000, isDesactive: false}
-    }, (resultUtil: UsersResponseInterface) => {
-        users.value = resultUtil.documents
     })
     if (isIdValid) {
         Fetch.requete({url: `/pots/${id}`, method: 'GET'}, (resultPot: { pot: PotInterface }) => {
             if (resultPot.pot !== null) {
                 pot.value = resultPot.pot
+                Fetch.requete({
+                    url: '/users',
+                    data: {page: 1, nombre: 1000, isDesactive: false}
+                }, (resultUtil: UsersResponseInterface) => {
+                    users.value = resultUtil.documents.map(user =>
+                        pot.value.participants.find(participant => participant._id === user._id)
+                        ?? {
+                            _id: user._id,
+                            nom: user.nom,
+                            prenom: user.prenom,
+                            paiementVirement: 0,
+                            paiementCheque: 0,
+                            paiementEspece: 0,
+                            renduMonnaie: 0,
+                            paye: false,
+                        } as ParticipantPotInterface)
+                })
             } else console.error('pas de pot correspondant à : ' + id)
-            // this.setPot(resultPot, produits, clients, title, mode, resultBN.valeur);
         })
     }
 })

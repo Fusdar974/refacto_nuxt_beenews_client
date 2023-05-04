@@ -1,86 +1,63 @@
 <template>
+<div>
+    <div>
+        <v-container class="justify-space-between align-center">
+            <v-row>
+                <v-col class="text-start">
+                    <h3 class="hidden-md-and-up">Pots </h3>
+                    <h1 class="hidden-sm-and-down">Pots </h1>
+                </v-col>
+                <v-col class="text-end">
+                    <v-btn variant="flat"
+                           color="secondary"
+                           prepend-icon="mdi:mdi-plus"
+                           @click="navigateTo('/pots/add')" >Créer</v-btn>
+                </v-col>
+            </v-row>
+        </v-container>
+        <div v-if="!loading" class="maxW800" >
+            <v-table density="comfortable" hover>
+                <thead>
+                <tr>
+                    <th class="align-center">Date</th>
+                    <th class="align-center">Titre</th>
+                    <th class="align-center">Etat</th>
+                    <th class="align-center">Actions</th>
+                </tr>
+                </thead>
+                <tbody v-if="pots !== null">
+                <tr v-for="(pot, index) in pots as Array<PotInterface>"
+                    :key="index"
+                    :style="`background-color: ${pot.etat === 'Payé' ? 'rgb(237, 247, 237)' : 'rgb(255, 244, 229)'}`"
+                    @click="navigateTo(`/pots/show/${pot._id}`)">
+                    <td class="align-center">{{pot.date}}</td>
+                    <td class="align-center">{{pot.titre}}</td>
+                    <td class="align-center">{{pot.etat}}</td>
+                    <td class="align-center">
+                            <v-btn @click="modifier($event, pot._id as string)"><v-icon icon="mdi mdi_small mdi-pencil"></v-icon></v-btn>
+                    </td>
+                </tr>
+                </tbody>
+            </v-table>
+            <v-pagination v-if="nombreParPage !== 'all'"
+                          v-model="page"
+                          :length="paginationSize as Number"
+                          prev-icon="mdi:mdi-arrow-left"
+                          next-icon="mdi:mdi-arrow-right"/>
+            <v-select v-model="nombreParPage"
+                      :items="[
+                          {value:'10', title: '10'},
+                          {value:'20', title: '20'},
+                          {value:'30', title: '30'},
+                          {value:'all', title: 'Tous'},
+                          ]"
+                      item-title="title"
+                      item-value="value"/>
 
-<!--    <div>-->
-<!--        {!actionUtilisateur && <div>-->
+        </div>
+    </div>
+</div>
 
-<!--        <Grid style={{ maxWidth: '800px' }} container alignItems="center" justify="space-between">-->
-<!--        <Grid item >-->
-<!--            <Hidden mdUp>-->
-<!--                <h3>Pots </h3>-->
-<!--            </Hidden>-->
-<!--            <Hidden smDown>-->
-<!--                <h1>Pots </h1>-->
-<!--            </Hidden>-->
-<!--        </Grid>-->
-<!--        <Grid item>-->
-<!--            <Button-->
-<!--                variant="contained"-->
-<!--                size="small"-->
-<!--                color="secondary"-->
-<!--                startIcon={<div className={'mdi mdi_small mdi-plus'} />}-->
-<!--            onClick={this.ajouter} >Créer</Button>-->
-<!--        </Grid>-->
-<!--        </Grid>-->
-<!--        {!loading && pots.length > 0 &&-->
-<!--        <div style={{ maxWidth: '800px' }}>-->
-
-<!--        <Table size="small" aria-label="a dense table">-->
-<!--            <TableHead>-->
-<!--                <TableRow>-->
-<!--                    <TableCell align="center">Date</TableCell>-->
-<!--                    <TableCell align="center">Titre</TableCell>-->
-<!--                    <TableCell align="center" className="disparaitre">Etat</TableCell>-->
-<!--                    <TableCell align="center">Actions</TableCell>-->
-
-<!--                </TableRow>-->
-<!--            </TableHead>-->
-<!--            <TableBody>-->
-<!--                {pots.map((item) => (-->
-<!--                <TableRow key={item._id} onClick={() => this.modifier(item._id)} style={{ backgroundColor: item.etat === 'Payé' ? 'rgb(237, 247, 237)' : 'rgb(255, 244, 229)' }}>-->
-<!--                <TableCell align="center">{this.formater(item.date)}</TableCell>-->
-<!--                <TableCell align="center">{item.titre}</TableCell>-->
-<!--                <TableCell className="disparaitre" align="center">{item.etat}</TableCell>-->
-<!--                <TableCell align="center"> <ButtonGroup size="small" variant="contained" color="primary" aria-label="contained primary button group">-->
-
-<!--                    <Button onClick={e => this.modifier(item._id, e)}><div className={'mdi mdi_small mdi-pencil'} /></Button>-->
-<!--                    {-->
-<!--                    item.etat === 'Créé' &&-->
-<!--                    <Button onClick={e => this.supprimer(item._id, e)}><div className={'mdi mdi_small mdi-delete'} /></Button>-->
-<!--                    }-->
-<!--                </ButtonGroup></TableCell>-->
-<!--                </TableRow>-->
-<!--                ))}-->
-<!--            </TableBody>-->
-<!--        </Table>-->
-
-<!--        <br />-->
-<!--        <FormControl>-->
-<!--            <ButtonGroup>-->
-<!--                {this.createLien()}-->
-<!--            </ButtonGroup>-->
-<!--        </FormControl>-->
-<!--    </div>-->
-<!--        }-->
-
-<!--        {!loading && pots.length === 0 &&-->
-<!--        <div style={{ maxWidth: '800px' }}>-->
-<!--        Il n'y a aucun pot.-->
-<!--    </div>-->
-<!--    }-->
-<!--    {-->
-<!--    loading &&-->
-<!--    <Grid container spacing={2} alignItems="center">-->
-<!--        <Grid item>-->
-<!--            <CircularProgress />-->
-<!--        </Grid>-->
-<!--        <Grid item xs>-->
-<!--            Chargement ...-->
-<!--        </Grid>-->
-<!--    </Grid>-->
-<!--    }-->
-<!--    </div>-->
-<!--    }-->
-<!--    {-->
 <!--    actionUtilisateur &&-->
 <!--    <ActionsPots onClose={this.closeAction} params={this.state.action} />-->
 <!--    }-->
@@ -112,17 +89,16 @@
 
 <script setup lang="ts">
 import ArticlePotInterface from "~/interfaces/ArticlePotInterface";
-import ProduitInterface from "~/interfaces/ProduitInterface";
 import Fetch from "~/services/FetchService";
-import PotsForm from "~/forms/PotsForm.vue";
 import PotsResponseInterface from "~/interfaces/PotsResponseInterface";
-const date: Ref<string> = ref('')
+import PotInterface from "~/interfaces/PotInterface";
 
 const loading: Ref<boolean> = ref(false)
-const pots: Ref<any> = ref([])
+const pots: Ref<Array<PotInterface>> = ref([] as Array<PotInterface>)
 const nombreParPage: Ref<number> = ref(10)
 const total: Ref<number> = ref(0)
 const page: Ref<number> = ref(1)
+const paginationSize: Ref<number> = ref(1)
 const vertical: Ref<string> = ref('top')
 const horizontal: Ref<string> = ref('center')
 const open: Ref<boolean> = ref(false)
@@ -145,13 +121,27 @@ const recharger = () => {
     loading.value =  true
     Fetch.requete({
         url: '/pots',
-        data: { page: page.value } }, (reponse: PotsResponseInterface)=>{
+        data: { page: page.value, nombre: nombreParPage.value } }, (reponse: PotsResponseInterface)=>{
+        paginationSize.value = Math.ceil(reponse.total / nombreParPage.value)
         pots.value = reponse.documents
         total.value = reponse.total
         page.value = reponse.page
         loading.value = false
         actionUtilisateur.value = false
     });
+}
+onMounted(() =>{
+    recharger()
+})
+
+watch(page, () => recharger())
+watch(nombreParPage, () => recharger())
+
+const modifier = (event: Event, id: string) => {
+    event.stopPropagation()
+    //message.value = "modification OK"
+    if(id)
+        navigateTo(`/pots/edit/${id}`)
 }
 
 </script>
