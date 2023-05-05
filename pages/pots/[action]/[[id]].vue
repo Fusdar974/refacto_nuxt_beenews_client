@@ -62,23 +62,28 @@
                                :total-par-participant="totalParParticipant"
                                :total="total"/>
             </v-col>
-            <pot-paiement-tab v-if="pot.etat === 'Paiement' || pot.etat === 'Payé'"
-                              :participants="pot.participants"
-                              :is-disable="action === SHOW"
-                              :total-par-participant="totalParParticipant"
-                              :payer="payer"/>
+            <pot-paiement-tab v-if="pot.etat === 'Paiement' || pot.etat === 'Payé'">
+                <pot-paiement-table-row v-for="(participant, index) in pot.participants"
+                                        :payer="payer"
+                                        :is-disable="action === SHOW"
+                                        :total-par-participant="totalParParticipant"
+                                        :participant="participant"
+                                        @update:participant="(newValue: ParticipantPotInterface) =>
+                                        pot.participants[index] = newValue"
+                                        :key="index"/>
+            </pot-paiement-tab>
         </v-row>
         <v-btn-group class="btn-group">
             <v-btn v-if="action === EDIT"
                    color="primary"
                    key="edit"
-                   @click="handleClickPot"
+                   @click="handleCreateUpdatePot"
                    class="ma-2">Modifier
             </v-btn>
             <v-btn v-else-if="action === CREATE"
                    color="primary"
                    key="create"
-                   @click="handleClickPot"
+                   @click="handleCreateUpdatePot"
                    class="ma-2">Créer
             </v-btn>
             <v-btn color="primary"
@@ -93,7 +98,6 @@
                    class="ma-2">Encaisser
             </v-btn>
         </v-btn-group>
-
     </v-container>
 </template>
 
@@ -107,6 +111,7 @@ import ParticipantPotInterface from "~/interfaces/ParticipantPotInterface";
 import {ComputedRef} from "vue";
 import ValeurBNResponseInterface from "~/interfaces/ValeurBNResponseInterface";
 import PotPaiementTab from "~/components/PotPaiementTab.vue";
+import PotPaiementTableRow from "~/components/PotPaiementTableRow.vue";
 
 definePageMeta({
     validate: async (route) => {
@@ -174,7 +179,7 @@ const formatedDate = computed({
     }
 })
 
-const handleClickPot = () => {
+const handleCreateUpdatePot = () => {
     if (pot.value.participants && pot.value.participants.length > 0) {
         const data = pot.value._id ?
             {url: `/pots/${pot.value._id}`, data: {pot: pot.value}, method: 'PUT'}

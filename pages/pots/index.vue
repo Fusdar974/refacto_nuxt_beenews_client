@@ -53,7 +53,6 @@
                           ]"
                       item-title="title"
                       item-value="value"/>
-
         </div>
     </div>
 </div>

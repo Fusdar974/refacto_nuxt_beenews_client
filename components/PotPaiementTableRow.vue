@@ -58,15 +58,27 @@ const emits = defineEmits(['update:participant'])
 
 const paiementEspeceComputed = computed({
     get: () => props.participant.paiementEspece,
-    set: (newPaiementEspece) => emits('update:participant', {...props.participant, paiementEspece:newPaiementEspece} as ParticipantPotInterface),
+    set: (newPaiementEspece) =>
+        emits('update:participant', {
+            ...props.participant,
+            paiementEspece: String(newPaiementEspece) === '' ? 0 : newPaiementEspece
+        } as ParticipantPotInterface)
 })
 const paiementVirementComputed = computed({
     get: () => props.participant.paiementVirement,
-    set: (newPaiementVirement) => emits('update:participant', {...props.participant, paiementVirement:newPaiementVirement} as ParticipantPotInterface),
+    set: (newPaiementVirement) =>
+        emits('update:participant', {
+            ...props.participant,
+            paiementVirement: String(newPaiementVirement) === '' ? 0 : newPaiementVirement
+        } as ParticipantPotInterface),
 })
 const paiementChequeComputed = computed({
     get: () => props.participant.paiementCheque,
-    set: (newPaiementCheque) => emits('update:participant', {...props.participant, paiementCheque:newPaiementCheque} as ParticipantPotInterface),
+    set: (newPaiementCheque) =>
+        emits('update:participant', {
+            ...props.participant,
+            paiementCheque: String(newPaiementCheque) === '' ? 0 : newPaiementCheque
+        } as ParticipantPotInterface),
 })
 
 const renduMonnaieComputed: ComputedRef<number> = computed(() => {
