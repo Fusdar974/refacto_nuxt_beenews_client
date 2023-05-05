@@ -95,6 +95,7 @@ const titre: Ref<string> = ref("Aucun titre")
 const severity: Ref<string> = ref("")
 const profils: Ref<Array<ProfilInterface>> = ref([] as Array<ProfilInterface>)
 const {open: snackbarStoreOpen, message: snackbarStoreMessage} = storeToRefs(useSnackbarStore())
+
 const rules = {
   nom: {required}, // Matches state.firstName
   prenom: {required}, // Matches state.lastName

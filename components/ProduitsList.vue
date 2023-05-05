@@ -11,8 +11,6 @@
 import ArticlePotInterface from "~/interfaces/ArticlePotInterface"
 import ProduitInterface from "~/interfaces/ProduitInterface"
 
-const articles: Ref<Array<ArticlePotInterface>> = ref([] as Array<ArticlePotInterface>)
-
 const props = defineProps({
     modelValue: {type: Object as () => Array<ArticlePotInterface>, required: true},
     produitsDispoList: {type: Object as () => Array<ProduitInterface>, required: true},
@@ -20,6 +18,8 @@ const props = defineProps({
     filterValue:[String, Number, Boolean],
     filterType:{type: String, default: 'isEqual'}
 })
+
+const articles: Ref<Array<ArticlePotInterface>> = ref([] as Array<ArticlePotInterface>)
 
 const emits = defineEmits(['update:modelValue'])
 
@@ -68,8 +68,8 @@ watch(() => [...articles.value], newValue => {
     inputValue.value = newValue.filter(article => !!article.quantite)
 })
 
-onBeforeMount(()=>{
-    articles.value = props.produitsDispoList.map(item => ({...item, quantite:0} as ArticlePotInterface))
+onMounted(()=>{
+    articles.value = props.produitsDispoList.map(item => ({...item, quantite: props.modelValue?.find(article => article._id === item._id)?.quantite ?? 0} as ArticlePotInterface))
 })
 
 </script>

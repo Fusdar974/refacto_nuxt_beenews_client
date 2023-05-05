@@ -1,5 +1,5 @@
 <template>
-    <h2>{{ TITLE }}</h2>
+<!--    <h2>{{ TITLE }}</h2>-->
     <v-container>
         <v-row class="mb-4">
             <v-col sm="12" :lg="pot?.articles?.length > 0 ? 9 : 12">
@@ -8,26 +8,32 @@
                         <v-col sm="12" md="8">
                             <v-text-field label="Titre"
                                           name="titre"
+                                          :error-messages="v$.titre.$errors.map(e => e.$message) as Array<string>"
                                           :disabled="action === SHOW"
                                           v-model="pot.titre"
+                                          @blur="v$.titre.$touch"
                                           type="text"/>
                         </v-col>
                         <v-col sm="12" md="4">
                             <v-text-field label="Jour événement"
                                           name="date"
+                                          :error-messages="v$.date.$errors.map(e => e.$message) as Array<string>"
                                           :disabled="action === SHOW"
                                           v-model="formatedDate"
+                                          @blur="v$.date.$touch"
                                           type="date"/>
                         </v-col>
                     </v-row>
                     <v-row>
                         <v-select v-model="pot.participants"
                                   :items="users as UserInterface[]"
+                                  :error-messages="v$.participants.$errors.map(e => e.$message) as Array<string>"
                                   :item-title="(user) => `${user.nom}  ${user.prenom}`"
                                   :disabled="action === SHOW"
                                   return-object
                                   multiple
                                   chips
+                                  @blur="v$.participants.$touch"
                                   label="Clients"/>
                     </v-row>
                     <v-row v-if="action !== SHOW && pot.etat === 'Créé'">
@@ -36,18 +42,23 @@
                                     center-active
                                     color="primary"
                                     slider-color="secondary"
-                                    align-tabs="center"
-                            >
+                                    align-tabs="center">
                                 <v-tab value="Bières">Bières</v-tab>
                                 <v-tab value="Boissons">Boissons</v-tab>
                             </v-tabs>
+                            <v-alert v-if="v$Encaisser.articles.$errors.length !==0"
+                                     type="error"
+                                     density="compact">
+                                Pas d'articles sélectionnés.
+                            </v-alert>
                         </v-col>
                     </v-row>
                     <v-row v-if="action !== SHOW && pot.etat === 'Créé'">
                         <v-col>
                             <div v-if="produitToScreen.length === 0" class="imageFondChargement"/>
                             <div v-else>
-                                <produits-list v-model="pot.articles"
+                                <produits-list :key="pot"
+                                               v-model="pot.articles"
                                                filter-by="type.nom"
                                                :filter-value="filtre as string"
                                                :produits-dispo-list="produitToScreen as ProduitInterface[]"/>
@@ -88,7 +99,7 @@
             </v-btn>
             <v-btn color="primary"
                    key="close"
-                   @click="fermer"
+                   @click="navigateTo(`/pots`)"
                    class="ma-2">Fermer
             </v-btn>
             <v-btn v-if="pot.etat === 'Créé' && action !== CREATE && action !== SHOW"
@@ -99,6 +110,10 @@
             </v-btn>
         </v-btn-group>
     </v-container>
+    <ModalConfirmation v-model="openDialogValidation"
+                       @confirmer="confirmerEncaisser"
+                       titre="Encaisser le pôt"
+                       question="Cette action est irreversible, souhaitez-vous encaisser le pôt ?"/>
 </template>
 
 <script setup lang="ts">
@@ -112,6 +127,10 @@ import {ComputedRef} from "vue";
 import ValeurBNResponseInterface from "~/interfaces/ValeurBNResponseInterface";
 import PotPaiementTab from "~/components/PotPaiementTab.vue";
 import PotPaiementTableRow from "~/components/PotPaiementTableRow.vue";
+import {email, required} from "@vuelidate/validators";
+import {useVuelidate} from "@vuelidate/core";
+import {storeToRefs} from "pinia";
+import {useSnackbarStore} from "~/stores/snackbarStore";
 
 definePageMeta({
     validate: async (route) => {
@@ -121,6 +140,7 @@ definePageMeta({
             || route.params.action === 'add' && route.params.id === ''
     }
 })
+
 
 const {action, id} = useRoute().params
 
@@ -149,7 +169,23 @@ const filtre: Ref<string> = ref('Bières')
 const valeurPoint: Ref<number> = ref(0)
 const show: Ref<boolean> = ref(false)
 const openDialogValidation: Ref<boolean> = ref(false)
+const {open: snackbarStoreOpen, message: snackbarStoreMessage} = storeToRefs(useSnackbarStore())
 
+
+const rules = {
+    titre: {required}, // Matches state.firstName
+    date: {required}, // Matches state.lastName
+    participants: {required},
+}
+
+const rulesEncaisser = {
+    ...rules,
+    articles:{required}
+}
+
+
+const v$ = useVuelidate(rules, pot)
+const v$Encaisser = useVuelidate(rulesEncaisser, pot)
 
 const total = computed(()=>{
     let result = 0
@@ -180,38 +216,35 @@ const formatedDate = computed({
 })
 
 const handleCreateUpdatePot = () => {
-    if (pot.value.participants && pot.value.participants.length > 0) {
-        const data = pot.value._id ?
-            {url: `/pots/${pot.value._id}`, data: {pot: pot.value}, method: 'PUT'}
-            :
-            {url: '/pots/create', data: {pot: pot.value}, method: 'POST'}
-        const message = pot.value._id ? 'Modification OK' : 'Création OK'
-        Fetch.requete(data, () => fermer(message))
-    } else {
-        alert("Il n'y a pas de participant")
-    }
+    v$.value.$validate()
+        .then(isValid => {
+            if(isValid){
+                const data = pot.value._id ?
+                    {url: `/pots/${pot.value._id}`, data: {pot: pot.value}, method: 'PUT'}
+                    :
+                    {url: '/pots/create', data: {pot: pot.value}, method: 'POST'}
+                const message = pot.value._id ? 'Modification OK' : 'Création OK'
+                Fetch.requete(data, () => fermer(message))
+            }}
+    )
 }
 
 const demanderEncaisser = () => {
-    openDialogValidation.value = true
-    let message = ''
-    if (pot.value.articles.length === 0) {
-        openDialogValidation.value = false;
-        message = `${message} Vous n'avez pas de produits selectionnés.`;
+    v$Encaisser.value.$validate()
+        .then(isValid => {
+            if(isValid){
+                openDialogValidation.value = true
+            }
+        })
+}
+const fermer = (messageAfficher: string) => {
+    if (messageAfficher) {
+        snackbarStoreMessage.value = messageAfficher
+        snackbarStoreOpen.value = true
     }
-
-    if (pot.value.participants.length === 0) {
-        openDialogValidation.value = false;
-        message = `${message} Vous n'avez pas de clients selectionnés.`;
-    }
-
-    if (!openDialogValidation.value) {
-        alert(message);
-    }
+    navigateTo(`/pots`)
 }
 
-const fermer = (t: string) => {
-}
 watch(()=>pot, nV => console.log(nV))
 const confirmerEncaisser = () => {
     const potTemp = {...pot.value, etat: 'Paiement', dateEncaissement: new Date()}
@@ -258,26 +291,26 @@ onMounted(() => {
         Fetch.requete({url: `/pots/${id}`, method: 'GET'}, (resultPot: { pot: PotInterface }) => {
             if (resultPot.pot !== null) {
                 pot.value = resultPot.pot
-                Fetch.requete({
-                    url: '/users',
-                    data: {page: 1, nombre: 1000, isDesactive: false}
-                }, (resultUtil: UsersResponseInterface) => {
-                    users.value = resultUtil.documents.map(user =>
-                        pot.value.participants.find(participant => participant._id === user._id)
-                        ?? {
-                            _id: user._id,
-                            nom: user.nom,
-                            prenom: user.prenom,
-                            paiementVirement: 0,
-                            paiementCheque: 0,
-                            paiementEspece: 0,
-                            renduMonnaie: 0,
-                            paye: false,
-                        } as ParticipantPotInterface)
-                })
             } else console.error('pas de pot correspondant à : ' + id)
         })
     }
+    Fetch.requete({
+        url: '/users',
+        data: {page: 1, nombre: 1000, isDesactive: false}
+    }, (resultUtil: UsersResponseInterface) => {
+        users.value = resultUtil.documents.map(user =>
+            pot.value.participants.find(participant => participant._id === user._id)
+            ?? {
+                _id: user._id,
+                nom: user.nom,
+                prenom: user.prenom,
+                paiementVirement: 0,
+                paiementCheque: 0,
+                paiementEspece: 0,
+                renduMonnaie: 0,
+                paye: false,
+            } as ParticipantPotInterface)
+    })
 })
 </script>
 
@@ -285,7 +318,7 @@ onMounted(() => {
 .btn-group {
     position: fixed;
     bottom: 10px;
-    left: 10px;
+    right: 10px;
     background-color: white;
     box-shadow: 0 1px 2px grey;
 }
