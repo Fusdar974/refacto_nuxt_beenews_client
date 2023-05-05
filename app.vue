@@ -30,8 +30,15 @@
             <v-main style="min-height: 300px;">
                 <NuxtPage :authenticate="authenticate"/>
             </v-main>
-        <v-snackbar v-model="snackbarStoreOpen" timeout="4000">
-        <v-alert type="success">{{ snackbarStoreMessage }}</v-alert>
+        <v-snackbar v-model="snackbarStoreOpen"
+                    color="success"
+                    timeout="3000">
+            <v-container class="pa-0">
+                <v-row class="align-center">
+                    <v-col cols="2"><v-icon icon="mdi:mdi-check-circle-outline"/></v-col>
+                    <v-col>{{ snackbarStoreMessage }}</v-col>
+                </v-row>
+            </v-container>
       </v-snackbar>
     </v-layout>
         <v-layout v-else class="rootDeco">
@@ -106,8 +113,6 @@ const login = () => {
         }
     }
 }
-
-watch(isLoading, (newValue:boolean) => console.log('newValue'))
 
 const logout = () => {
     isLoading.value = true
