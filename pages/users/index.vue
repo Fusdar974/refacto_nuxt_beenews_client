@@ -1,7 +1,7 @@
 <template>
   <private-route>
     <div>
-        <v-container class="maxW800 align-center align-content-lg-space-between ma-3">
+        <v-container class="maxW1000 align-center align-content-lg-space-between ma-3">
           <v-row>
             <v-col>
               <h3 class="d-lg-none">Clients </h3>

@@ -1,54 +1,40 @@
 <template>
+
   <v-table density="compact">
     <thead>
     <tr>
-      <th class="text-center">{{Header1}}</th>
-      <th class="text-center">{{Header2}}</th>
-      <th class="text-center">{{Header3}}</th>
-      <th class="text-center">{{Header4}}</th>
-      <th class="text-center">{{Header5}}</th>
-      <th class="text-center">{{Header6}}</th>
-      <th class="text-center">{{Header7}}</th>
-      <th class="text-center">{{Header8}}</th>
-      <th class="text-center">{{Header9}}</th>
+      <th v-for="(attrs, index) in attributes " :key="index" class="text-center">{{attrs.header}}</th>
     </tr>
     </thead>
-    <tbody >
-    <tr v-for="(item, index) in historique"
-        :key="index"
-        @click="() => afficherDetail(item._id)">
-      <td class="text-center">{{ new Date(item.date).toLocaleString() }}</td>
-      <td class="text-center">{{ item.ancienSolde }}</td>
-      <td class="text-center disparaitre">{{ item.nouveauCredit }}</td>
-      <td class="text-center disparaitre">{{ item.paiementCompte }}</td>
-      <td class="text-center">{{ item.nouveauSolde }}</td>
-      <td class="text-center disparaitre">{{ item.paiementEspece }}</td>
-      <td class="text-center disparaitre">{{ item.paiementCheque }}</td>
-      <td class="text-center disparaitre">{{ item.paiementVirement }}</td>
-      <td class="text-center disparaitre">{{ item.rendreMonnaie }}</td>
-      <td class="text-center"><v-btn icon="mdi:mdi-eye" variant="text"/></td>
+    <tbody>
+    <tr v-for="(obj, index) in objects" :key="index">
+<!--      @click="() => afficherDetail(item._id)"-->
+      <td v-for="(attrs, indexAttr) in attributes"
+      :key="indexAttr" class="text-center">
+        <v-img  v-if="attributes[indexAttr].isImage" :src="serverconfig.concat(reachDepth(attrs.attr, obj))"></v-img>
+        <div v-else>{{ reachDepth(attrs.attr, obj) }}</div>
+      </td>
+      <slot :obj="obj"/>
     </tr>
     </tbody>
   </v-table>
+
 </template>
 
 <script setup lang="ts">
 
+import {Ref} from "vue";
+import {SymbolKind} from "vscode-languageserver-types";
+import Array = SymbolKind.Array;
+import AttributeInterface from "~/interfaces/AttributeInterface";
+import reachDepth from "../functions/reachDepth";
+import serverconfig from "~/serverconfig";
+
 const props = defineProps({
-  NombreLigne: {type: Number, required: true},
-  NombreCol: {type: Number, required: true},
-  Header1: {type: String, required: true},
-  Header2: {type: String},
-  Header3: {type: String},
-  Header4: {type: String},
-  Header5: {type: String},
-  Header6: {type: String},
-  Header7: {type: String},
-  Header8: {type: String},
-  Header9: {type: String},
+  objects: {type: Object  as Object[], required: true},
+  attributes: {type: Object as () => AttributeInterface[], required: true},
+  fonction: {type: Function}
 })
-
-
 
 </script>
 
