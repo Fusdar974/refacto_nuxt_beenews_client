@@ -30,7 +30,10 @@
             <v-main style="min-height: 300px;">
                 <NuxtPage :authenticate="authenticate"/>
             </v-main>
-        </v-layout>
+        <v-snackbar v-model="snackbarStoreOpen" timeout="4000">
+        <v-alert type="success">{{ snackbarStoreMessage }}</v-alert>
+      </v-snackbar>
+    </v-layout>
         <v-layout v-else class="rootDeco">
             <v-container class="container-deco">
                 <v-row class="flex-grow-0">
@@ -50,7 +53,7 @@
 </template>
 
 <script setup lang="ts">
-import jwtDecode, {JwtPayload} from "jwt-decode";
+import jwtDecode from "jwt-decode";
 import {useRouter} from "#app";
 import {onMounted} from "#imports";
 import MenuInterface from "~/interfaces/MenuInterface";
@@ -59,6 +62,9 @@ import DisconnectButton from "~/components/DisconnectButton.vue";
 import Drawer from "~/components/Drawer.vue"
 import LoginForm from "~/forms/LoginForm.vue";
 import {useDisplay} from "vuetify";
+import {useSnackbarStore} from "~/stores/snackbarStore";
+import {storeToRefs} from "pinia";
+import Fetch from "~/services/FetchService";
 
 const konamiChaine1 = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65].join('/')
 const konamiChaine2 = [38, 38, 40, 40, 37, 39, 37, 39, 98, 97].join('/')
@@ -73,6 +79,9 @@ const lettres: Ref<Array<number>> = ref([])
 const konami: Ref<boolean> = ref(false)
 
 const {mdAndUp} = useDisplay()
+
+const {open: snackbarStoreOpen, message: snackbarStoreMessage} = storeToRefs(useSnackbarStore())
+
 const handleDrawerToggle = () => {
     mobileOpen.value = !mobileOpen.value
 }
@@ -106,6 +115,8 @@ const logout = () => {
     useRouter().push('/');
     localStorage.clear();
 }
+
+Fetch.setFonctionDeco(logout);
 
 const isClickedBtn = (path: string) => useRouter().currentRoute.value.path === path
 

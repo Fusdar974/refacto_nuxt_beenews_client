@@ -17,6 +17,10 @@ html {
   animation: 5s clignotement linear infinite;
 }
 
+.maxW1000{
+  max-width: 1000px;
+}
+
 @keyframes clignotement {
   0% {
     transform: translate(0px) scaleX(-1);
