@@ -11,7 +11,7 @@ class Fetch {
         this.deco();
     }
 
-    static requete(data, reussite) {
+    static requete(data, reussite, echec = ()=>{}) {
 
         const myHeaders = new Headers({
             'Accept': 'application/json',
@@ -49,7 +49,7 @@ class Fetch {
                 if (err.status === 401) {
                     Fetch.getFonctionDeco();
                 } else {
-                    reussite();
+                    echec(err);
                 }
 
             });
