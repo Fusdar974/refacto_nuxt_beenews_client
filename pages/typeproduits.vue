@@ -10,7 +10,7 @@
             </v-col>
             <v-col cols="auto" >
                 <v-sheet class="pa-2 ma-2">
-                    <v-btn  color="pink">
+                    <v-btn  color="pink" @click="ajouter()">
                         + CRÉER
                     </v-btn>
                 </v-sheet>
@@ -41,14 +41,14 @@
                             <v-text-field
                             v-model="category.nom"
                             :rules="[v => !!v || 'Veuillez rentrer un nom']"
-                            onchange="updateCategoryName(event, category._id)"
+                            @change="updateCategory(category)"
                             ></v-text-field>
                         </td>
                         <td>
-                            <v-checkbox v-model="category.proposablePot"></v-checkbox>
+                            <v-checkbox v-model="category.proposablePot" @change="updateCategory(category)" color="pink"></v-checkbox>
                         </td>
                         <td>
-                            <v-checkbox v-model="category.proposableSoum"></v-checkbox>
+                            <v-checkbox v-model="category.proposableSoum" @change="updateCategory(category)" color="pink"></v-checkbox>
                         </td>
                         <td>{{ category.nombreProduits }} produits en stock</td>
                     </tr>
@@ -64,41 +64,87 @@
                 </v-sheet>
             </v-col>
         </v-row>
+        <v-row  align="start">
+            <v-col cols="auto">
+                <v-btn color="primary"  @click="ticketJour()">Ticket jour</v-btn>
+            </v-col>
+            <v-col cols="auto">
+                <v-btn color="primary"  @click="consoSoum()">Conso Soum</v-btn>
+            </v-col>
+            <v-col >
+                <v-text-field type="date" v-model="dateDebutConsoSoum" label="Date de début"></v-text-field>
+            </v-col>
+            <v-col >
+                <v-text-field type="date" v-model="dateFinConsoSoum" label="Date de fin"></v-text-field>
+            </v-col>
+        </v-row>
+        <v-row justify="space-between" align="start">
+            <v-col cols="auto">
+                <v-sheet class="pa-2 ma-2">
+                    <h2 class="d-none d-md-flex">Points BN offerts</h2>
+                    <h3 class="d-flex d-md-none">Points BN offerts</h3>
+                </v-sheet>
+            </v-col>
+        </v-row>
+
+        <v-row  align="start">
+            <v-col>
+                <v-text-field type="number" v-model="nombreBnOfferts" label="valeur" :rules="[v => !!v || 'Veuillez rentrer un nombre']"></v-text-field>
+            </v-col>
+            <v-col>
+                <v-select  :items="users" item-title="nom"
+                           item-value="_id" v-model="selectedReciever" label="Client"></v-select>
+            </v-col>
+            <v-col cols="auto">
+                <v-btn color="primary"  @click="consoSoum()">Conso Soum</v-btn>
+            </v-col>
+        </v-row>
     </v-container>
 </template>
 
 <script setup lang="ts">
+
+
 import Fetch from "~/services/FetchService";
 import Category from "~/interfaces/Category";
 import {Ref} from "vue";
-const categorys: Ref<Array<Category>> = ref([])
+import serverconfig from "~/serverconfig";
 
-// const updateCategoryName = (event: any, identifiant: string) => {
-//     const type = categorys.value.find(item => item._id === identifiant);
-//     if (event.target.name !== 'nom') {
-//         type[event.target.name] = !type[event.target.name];
-//     } else {
-//         type[event.target.name] = event.target.value;
-//     }
-//     Fetch.requete({ url: `/typeproduits/${identifiant}`, method: 'PUT', data: { typeproduit: type } }, res => {
-//         console.log(res)
-//     })
-// }
-//
-// const ajouter = () => {
-//     const data = {
-//         typeproduit: {
-//             nom: "",
-//             proposablePot: false,
-//             proposableSoum: false
-//         }
-//     }
-//     Fetch.requete({ url: `/typeproduits/create`, method: 'POST', data }, result => {
-//         const { types } = this.state;
-//         types.push(result.typeproduit);
-//         this.setState({ types });
-//     })
-// }
+const categorys: Ref<Array<Category>> = ref([])
+const dateDebutConsoSoum: Ref<Date> = ref(new Date())
+const dateFinConsoSoum: Ref<Date> = ref(new  Date())
+const users: Ref<Array<any>> = ref([])
+const selectedReciever: Ref<any> = ref({ _id: "", nom: "", prenom: "" })
+const nombreBnOfferts: Ref<number> = ref(0)
+
+async function updateCategory(category: Category) {
+    if (category.nom !=='') {
+        await Fetch.requete({ url: `/typeproduits/${category._id}`, method: 'PUT', data: { typeproduit: category } });
+    }
+}
+function ajouter() {
+    const emptyCategory: Category = {
+        nom: "",
+        proposablePot: false,
+        proposableSoum: false
+    }
+    Fetch.requete({ url: `/typeproduits/create`, method: 'POST', data: { typeproduit: emptyCategory }}, (res: { typeproduit: Category; }) => {
+        categorys.value.push(res.typeproduit);
+    });
+}
+function ticketJour() {
+    Fetch.requete({ url: '/soum/ticketjour', method: 'POST' }, (res: { ticket: any; }) => {
+        window.open(`${serverconfig}v1/pdf/ticketJour?token=${res.ticket}`, '_blanck');
+    });
+}
+function consoSoum() {
+    if (dateDebutConsoSoum && dateFinConsoSoum) {
+        Fetch.requete({ url: '/parametre/consoSoum', method: 'POST', data: { debut: new Date(dateDebutConsoSoum.value).getTime(), fin: new Date(dateFinConsoSoum.value).getTime() } }, (res: { ticket: any; }) => {
+            window.open(`${serverconfig}v1/pdf/consoSoum?token=${res.ticket}`, '_blanck');
+        });
+    }
+}
+
 //
 // const supprimerTypeProduit = (identifiantASupp: number) => {
 //     this.setState({ identifiantASupp, openDialog: true });
@@ -213,9 +259,14 @@ const categorys: Ref<Array<Category>> = ref([])
 // };
 
 
-const getCategorys = () => {
-    Fetch.requete(Fetch.requete({ url: '/typeproduits' }, (resultat: Array<Category>) => {
+const getCategorys = async ()  =>  {
+    await Fetch.requete(Fetch.requete({ url: '/typeproduits'}, (resultat: Array<Category>) => {
         categorys.value = resultat;
+    }))
+}
+const getUsers = ()  =>  {
+    Fetch.requete(Fetch.requete({ url: '/users',data: { page: 1, nombre: 1000 }}, (resultat: { documents: any; }) => {
+        users.value = resultat.documents;
     }))
 }
 const getBnState = () => {
@@ -225,9 +276,13 @@ const getBnState = () => {
 }
 
 
-onMounted(()=>{
-    getCategorys();
+onBeforeMount(async () => {
+    await getCategorys();
 })
+onMounted(()=>{
+    getUsers();
+})
+
 </script>
 
 <style scoped>
