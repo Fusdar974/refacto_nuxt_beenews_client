@@ -20,7 +20,8 @@
           </v-row>
         </v-row>
       </v-container>
-      <generic-table :objects="produits" :attributes="attributes">
+      <generic-table :objects="produits" :attributes="attributes" :actions-td="true"
+                     v-model:page-size="paginationSize" v-model:page="page" v-model:nb-par-page="nombreParPage">
         <template v-slot:default="slotProps">
           <td>
             <v-btn-group variant="tonal">
@@ -30,24 +31,6 @@
           </td>
         </template>
       </generic-table>
-      <div v-if="!loading" class="maxW1000" >
-        <v-pagination v-if="nombreParPage !== 'all'"
-                      v-model="page"
-                      :length="paginationSize"
-                      prev-icon="mdi:mdi-arrow-left"
-                      next-icon="mdi:mdi-arrow-right"/>
-        <v-select v-model="nombreParPage"
-                  @change="handleChangeSelect"
-                  :items="[
-                              {value:'10', title: '10'},
-                              {value:'20', title: '20'},
-                              {value:'30', title: '30'},
-                              {value:'all', title: 'Tous'},
-                              ]"
-                  item-title="title"
-                  item-value="value"/>
-
-      </div>
       <v-container v-if="loading" class="align-center">
         <v-row>
           <v-col>
@@ -55,7 +38,6 @@
           </v-col>
         </v-row>
         <v-col>Chargement...</v-col>
-        {{recharger}}
       </v-container>
       <modal-confirmation v-model="openDialog"
                           :titre="'Confirmation de suppression'"
@@ -83,7 +65,8 @@ const loading : Ref<boolean> = ref(false)
 const produits: Ref<Array<ProduitInterface> | null> = ref(null)
 const nombreParPage: Ref<string>= ref('10')
 const types: Ref<Array<TypeInterface> >= ref([{}] as TypeInterface[])
-const attributes: Ref<Array<AttributeInterface>> = ref([{header: 'Nom', attr:'nom',}, {header: 'Image', attr: 'image', isImage: true}, {header: 'Stock', attr: 'nombre'}, {header: 'Type', attr: 'type.nom'}] as Array<AttributeInterface>)
+const attributes: Ref<Array<AttributeInterface>> = ref([{header: 'Nom', attr:'nom',},
+  {header: 'Image', attr: 'image', isImage: true}, {header: 'Stock', attr: 'nombre'}, {header: 'Type', attr: 'type.nom'}] as Array<AttributeInterface>)
 const total: Ref<number> = ref(0)
 const page: Ref<number> = ref(1)
 const paginationSize: Ref<number> = ref(1)
@@ -197,16 +180,6 @@ const handleConfirmerSuppression = () => {
     closeAction('SUPPRESSION ok');
     openDialog.value = false
   });
-}
-
-/**
- * Change le nombre d'utilisateurs affichés par pages lorsque la valeur du select est modifiée
- * @param e
- */
-const handleChangeSelect = (e: any) => {
-  const valeur = e.target;
-  nombreParPage.value = valeur.value;
-  return { nombreParPage: valeur.value, loading: true }
 }
 
 </script>
