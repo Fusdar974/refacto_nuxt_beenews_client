@@ -21,7 +21,7 @@
               <v-text-field v-model="newpassword"
                             density="compact"
                             type="password"
-                            :error="errorpassword"
+                            :error="errorpassword as boolean"
                             label="Nouveau mot de passe"
                             name="newpassword"/>
             </v-col>
@@ -29,7 +29,7 @@
               <v-text-field v-model="confirmpassword"
                             density="compact"
                             type="password"
-                            :error="errorpassword"
+                            :error="errorpassword as boolean"
                             label="Confirmer nouveau mot de passe"
                             name="confirmpassword"/>
             </v-col>
@@ -64,6 +64,8 @@ import {onMounted} from "#imports";
 import PrivateRoute from "~/components/PrivateRoute.vue";
 import PasswordChangeResponseInterface from "~/interfaces/PasswordChangeResponseInterface";
 import HistoriqueClient from "~/components/HistoriqueClient.vue";
+import {storeToRefs} from "pinia";
+import {useMenuStore} from "~/stores/menuStore";
 
 const user: Ref<UserInterface | null> = ref(null)
 const changerMotDePasse: Ref<boolean> = ref(false)
@@ -73,9 +75,8 @@ const confirmpassword: Ref<string> = ref('')
 const errorpassword: Ref<boolean> = ref(false)
 const message: Ref<string> = ref('')
 
-const props = defineProps({
-  authenticate: Boolean,
-})
+const {titleAppBar} = storeToRefs(useMenuStore())
+titleAppBar.value = 'Mon Compte'
 
 const majUser = (id: string) => {
   if (typeof id !== "undefined" && id !== "" && id) {
