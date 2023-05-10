@@ -57,8 +57,10 @@
                             <div v-else>
                                 <produits-list :key="pot"
                                                v-model="pot.articles"
-                                               filter-by="type._id"
-                                               :filter-value="filtre as string"
+                                               :filters="[
+                                                   {by:'type._id', value:filtre as string},
+                                                   {by:'nombre', value:0, type: 'isGreater'},
+                                                   ] as Array<ProduitsListFilterInterface>"
                                                :produits-dispo-list="produitToScreen as ProduitInterface[]"/>
                             </div>
                         </v-col>
@@ -138,6 +140,7 @@ import {storeToRefs} from "pinia";
 import {useSnackbarStore} from "~/stores/snackbarStore";
 import {useMenuStore} from "~/stores/menuStore";
 import TypeProduitInterface from "~/interfaces/TypeProduitInterface";
+import ProduitsListFilterInterface from "~/interfaces/ProduitsListFilterInterface";
 
 definePageMeta({
     validate: async (route) => {
