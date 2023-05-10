@@ -1,11 +1,238 @@
 <template>
-
+  <div>
+    <h2> {{ titre }} </h2>
+    <v-form v-if="selectedProduit" :disabled="mode === SHOW">
+      <v-text-field v-model="selectedProduit.nom" type="text" label="nom"
+                    :error-messages="v$.nom.$errors.map(e => e.$message)"
+                    required
+                    sm="12"
+                    @input="v$.nom.$touch"
+                    @blur="v$.nom.$touch"/>
+      <v-text-field v-model="selectedProduit.prix" type="text" label="prix en BN"
+                    :error-messages="v$.prix.$errors.map(e => e.$message)"
+                    sm="4"
+                    required
+                    @blur="v$.prix.$touch"/>
+      <v-text-field v-model="selectedProduit.prixEuros"
+                    :error-messages="v$.prixEuros.$errors.map(e => e.$message)"
+                    sm="4"
+                    @blur="v$.prix.$touch"
+                    type="text"
+                    label="prix en euros" />
+      <v-text-field v-model="selectedProduit.credit" type="text" label="credit" sm="4"/>
+      <v-text-field v-model="selectedProduit.nombre" type="text" label="stock" sm="6"
+                    :error-messages="v$.nombre.$errors.map(e => e.$message)"
+                    required
+                    @blur="v$.nombre.$touch"/>
+      <v-select v-model="selectedProduit.type"
+                @change="handleChangeSelect"
+                :items="types"
+                item-title="nom"
+                item-value=""
+                return-object/>
+      <v-checkbox label="Archivé"
+                  v-model="selectedProduit.archive"
+                  color="red"
+      ></v-checkbox>
+      <div>
+        <v-btn v-if="mode === SHOW" color="primary" class="ma-1" variant="outlined" key="edit" @click="mode = EDIT">
+          Modifier
+        </v-btn>
+        <v-btn v-if="mode === EDIT" color="primary" class="ma-1" variant="outlined" key="edit" @click="modifier">Valider
+        </v-btn>
+        <v-btn v-if="mode === CREATE" color="primary" class="ma-1" variant="outlined" key="create" @click="creer">Créer
+        </v-btn>
+        <v-btn color="primary" class="ma-1" variant="outlined" key="create" @click="fermer(null)">Fermer</v-btn>
+      </div>
+    </v-form>
+  </div>
 </template>
 
-<script>
-export default {
-  name: "ProduitsForm"
+<script setup lang="ts">
+
+import Fetch from "~/services/FetchService";
+import {storeToRefs} from "pinia";
+import {useSnackbarStore} from "~/stores/snackbarStore";
+import {useVuelidate} from '@vuelidate/core'
+import {required} from '@vuelidate/validators'
+import {SymbolKind} from "vscode-languageserver-types";
+import ProduitResponseInterface from "~/interfaces/ProduitResponseInterface";
+import ProduitInterface from "~/interfaces/ProduitInterface";
+import TypeProduitInterface from "~/interfaces/TypeProduitInterface";
+import TypesProduitsResponseInterface from "~/interfaces/TypesProduitsResponseInterface";
+import Array = SymbolKind.Array;
+import TypeInterface from "~/interfaces/TypeProduitInterface";
+
+
+/**
+ * userId : l'id de l'utilisateur à consulter/modifier
+ * action : string qui détermine le mode du UserForm
+ */
+const props = defineProps({
+  produitId: {type: String},
+  action: {type: String, required: true},
+})
+
+
+const SHOW = 'show'
+const EDIT = 'edit';
+const CREATE = 'add';
+const selectedProduit: Ref<ProduitInterface> = ref({} as ProduitInterface)
+const mode: Ref<string> = ref(props.action)
+const titre: Ref<string> = ref("Aucun titre")
+const types: Ref<Array<TypeProduitInterface>> = ref([] as Array<TypeProduitInterface>)
+const {open: snackbarStoreOpen, message: snackbarStoreMessage} = storeToRefs(useSnackbarStore())
+const rules = {
+  nom: {required}, // Matches state.firstName
+  prix: {required},
+  prixEuros: {required},
+  nombre: {required},
+  type: {required}
 }
+
+const v$ = useVuelidate(rules, selectedProduit)//valide si les propriétées de selectedUser respectent les règles
+
+/**
+ * avant que la page soit créée:
+ * détermine en quel mode est le formulaire
+ * si il n'est pas en mode création, charge l'utilisateur sélectionné
+ * sinon, créé un utilisateur vide
+ */
+onBeforeMount(() => {
+  let title: string;
+  switch (props.action) {
+    case 'show':
+      title = "Informations produit"
+      break;
+    case 'edit':
+      title = "Modifier produit"
+      break;
+    case 'add':
+      title = "Ajouter produit"
+      break;
+    default:
+      title = "Informations produit"
+      break;
+  }
+  if (mode.value !== CREATE) {
+    Fetch.requete({url: `/produits/${props.produitId}`, method: 'GET'}, (resultProduits: ProduitResponseInterface) => {
+      selectedProduit.value = resultProduits.produit
+    })
+  } else {
+    selectedProduit.value = {
+      nom: "",
+      image: "",
+      prix: 0,
+      prixEuros: 0,
+      nombre: 0,
+      credit: 0,
+      effacable: false,
+      archive: false,
+    }
+  }
+  Fetch.requete({ url: `/typeproduits`, method: 'POST' }, (result: [TypeInterface]) => {
+    types.value = result
+  })
+  titre.value = title
+})
+
+/**
+ * ferme le formulaire et renvoie sur la page des clients, si un message est passé en paramètre
+ * celui-ci est stocké dans le store ainsi qu'un booléen qui permet d'activer le snackbar de la page principale est afficher le message
+ * @param messageAfficher message à afficher
+ */
+const fermer = (messageAfficher: string) => {
+  if (messageAfficher) {
+    snackbarStoreMessage.value = messageAfficher
+    snackbarStoreOpen.value = true
+  }
+  navigateTo('/produits')
+}
+
+/**
+ * Envoie une requete de création d'utilisateur dans le back et ferme le formulaire
+ */
+const creer = () => {
+  v$.value.$validate()
+      .then( result => {
+        if (result && selectedProduit.value !== null) {
+          let produit = {_id: selectedProduit.value._id,
+            nom: selectedProduit.value.nom,
+            image: selectedProduit.value.image,
+            type: selectedProduit.value.type?._id,
+            prix: selectedProduit.value.prix,
+            prixEuros: selectedProduit.value.prixEuros,
+            nombre: selectedProduit.value.nombre,
+            credit: selectedProduit.value.credit,
+            effacable: selectedProduit.value.effacable,
+            archive: selectedProduit.value.archive,}
+          Fetch.requete({url: '/produits/create', method: 'POST', data: {produit: produit}}, () => {
+            fermer('Création OK')
+          });
+        }}
+      )
+}
+
+/**
+ * Envoie une requete de modification d'utilisateur dans le back et ferme le formulaire
+ */
+const modifier = () => {
+  v$.value.$validate()
+      .then( result => {
+        if (result && selectedProduit.value !== null) {
+          Fetch.requete({
+            url: `/produits/${selectedProduit.value._id}`,
+            data: { produit: selectedProduit.value },
+            method: 'PUT'}, () => {
+            fermer('Modification OK');
+          });
+        }
+      })
+}
+
+const handleChangeSelect = (e: any) => {
+  const valeur = e.target;
+  selectedProduit.value.type = valeur.value;
+  console.log(selectedProduit.value.type)
+}
+
+const changementImage = (event  : Event) => {
+  event.preventDefault();
+
+  const reader = new FileReader();
+  reader.readAsBinaryString(fileInput.current.files[0]);
+
+  let produit = this.state.produit;
+
+  reader.onload = () => {
+    var img = new Image();
+    img.src = window.URL.createObjectURL(this.fileInput.current.files[0]);
+    img.onload = () => {
+      const width = img.naturalWidth;
+      const height = img.naturalHeight;
+
+      // unload it
+      window.URL.revokeObjectURL(img.src);
+
+      // check its dimensions
+      if (width <= 200 && height <= 200) {
+        // it fits
+        produit.imageBnr = reader.result;
+        produit.image = window.URL.createObjectURL(this.fileInput.current.files[0]);
+        this.setState({ produit });
+      } else {
+        // it doesn't fit, unset the value
+        // post an error
+
+        alert("Image maximum de 200x200")
+      }
+    };
+  };
+  reader.onerror = function (error) {
+    console.error('Fichier error: ', error);
+  };
+}
+
 </script>
 
 <style scoped>

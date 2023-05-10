@@ -114,7 +114,10 @@ watch(champRecherche, () => recharger())
  * recharge la liste des utilisateurs lorsque la page est créée
  */
 onMounted(()=>{
-  Fetch.requete({ url: '/typeproduits' }, (result: [TypeInterface]) => types.value = result.map(item => ({ _id: item._id, nom: item.nom, proposablePot: item.proposablePot, proposableSoum: item.proposableSoum, nombreProduits: item.nombreProduits,  selectionne: false })));
+  Fetch.requete({ url: '/typeproduits' }, (result: [TypeInterface]) =>
+      types.value = result.map(item => ({
+        _id: item._id, nom: item.nom, proposablePot: item.proposablePot, proposableSoum: item.proposableSoum, nombreProduits: item.nombreProduits,  selectionne: false
+      })));
   recharger();
 })
 
@@ -141,7 +144,7 @@ const recharger = () => {
 const handleModifier = (event: Event, id: string) => {
   event.stopPropagation()
   identifiant.value = id
-  navigateTo(`/users/edit/${identifiant.value}`)
+  navigateTo(`/produits/edit/${identifiant.value}`)
 }
 
 /**
@@ -160,7 +163,7 @@ const handleSupprimer = (event: Event , id: string) => {
  */
 const ajouter = () => {
   message.value = "modification OK"
-  navigateTo('/users/add')
+  navigateTo('/produits/add')
 }
 
 /**

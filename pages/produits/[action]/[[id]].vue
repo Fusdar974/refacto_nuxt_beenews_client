@@ -1,12 +1,12 @@
 <template>
   <div>
-    <users-form :action="action" :user-id="id"/>
+    <produits-form :action="action" :produit-id="id"/>
   </div>
 </template>
 
 <script setup lang="ts">
 
-import UsersForm from "~/forms/UsersForm.vue";
+import ProduitsForm from "~/forms/ProduitsForm.vue";
 
 definePageMeta({
   validate: async (route) => {

@@ -99,7 +99,7 @@ const login = () => {
   const token = localStorage.getItem('token');
   if (token) {
     const tokenDecode: JwtPayloadInterface = jwtDecode(token);
-    localStorage.setItem('idCompte', tokenDecode.userId);
+    localStorage.setItem('idCompte', tokenDecode.produitId);
 
     const expire = new Date((tokenDecode.exp || 0) * 1000) < new Date();
     if (!expire) {

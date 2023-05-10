@@ -1,9 +1,9 @@
 import TypeProduitInterface from "~/interfaces/TypeProduitInterface";
 interface ProduitInterface{
-    _id: string,
+    _id?: string,
     nom: string,
     image: string,
-    type: TypeProduitInterface,
+    type?: TypeProduitInterface,
     prix: number,
     prixEuros: number,
     nombre: number,
