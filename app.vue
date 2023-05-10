@@ -31,11 +31,15 @@
                 <NuxtPage/>
             </v-main>
         <v-snackbar v-model="snackbarStoreOpen"
-                    color="success"
+                    :color="snackbarStoreCouleur"
                     timeout="3000">
             <v-container class="pa-0">
                 <v-row class="align-center">
-                    <v-col cols="2"><v-icon icon="mdi:mdi-check-circle-outline"/></v-col>
+                    <v-col cols="2">
+                        <v-icon
+                            :icon="`mdi:mdi-${
+                                snackbarStoreCouleur==='success'?'check':'close'
+                            }-circle-outline`"/></v-col>
                     <v-col>{{ snackbarStoreMessage }}</v-col>
                 </v-row>
             </v-container>
@@ -81,9 +85,7 @@ const initMenu: Array<MenuInterface> = [{_id: 1, to: "/", libelle: 'Accueil', au
 
 const menus: Ref<Array<MenuInterface>> = ref(initMenu)
 const mobileOpen: Ref<boolean> = ref(false)
-const authenticate: Ref<boolean> = ref(false)
 const isLoading: Ref<boolean> = ref(false)
-const title: Ref<string> = ref(initMenu[0].libelle)
 const lettres: Ref<Array<number>> = ref([])
 const konami: Ref<boolean> = ref(false)
 
@@ -91,7 +93,8 @@ const {mdAndUp} = useDisplay()
 
 const {
     open: snackbarStoreOpen,
-    message: snackbarStoreMessage
+    message: snackbarStoreMessage,
+    couleur: snackbarStoreCouleur
 } = storeToRefs(useSnackbarStore())
 
 const {isAuthenticated} = storeToRefs(useAuthenticateStore())
