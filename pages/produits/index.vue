@@ -31,6 +31,14 @@
           </td>
         </template>
       </generic-table>
+      <v-container class="align-center">
+        <v-btn @click="openInventairePartiel = !openInventairePartiel" variant="tonal" color="primary" class="ma-1">
+          Inventaire partiel
+        </v-btn>
+        <v-btn @click="afficherPDF" variant="tonal" color="primary" class="ma-1">
+          Inventaire complet
+        </v-btn>
+      </v-container>
       <v-container v-if="loading" class="align-center">
         <v-row>
           <v-col>
@@ -43,6 +51,19 @@
                           :titre="'Confirmation de suppression'"
                           :question="'Voulez vous supprimer cet utilisateur ?'"
                           @confirmer="handleConfirmerSuppression">
+      </modal-confirmation>
+      <modal-confirmation v-model="openInventairePartiel"
+                          :titre="'Catégories à imprimer'"
+                          :question="'Quelles sont les catégories à imprimer?'"
+                          @confirmer="confirmerInventairePartiel">
+        <v-card-actions>
+          <v-checkbox v-for="(type,index) in types"
+                      :key="index"
+                      v-model="type.selectionne"
+                      :label="type.nom"
+                      :value="type"
+                      color="indigo" ></v-checkbox>
+        </v-card-actions>
       </modal-confirmation>
     </div>
     <v-snackbar v-model="open" timeout="1000"><v-alert type="success">{{message}}</v-alert></v-snackbar>
@@ -59,6 +80,7 @@ import ProduitInterface from "~/interfaces/ProduitInterface";
 import TypeInterface from "~/interfaces/TypeProduitInterface";
 import ProduitsResponseInterface from "~/interfaces/ProduitsResponseInterface";
 import AttributeInterface from "~/interfaces/AttributeInterface";
+import serverconfig from "~/serverconfig";
 
 
 const loading : Ref<boolean> = ref(false)
@@ -92,7 +114,7 @@ watch(champRecherche, () => recharger())
  * recharge la liste des utilisateurs lorsque la page est créée
  */
 onMounted(()=>{
-  Fetch.requete({ url: '/typeproduits' }, (result: [TypeInterface]) => types.value = result);
+  Fetch.requete({ url: '/typeproduits' }, (result: [TypeInterface]) => types.value = result.map(item => ({ _id: item._id, nom: item.nom, proposablePot: item.proposablePot, proposableSoum: item.proposableSoum, nombreProduits: item.nombreProduits,  selectionne: false })));
   recharger();
 })
 
@@ -110,16 +132,6 @@ const recharger = () => {
     page.value = result.page > paginationSize.value ? paginationSize.value: result.page
     loading.value = false}, () => {loading.value = false} );
 }
-
-// const SetAttributes = () => {
-//   let attrs: AttributeInterface[]
-//   attrs[0].header = "Nom"
-//   attrs[0].attr = "nom"
-//   attrs[1].header = "Image"
-//   attrs[1].attr = "image"
-//   attrs[2].header = "Image"
-//   attrs[2].attr = "image"
-// }
 
 /**
  * envoie sur le composant de modification d'utilisateur
@@ -141,15 +153,6 @@ const handleSupprimer = (event: Event , id: string) => {
   event.stopPropagation()
   openDialog.value = true
   identifiantASupp.value =  id
-}
-
-/**
- * envoie sur le composant de consultation d'utilisateur
- * @param id l'identifiant de l'utilisateur sélectionné
- */
-const consulter = (id : string) => {
-  identifiant.value = id
-  navigateTo(`/users/show/${identifiant.value}`)
 }
 
 /**
@@ -179,6 +182,19 @@ const handleConfirmerSuppression = () => {
   Fetch.requete({ url: `/users/${identifiantASupp.value}`, method: 'DELETE' }, () => {
     closeAction('SUPPRESSION ok');
     openDialog.value = false
+  });
+}
+
+const confirmerInventairePartiel = () => {
+  Fetch.requete({ url: '/produits/pdf', method: 'POST', data: { types:  types.value.filter(item => item.selectionne).map(item => item._id) } }, result => {
+    window.open(`${serverconfig}v1/pdf/pdf?token=${result.ticket}`, '_blanck');
+  });
+  openInventairePartiel.value = !openInventairePartiel.value
+}
+
+const afficherPDF = () => {
+  Fetch.requete({ url: '/produits/pdf', method: 'POST' }, result => {
+    window.open(`${serverconfig}v1/pdf/pdf?token=${result.ticket}`, '_blanck');
   });
 }
 

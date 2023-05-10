@@ -4,5 +4,6 @@ interface TypeProduitInterface{
     proposablePot: boolean,
     proposableSoum: boolean,
     nombreProduits?: number,
+    selectionne?: boolean
 }
 export default TypeProduitInterface
