@@ -1,7 +1,7 @@
 <template>
     <NuxtLayout>
 <!--        <div class="imageFondChargement"/>-->
-        <v-layout v-if="authenticate" class="root">
+        <v-layout v-if="isAuthenticated" class="root">
             <drawer v-model="mobileOpen">
                 <v-list>
                     <v-list-item v-for="(menu, index) in menus"
@@ -22,13 +22,13 @@
                                         @click="handleDrawerToggle"
                                         class="d-md-none"/>
                 </template>
-                <v-app-bar-title>{{ title }}</v-app-bar-title>
+                <v-app-bar-title>{{ titleAppBar }}</v-app-bar-title>
                 <v-spacer></v-spacer>
                 <disconnect-button :fonc-deco="logout"
                                    class="mr-2"/>
             </v-app-bar>
             <v-main style="min-height: 300px;">
-                <NuxtPage :authenticate="authenticate"/>
+                <NuxtPage/>
             </v-main>
         <v-snackbar v-model="snackbarStoreOpen"
                     color="success"
@@ -72,6 +72,8 @@ import {useDisplay} from "vuetify";
 import {useSnackbarStore} from "~/stores/snackbarStore";
 import {storeToRefs} from "pinia";
 import Fetch from "~/services/FetchService";
+import {useAuthenticateStore} from "~/stores/authenticateStore";
+import {useMenuStore} from "~/stores/menuStore";
 
 const konamiChaine1 = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65].join('/')
 const konamiChaine2 = [38, 38, 40, 40, 37, 39, 37, 39, 98, 97].join('/')
@@ -87,13 +89,21 @@ const konami: Ref<boolean> = ref(false)
 
 const {mdAndUp} = useDisplay()
 
-const {open: snackbarStoreOpen, message: snackbarStoreMessage} = storeToRefs(useSnackbarStore())
+const {
+    open: snackbarStoreOpen,
+    message: snackbarStoreMessage
+} = storeToRefs(useSnackbarStore())
+
+const {isAuthenticated} = storeToRefs(useAuthenticateStore())
+const {titleAppBar} = storeToRefs(useMenuStore())
+// const {isLoading} = useLoadingStore()
 
 const handleDrawerToggle = () => {
     mobileOpen.value = !mobileOpen.value
 }
+
 const setAuthenticate = (boolAuth: boolean, newMenus: Array<MenuInterface>) => {
-    authenticate.value = boolAuth
+    isAuthenticated.value = boolAuth
     menus.value = newMenus
     isLoading.value = false
 }
@@ -138,7 +148,6 @@ const handleKeyUp = (e: any) => {
 
 const handleOnClick = (item: MenuInterface) => {
     useRouter().push(item.to)
-    title.value = item.libelle
     if (!mdAndUp) {
         mobileOpen.value = false
     }
