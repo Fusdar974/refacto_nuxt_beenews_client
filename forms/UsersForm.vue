@@ -40,7 +40,7 @@
         </v-btn>
         <v-btn v-if="mode === CREATE" color="primary" class="ma-1" variant="outlined" key="create" @click="creer">Créer
         </v-btn>
-        <v-btn color="primary" class="ma-1" variant="outlined" key="create" @click="fermer(null)">Fermer</v-btn>
+        <v-btn color="primary" class="ma-1" variant="outlined" key="create" @click="fermer">Fermer</v-btn>
       </div>
     </v-form>
 
@@ -56,9 +56,11 @@
                        titre="Remise à zéro du mot de passe"
                        question="Voulez-vous mettre le mot de passe par défaut ?"
     />
-    <v-snackbar v-if="openSnackUserForm" v-model="openSnackUserForm" timeout="4000">
-      <v-alert :type="severity">{{ messageSnackUserForm }}</v-alert>
-    </v-snackbar>
+      <v-snackbar v-if="openSnackUserForm" v-model="openSnackUserForm" timeout="4000">
+          <v-alert :type="severity">
+              {{ messageSnackUserForm }}
+          </v-alert>
+      </v-snackbar>
   </div>
 </template>
 
@@ -75,8 +77,8 @@ import {useSnackbarStore} from "~/stores/snackbarStore"
 import {useVuelidate} from '@vuelidate/core'
 import {email, required} from '@vuelidate/validators'
 import {SymbolKind} from "vscode-languageserver-types"
-import Array = SymbolKind.Array;
 import {useMenuStore} from "~/stores/menuStore";
+import Array = SymbolKind.Array;
 
 const SHOW = 'show'
 const EDIT = 'edit'
@@ -98,7 +100,7 @@ const openSnackUserForm: Ref<boolean> = ref(false)
 const erreurMail: Ref<boolean> = ref(false)
 const messageSnackUserForm: Ref<string> = ref("")
 const mode: Ref<string> = ref(props.action)
-const severity: Ref<string> = ref("")
+const severity: Ref<'error' | 'success' | 'warning' | 'info' | undefined> = ref(undefined)
 const profils: Ref<Array<ProfilInterface>> = ref([] as Array<ProfilInterface>)
 
 const {open: snackbarStoreOpen, message: snackbarStoreMessage} = storeToRefs(useSnackbarStore())
@@ -152,12 +154,12 @@ onBeforeMount(() => {
  * celui-ci est stocké dans le store ainsi qu'un booléen qui permet d'activer le snackbar de la page principale est afficher le message
  * @param messageAfficher message à afficher
  */
-const fermer = (messageAfficher: string) => {
-  if (messageAfficher) {
-    snackbarStoreMessage.value = messageAfficher
-    snackbarStoreOpen.value = true
-  }
-  navigateTo('/users')
+const fermer = (messageAfficher: string | undefined) => {
+    if (messageAfficher) {
+        snackbarStoreMessage.value = messageAfficher
+        snackbarStoreOpen.value = true
+    }
+    navigateTo('/users')
 }
 
 /**

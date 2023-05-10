@@ -32,27 +32,31 @@
               </tr>
               </thead>
               <tbody v-if="users !== null">
-                <tr v-for="(user, index) in users"
+                <tr v-for="(user, index) in users as Array<UserInterface>"
                     :key="index" @click="navigateTo(`/users/show/${user._id}`)">
-                  <td class="align-center">
-                    <v-icon v-if="user.isDesactive" icon="mdi:mdi_small" color="red"/>
-                    {{user.nom}}
-                  </td>
-                  <td class="align-center">{{user.prenom}}</td>
-                  <td class="align-center">{{user.compte}}</td>
-                  <td class="align-center hidden-md-and-down">{{user.profils.map(item => item.nom).join(',')}}</td>
-                  <td class="align-center">
-                    <v-btn-group variant="tonal">
-                      <v-btn @click="handleModifier($event,user._id)" class="ma-1"><v-icon icon="mdi mdi_small mdi-pencil"></v-icon></v-btn>
-                      <v-btn v-if="user.supprimable" @click="handleSupprimer($event, user._id)" class="ma-1"><v-icon icon="mdi mdi_small mdi-delete"></v-icon></v-btn>
-                    </v-btn-group>
-                  </td>
+                    <td class="align-center">
+                        <v-icon v-if="user.isDesactive" icon="mdi:mdi_small" color="red"/>
+                        {{ user.nom }}
+                    </td>
+                    <td class="align-center">{{ user.prenom }}</td>
+                    <td class="align-center">{{ user.compte }}</td>
+                    <td class="align-center hidden-md-and-down">{{ user.profils.map(item => item.nom).join(',') }}</td>
+                    <td class="align-center">
+                        <v-btn-group variant="tonal">
+                            <v-btn @click="handleModifier($event, user._id)" class="ma-1">
+                                <v-icon icon="mdi mdi_small mdi-pencil"></v-icon>
+                            </v-btn>
+                            <v-btn v-if="user.supprimable" @click="handleSupprimer($event, user._id)" class="ma-1">
+                                <v-icon icon="mdi mdi_small mdi-delete"></v-icon>
+                            </v-btn>
+                        </v-btn-group>
+                    </td>
                 </tr>
               </tbody>
             </v-table>
             <v-pagination v-if="nombreParPage !== 'all'"
                           v-model="page"
-                          :length="paginationSize"
+                          :length="paginationSize as number"
                           prev-icon="mdi:mdi-arrow-left"
                           next-icon="mdi:mdi-arrow-right"/>
             <v-select v-model="nombreParPage"
@@ -86,23 +90,23 @@
 
 <script setup lang="ts">
 
-  import UserInterface from "~/interfaces/UserInterface";
-  import UsersResponseInterface from "~/interfaces/UsersResponseInterface";
-  import Fetch from "~/services/FetchService";
-  import {watch} from "#imports";
-  import {storeToRefs} from "pinia";
-  import {useMenuStore} from "~/stores/menuStore";
-  import {useSnackbarStore} from "~/stores/snackbarStore";
+import UserInterface from "~/interfaces/UserInterface";
+import UsersResponseInterface from "~/interfaces/UsersResponseInterface";
+import Fetch from "~/services/FetchService";
+import {watch} from "#imports";
+import {storeToRefs} from "pinia";
+import {useMenuStore} from "~/stores/menuStore";
+import {useSnackbarStore} from "~/stores/snackbarStore";
 
-  const loading : Ref<boolean> = ref(false)
-  const users: Ref<Array<UserInterface> | null> = ref(null)
-  const nombreParPage: Ref<string>= ref('10')
-  const total: Ref<number> = ref(0)
-  const page: Ref<number> = ref(1)
-  const paginationSize: Ref<number> = ref(1)
-  const openDialogConfirmationSuppression: Ref<boolean> = ref(false)
-  const identifiantASupp: Ref<string> = ref("")
-  const champRecherche: Ref<string> = ref("")
+const loading: Ref<boolean> = ref(false)
+const users: Ref<Array<UserInterface> | null> = ref(null)
+const nombreParPage: Ref<string> = ref('10')
+const total: Ref<number> = ref(0)
+const page: Ref<number> = ref(1)
+const paginationSize: Ref<number> = ref(1)
+const openDialogConfirmationSuppression: Ref<boolean> = ref(false)
+const identifiantASupp: Ref<string> = ref("")
+const champRecherche: Ref<string> = ref("")
 
   const {
       open: snackbarStoreOpen,
@@ -141,26 +145,30 @@
       }, () => {loading.value = false} );
     }
 
-  /**
-   * envoie sur le composant de modification d'utilisateur
-   * @param event evenement du click sur le bouton
-   * @param id l'identifiant de l'utilisateur sélectionné
-   */
-  const handleModifier = (event: Event, id: string) => {
+/**
+ * envoie sur le composant de modification d'utilisateur
+ * @param event evenement du click sur le bouton
+ * @param id l'identifiant de l'utilisateur sélectionné
+ */
+const handleModifier = (event: Event, id: string | undefined) => {
     event.stopPropagation() // empèche le déclenchement d'un autre event (show)
-    navigateTo(`/users/edit/${id}`)
-  }
+    if (id) {
+        navigateTo(`/users/edit/${id}`)
+    }
+}
 
-  /**
-   * Active le dialog de confirmation de suppression de client
-   * @param event evenement du click sur le bouton
-   * @param id l'identifiant de l'utilisateur sélectionné
-   */
-  const handleSupprimer = (event: Event , id: string) => {
+/**
+ * Active le dialog de confirmation de suppression de client
+ * @param event evenement du click sur le bouton
+ * @param id l'identifiant de l'utilisateur sélectionné
+ */
+const handleSupprimer = (event: Event, id: string | undefined) => {
     event.stopPropagation()
-    openDialogConfirmationSuppression.value = true
-    identifiantASupp.value =  id
-  }
+    if (id) {
+        openDialogConfirmationSuppression.value = true
+        identifiantASupp.value = id
+    }
+}
 
   /**
    * Supprime l'utilisateur , affiche un message de confirmation dans une snackbar et ferme le dialog
