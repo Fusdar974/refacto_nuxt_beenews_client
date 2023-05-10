@@ -1,11 +1,10 @@
 <template>
-<!--    <h2>{{ TITLE }}</h2>-->
     <v-container>
-        <v-row class="mb-4">
-            <v-col sm="12" :lg="pot?.articles?.length > 0 ? 9 : 12">
+        <v-row class="mb-16">
+            <v-col cols="12" :lg="pot?.articles?.length > 0 ? 9 : 12">
                 <v-container>
                     <v-row>
-                        <v-col sm="12" md="8">
+                        <v-col cols="12" md="8">
                             <v-text-field label="Titre"
                                           name="titre"
                                           :error-messages="v$.titre.$errors.map(e => e.$message) as Array<string>"
@@ -14,17 +13,15 @@
                                           @blur="v$.titre.$touch"
                                           type="text"/>
                         </v-col>
-                        <v-col sm="12" md="4">
+                        <v-col cols="12" md="4">
                             <v-text-field label="Jour événement"
                                           name="date"
-                                          :error-messages="v$.date.$errors.map(e => e.$message) as Array<string>"
                                           :disabled="action === SHOW"
-                                          v-model="formatedDate"
-                                          @blur="v$.date.$touch"
+                                          v-model="formatedDateComputed"
                                           type="date"/>
                         </v-col>
                     </v-row>
-                    <v-row>
+                    <v-row v-if="!paiementEnCoursComputed">
                         <v-select v-model="pot.participants"
                                   :items="users as UserInterface[]"
                                   :error-messages="v$.participants.$errors.map(e => e.$message) as Array<string>"
@@ -43,8 +40,9 @@
                                     color="primary"
                                     slider-color="secondary"
                                     align-tabs="center">
-                                <v-tab value="Bières">Bières</v-tab>
-                                <v-tab value="Boissons">Boissons</v-tab>
+                                <v-tab v-for="(typeproduit, index) in typeproduits as Array<TypeProduitInterface>"
+                                       :key="index"
+                                       :value="typeproduit._id">{{ typeproduit.nom }}</v-tab>
                             </v-tabs>
                             <v-alert v-if="v$Encaisser.articles.$errors.length !==0"
                                      type="error"
@@ -59,7 +57,7 @@
                             <div v-else>
                                 <produits-list :key="pot"
                                                v-model="pot.articles"
-                                               filter-by="type.nom"
+                                               filter-by="type._id"
                                                :filter-value="filtre as string"
                                                :produits-dispo-list="produitToScreen as ProduitInterface[]"/>
                             </div>
@@ -70,18 +68,24 @@
             <v-col v-if="pot.articles?.length > 0" sm="12" lg="3">
                 <pot-recap-tab :pot="pot as PotInterface"
                                :valeur-point="valeurPoint as number"
-                               :total-par-participant="totalParParticipant"
+                               :total-par-participant="totalParParticipantComputed"
                                :total="total"/>
             </v-col>
-            <pot-paiement-tab v-if="pot.etat === 'Paiement' || pot.etat === 'Payé'">
+            <pot-paiement-tab v-if="paiementEnCoursComputed"
+                              :init-panel="pot.participants.map((potPart, indexParticipant) => indexParticipant)">
                 <pot-paiement-table-row v-for="(participant, index) in pot.participants"
-                                        :payer="payer"
-                                        :is-disable="action === SHOW"
-                                        :total-par-participant="totalParParticipant"
                                         :participant="participant"
-                                        @update:participant="(newValue: ParticipantPotInterface) =>
-                                        pot.participants[index] = newValue"
-                                        :key="index"/>
+                                        :color-alert="colorAlertPaiement[index]"
+                                        :key="index">
+                    <pot-paiement-table-row-content :payer="payer"
+                                                    :is-disable="action === SHOW"
+                                                    :total-par-participant="totalParParticipantComputed"
+                                                    :participant="participant"
+                                                    @update:color="(newColor) => colorAlertPaiement[index]= newColor"
+                                                    @update:participant="(newValue: ParticipantPotInterface) =>
+                                                    pot.participants[index] = newValue"
+                                                    :key="index"/>
+                </pot-paiement-table-row>
             </pot-paiement-tab>
         </v-row>
         <v-btn-group class="btn-group">
@@ -117,20 +121,23 @@
 </template>
 
 <script setup lang="ts">
-import UserInterface from "~/interfaces/UserInterface";
+import ParticipantPotInterface from "~/interfaces/potsInterfaces/ParticipantPotInterface";
+import PotInterface from "~/interfaces/potsInterfaces/PotInterface";
 import ProduitInterface from "~/interfaces/ProduitInterface";
-import Fetch from "~/services/FetchService";
-import PotInterface from "~/interfaces/PotInterface";
+import UserInterface from "~/interfaces/UserInterface";
 import UsersResponseInterface from "~/interfaces/UsersResponseInterface";
-import ParticipantPotInterface from "~/interfaces/ParticipantPotInterface";
-import {ComputedRef} from "vue";
 import ValeurBNResponseInterface from "~/interfaces/ValeurBNResponseInterface";
-import PotPaiementTab from "~/components/PotPaiementTab.vue";
-import PotPaiementTableRow from "~/components/PotPaiementTableRow.vue";
-import {email, required} from "@vuelidate/validators";
+
+import Fetch from "~/services/FetchService";
+import {ComputedRef} from "vue";
+import PotPaiementTab from "~/components/potComponents/PotPaiementTab.vue";
+import PotPaiementTableRow from "~/components/potComponents/PotPaiementTableRow.vue";
+import {required} from "@vuelidate/validators";
 import {useVuelidate} from "@vuelidate/core";
 import {storeToRefs} from "pinia";
 import {useSnackbarStore} from "~/stores/snackbarStore";
+import {useMenuStore} from "~/stores/menuStore";
+import TypeProduitInterface from "~/interfaces/TypeProduitInterface";
 
 definePageMeta({
     validate: async (route) => {
@@ -141,17 +148,17 @@ definePageMeta({
     }
 })
 
-
 const {action, id} = useRoute().params
 
 const SHOW = 'show'
 const EDIT = 'edit'
 const CREATE = 'add'
 
-const TITLE = action === 'show' && "Informations pot"
-    || action === 'edit' && "Modifier pot"
-    || action === 'add' && "Ajouter pot"
-    || "Informations pot"
+const {titleAppBar} = storeToRefs(useMenuStore())
+titleAppBar.value =  action === 'show' && "Informations du pot"
+    || action === 'edit' && "Modification du pot"
+    || action === 'add' && "Ajout d'un pot"
+    || "Informations du pot"
 
 const isIdValid = ['show', 'edit'].includes(action as string)
     && /[0-9a-zA-Z]{16}/.test(id as string)
@@ -159,34 +166,42 @@ const isIdValid = ['show', 'edit'].includes(action as string)
 const pot: Ref<PotInterface> = ref({
     titre: '',
     participants: [],
-    date: (new Date).toDateString(),
+    date: (new Date).toISOString(),
     articles: [],
     etat: 'Créé'
 } as PotInterface)
 const users: Ref<Array<ParticipantPotInterface>> = ref([] as Array<ParticipantPotInterface>)
+const typeproduits: Ref<Array<TypeProduitInterface>> = ref([] as Array<TypeProduitInterface>)
 const produitToScreen: Ref<Array<ProduitInterface>> = ref([] as Array<ProduitInterface>)
-const filtre: Ref<string> = ref('Bières')
+const filtre: Ref<string> = ref('')
+const colorAlertPaiement: Ref<Array<string>> = ref([])
 const valeurPoint: Ref<number> = ref(0)
 const show: Ref<boolean> = ref(false)
 const openDialogValidation: Ref<boolean> = ref(false)
-const {open: snackbarStoreOpen, message: snackbarStoreMessage} = storeToRefs(useSnackbarStore())
 
+const {
+    open: snackbarStoreOpen,
+    message: snackbarStoreMessage,
+    couleur: snackbarStoreCouleur
+} = storeToRefs(useSnackbarStore())
 
+/** Règles vuelidate utilisées pour la création et la modification */
 const rules = {
-    titre: {required}, // Matches state.firstName
-    date: {required}, // Matches state.lastName
+    titre: {required},
     participants: {required},
 }
 
+/** Règles vuelidate utilisées pour l'encaissement */
 const rulesEncaisser = {
     ...rules,
     articles:{required}
 }
 
-
 const v$ = useVuelidate(rules, pot)
+
 const v$Encaisser = useVuelidate(rulesEncaisser, pot)
 
+/** Calcul du total en euro */
 const total = computed(()=>{
     let result = 0
     pot.value?.articles
@@ -195,13 +210,15 @@ const total = computed(()=>{
     return Number(result)
 })
 
-const totalParParticipant: ComputedRef<string> = computed(()=>{
+/** Calcul du total en euro par participant */
+const totalParParticipantComputed: ComputedRef<string> = computed(()=>{
     if(pot.value.participants && pot.value.participants.length!==0) {
         return (total.value / pot.value.participants.length).toFixed(2)
     }else return ''
 })
 
-const formatedDate = computed({
+/** Computed faisant le lien entre le composant date en YYYY-mm-dd et la date souhaitée en ISO */
+const formatedDateComputed = computed({
     get: () => {
         const dateToFormat = new Date(pot.value.date)
         const day = dateToFormat.getDate()
@@ -215,77 +232,22 @@ const formatedDate = computed({
     }
 })
 
-const handleCreateUpdatePot = () => {
-    v$.value.$validate()
-        .then(isValid => {
-            if(isValid){
-                const data = pot.value._id ?
-                    {url: `/pots/${pot.value._id}`, data: {pot: pot.value}, method: 'PUT'}
-                    :
-                    {url: '/pots/create', data: {pot: pot.value}, method: 'POST'}
-                const message = pot.value._id ? 'Modification OK' : 'Création OK'
-                Fetch.requete(data, () => fermer(message))
-            }}
-    )
-}
+/** Computed boolean permettant l'affichage du tableau de paiement */
+const paiementEnCoursComputed = computed(() =>
+    pot.value.etat === 'Paiement' || pot.value.etat === 'Payé')
 
-const demanderEncaisser = () => {
-    v$Encaisser.value.$validate()
-        .then(isValid => {
-            if(isValid){
-                openDialogValidation.value = true
-            }
-        })
-}
-const fermer = (messageAfficher: string) => {
-    if (messageAfficher) {
-        snackbarStoreMessage.value = messageAfficher
-        snackbarStoreOpen.value = true
-    }
-    navigateTo(`/pots`)
-}
-
-watch(()=>pot, nV => console.log(nV))
-const confirmerEncaisser = () => {
-    const potTemp = {...pot.value, etat: 'Paiement', dateEncaissement: new Date()}
-
-    Fetch.requete({
-        url: `/pots/${pot.value._id}`,
-        data: {pot: pot.value},
-        method: 'PUT'
-    }, () => {
-        pot.value = potTemp
-        openDialogValidation.value = false
-    });
-}
-
-const payer = (identifiant: string) => {
-    const participant = pot.value.participants.find(item => item._id === identifiant)
-    if (participant) {
-        participant.paye = true
-        participant.datePaiement = new Date()
-    }
-    const paye = pot.value.participants.map(item => item.paye).reduce((a, b) => a && b);
-
-    if (paye) {
-        pot.value.etat = "Payé"
-    }
-
-    Fetch.requete({
-        url: `/pots/${pot.value._id}`,
-        data: {pot: pot.value},
-        method: 'PUT'
-    }, () => {
-        console.log('reussite')
-    })
-}
-
+/** Chargement des données après le montage du composant dans le dom */
 onMounted(() => {
     Fetch.requete({ url: '/parametre/valeurBN', method: 'GET' }, (resultBN: ValeurBNResponseInterface) => {
         valeurPoint.value = resultBN.valeur
     })
-    Fetch.requete({url: '/pots/produits', method: 'POST'}, (resultProduits: { produits: Array<ProduitInterface> }) => {
-        produitToScreen.value = resultProduits.produits
+
+    Fetch.requete({url: '/typeproduits', method: 'POST',data: {"proposablePot":true}}, (resultTypeproduits: Array<TypeProduitInterface>) => {
+        Fetch.requete({url: '/pots/produits', method: 'POST'}, (resultProduits: { produits: Array<ProduitInterface> }) => {
+            typeproduits.value = resultTypeproduits
+            filtre.value = resultTypeproduits[0]._id || ''
+            produitToScreen.value = resultProduits.produits
+        })
     })
     if (isIdValid) {
         Fetch.requete({url: `/pots/${id}`, method: 'GET'}, (resultPot: { pot: PotInterface }) => {
@@ -312,6 +274,106 @@ onMounted(() => {
             } as ParticipantPotInterface)
     })
 })
+
+/**
+ * Permet la création ou la modification si ID
+ */
+const handleCreateUpdatePot = () => {
+
+    v$.value.$validate()
+        .then(isValid => {
+            if(isValid){
+                const data = pot.value._id ?
+                    {url: `/pots/${pot.value._id}`, data: {pot: pot.value}, method: 'PUT'}
+                    :
+                    {url: '/pots/create', data: {pot: pot.value}, method: 'POST'}
+                const message = pot.value._id ? 'Modification OK' : 'Création OK'
+                Fetch.requete(
+                    data,
+                    () => fermer(message),
+                    () => erreur(isValid?'Modification':'Création')
+                )
+            }
+        }
+    )
+}
+
+/**
+ * Teste la validité du pot avant encaissement puis ouvre la fenêtre de confirmation
+ */
+const demanderEncaisser = () => {
+    v$Encaisser.value.$validate()
+        .then(isValid => {
+            if(isValid){
+                openDialogValidation.value = true
+            }
+        })
+}
+
+/**
+ * permet l'affichage de la snackbar de app.vue au retour su /pots
+ * @param messageAfficher
+ */
+const fermer = (messageAfficher: string) => {
+    if (messageAfficher) {
+        snackbarStoreMessage.value = messageAfficher
+        snackbarStoreCouleur.value = 'success'
+        snackbarStoreOpen.value = true
+    }
+    navigateTo(`/pots`)
+}
+
+/**
+ * En cas d'erreur dans la requête HTTP
+ * @param type
+ */
+const erreur = (type: string) => {
+    snackbarStoreMessage.value = `Une erreur a eu lieu dans la ${type}`
+    snackbarStoreOpen.value = true
+    snackbarStoreCouleur.value = 'error'
+}
+
+/**
+ * A la validation de l'encaissement, transmet le nouvel état sur le serveur
+ */
+const confirmerEncaisser = () => {
+    const potTemp = {...pot.value, etat: 'Paiement', dateEncaissement: new Date()}
+
+    Fetch.requete({
+        url: `/pots/${pot.value._id}`,
+        data: {pot: potTemp},
+        method: 'PUT'
+    }, () => {
+        pot.value = potTemp
+        openDialogValidation.value = false
+    });
+}
+
+/**
+ * Valide le paiement de l'utilisateur sélectionné
+ * @param identifiant
+ */
+const payer = (identifiant: string) => {
+    const participant = pot.value.participants.find(item => item._id === identifiant)
+    if (participant) {
+        participant.paye = true
+        participant.datePaiement = new Date()
+    }
+    const paye = pot.value.participants.map(item => item.paye).reduce((a, b) => a && b);
+
+    if (paye) {
+        pot.value.etat = "Payé"
+    }
+
+    Fetch.requete({
+        url: `/pots/${pot.value._id}`,
+        data: {pot: pot.value},
+        method: 'PUT'
+    }, () => {
+        console.log('reussite')
+    })
+}
+
 </script>
 
 <style scoped>
@@ -319,6 +381,7 @@ onMounted(() => {
     position: fixed;
     bottom: 10px;
     right: 10px;
+    z-index: 2;
     background-color: white;
     box-shadow: 0 1px 2px grey;
 }

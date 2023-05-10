@@ -28,7 +28,7 @@
 
 <script setup lang="ts">
 import serverconfig from "~/serverconfig";
-import ArticlePotInterface from "~/interfaces/ArticlePotInterface";
+import ArticlePotInterface from "~/interfaces/potsInterfaces/ArticlePotInterface";
 
 const props = defineProps({
     modelValue:{

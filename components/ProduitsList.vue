@@ -8,7 +8,7 @@
 </template>
 
 <script setup lang="ts">
-import ArticlePotInterface from "~/interfaces/ArticlePotInterface"
+import ArticlePotInterface from "~/interfaces/potsInterfaces/ArticlePotInterface"
 import ProduitInterface from "~/interfaces/ProduitInterface"
 
 const props = defineProps({

@@ -1,4 +1,4 @@
-import PotInterface from "~/interfaces/PotInterface";
+import PotInterface from "~/interfaces/potsInterfaces/PotInterface";
 
 interface PotsResponseInterface{
     documents: Array<PotInterface>

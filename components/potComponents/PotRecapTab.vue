@@ -23,7 +23,7 @@
 </template>
 
 <script setup lang="ts">
-import PotInterface from "~/interfaces/PotInterface";
+import PotInterface from "~/interfaces/potsInterfaces/PotInterface";
 
 const props = defineProps({
     pot:{type: Object as ()=> PotInterface, required:true},
