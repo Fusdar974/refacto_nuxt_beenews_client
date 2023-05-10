@@ -15,7 +15,7 @@
                               append-inner-icon="mdi:mdi-magnify"/>
                 <v-btn variant="tonal"
                        color="primary"
-                       @click="ajouter">Créer</v-btn>
+                       @click="navigateTo('/users/add')">Créer</v-btn>
               </v-col>
             </v-row>
           </v-row>
@@ -33,7 +33,7 @@
               </thead>
               <tbody v-if="users !== null">
                 <tr v-for="(user, index) in users"
-                    :key="index" @click="consulter(user._id)">
+                    :key="index" @click="navigateTo(`/users/show/${user._id}`)">
                   <td class="align-center">
                     <v-icon v-if="user.isDesactive" icon="mdi:mdi_small" color="red"/>
                     {{user.nom}}
@@ -74,15 +74,13 @@
               </v-col>
           </v-row>
             <v-col>Chargement...</v-col>
-            {{recharger}}
         </v-container>
-        <modal-confirmation v-model="openDialog"
+        <modal-confirmation v-model="openDialogConfirmationSuppression"
                             :titre="'Confirmation de suppression'"
                             :question="'Voulez vous supprimer cet utilisateur ?'"
                             @confirmer="handleConfirmerSuppression">
         </modal-confirmation>
       </div>
-    <v-snackbar v-model="open" timeout="1000"><v-alert type="success">{{message}}</v-alert></v-snackbar>
   </private-route>
 </template>
 
@@ -91,9 +89,10 @@
   import UserInterface from "~/interfaces/UserInterface";
   import UsersResponseInterface from "~/interfaces/UsersResponseInterface";
   import Fetch from "~/services/FetchService";
-  import ActionInterface from "~/interfaces/ActionInterface";
-  import {no} from "vuetify/locale";
   import {watch} from "#imports";
+  import {storeToRefs} from "pinia";
+  import {useMenuStore} from "~/stores/menuStore";
+  import {useSnackbarStore} from "~/stores/snackbarStore";
 
   const loading : Ref<boolean> = ref(false)
   const users: Ref<Array<UserInterface> | null> = ref(null)
@@ -101,109 +100,66 @@
   const total: Ref<number> = ref(0)
   const page: Ref<number> = ref(1)
   const paginationSize: Ref<number> = ref(1)
-  const open: Ref<boolean> = ref(false)
-  const openDialog: Ref<boolean> = ref(false)
-  const actionUtilisateur: Ref<boolean> = ref(false)
-  const action: Ref<ActionInterface |null> = ref(null)
-  const identifiant: Ref<string> = ref("")
+  const openDialogConfirmationSuppression: Ref<boolean> = ref(false)
   const identifiantASupp: Ref<string> = ref("")
   const champRecherche: Ref<string> = ref("")
-  const message: Ref<string> = ref("")
-  /**
-   * authenticate, booleén qui permet de savoir si l'utilisateur est authentifié
-   */
-  const props = defineProps({
-    authenticate: Boolean,
-  })
+
+  const {
+      open: snackbarStoreOpen,
+      message: snackbarStoreMessage,
+  } = storeToRefs(useSnackbarStore())
+
+  const {titleAppBar} = storeToRefs(useMenuStore())
+  titleAppBar.value = 'Clients'
 
   watch(page, () => recharger())
   watch(nombreParPage, () => recharger())
   watch(champRecherche, () => recharger())
 
   /**
-   * recharge la liste des utilisateurs lorsque la page est créée
+   * recharge la liste des utilisateurs lorsque la page est montée dans le DOM
    */
   onMounted(()=>{
     recharger();
   })
 
   /**
-   * Recharge la page en envoyant une requète vers le back, si celle-ci réussie,
-   * la liste des utilisateurs est mises à jour ainsi que la pagination
+   * Recharge la liste des utilisateurs  en envoyant une requète http vers le back,
+   * en cas de réponse positive : les données sont mises à jour ainsi que la pagination
    */
     const recharger = () => {
       loading.value = true
-      Fetch.requete({ url: '/users', data: { page: page.value, nombre: nombreParPage.value ,recherche: champRecherche.value } }, (result : UsersResponseInterface) => {
+      Fetch.requete({
+          url: '/users',
+          data: { page: page.value, nombre: nombreParPage.value ,recherche: champRecherche.value }
+      }, (result : UsersResponseInterface) => {
         paginationSize.value = Math.ceil(result.total / parseInt(nombreParPage.value));
         users.value = result.documents
         total.value = result.total
         page.value = result.page > paginationSize.value ? paginationSize.value: result.page
         loading.value = false
-        actionUtilisateur.value = false}, () => {loading.value = false} );
+      }, () => {loading.value = false} );
     }
 
   /**
    * envoie sur le composant de modification d'utilisateur
-   * @param event ici le click sur le bouton
+   * @param event evenement du click sur le bouton
    * @param id l'identifiant de l'utilisateur sélectionné
    */
   const handleModifier = (event: Event, id: string) => {
-    event.stopPropagation()
-    actionUtilisateur.value = true
-    identifiant.value = id
-    let newAction: ActionInterface
-    newAction = {action : "edit", id : identifiant }
-    action.value = newAction
-    navigateTo(`/users/edit/${identifiant.value}`)
+    event.stopPropagation() // empèche le déclenchement d'un autre event (show)
+    navigateTo(`/users/edit/${id}`)
   }
 
   /**
    * Active le dialog de confirmation de suppression de client
-   * @param event ici le click sur le bouton
+   * @param event evenement du click sur le bouton
    * @param id l'identifiant de l'utilisateur sélectionné
    */
   const handleSupprimer = (event: Event , id: string) => {
     event.stopPropagation()
-    openDialog.value = true
+    openDialogConfirmationSuppression.value = true
     identifiantASupp.value =  id
-  }
-
-  /**
-   * envoie sur le composant de consultation d'utilisateur
-   * @param id l'identifiant de l'utilisateur sélectionné
-   */
-  const consulter = (id : string) => {
-    actionUtilisateur.value = true
-    let newAction: ActionInterface
-    newAction = {action : "edit", id : identifiant }
-    action.value = newAction
-    identifiant.value = id
-    navigateTo(`/users/show/${identifiant.value}`)
-  }
-
-  /**
-   * envoie sur le composant de création d'utilisateur
-   */
-  const ajouter = () => {
-    actionUtilisateur.value = true
-    message.value = "modification OK"
-    navigateTo('/users/add')
-  }
-
-  /**
-   * Affiche un message dans un snackbar lors de la fermeture d'un dialog
-   * @param messageAfficher message à afficher
-   */
-  const closeAction = (messageAfficher : string) => {
-    if (messageAfficher) {
-      actionUtilisateur.value = false
-      open.value = true
-      message.value = messageAfficher
-    }
-    else {
-      actionUtilisateur.value = false
-    }
-    recharger();
   }
 
   /**
@@ -211,9 +167,11 @@
    */
   const handleConfirmerSuppression = () => {
     Fetch.requete({ url: `/users/${identifiantASupp.value}`, method: 'DELETE' }, () => {
-      closeAction('SUPPRESSION ok');
-      openDialog.value = false
-    });
+        snackbarStoreOpen.value = true
+        snackbarStoreMessage.value = 'Suppression OK'
+        recharger();
+        openDialogConfirmationSuppression.value = false
+    })
   }
 
   /**

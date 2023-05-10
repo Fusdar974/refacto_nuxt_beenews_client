@@ -2,8 +2,8 @@ import UserInterface from "~/interfaces/UserInterface";
 
 interface  UsersResponseInterface{
     documents:Array<UserInterface>
-    nombre: Number
-    page: Number
-    total: Number
+    nombre: number
+    page: number
+    total: number
 }
 export default UsersResponseInterface

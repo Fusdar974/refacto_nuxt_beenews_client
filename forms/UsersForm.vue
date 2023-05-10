@@ -1,19 +1,18 @@
 <template>
   <div>
-    <h2> {{ titre }} </h2>
     <v-form v-if="selectedUser" :disabled="mode === SHOW">
       <v-text-field v-model="selectedUser.nom" type="text" label="nom"
-                    :error-messages="v$.nom.$errors.map(e => e.$message)"
+                    :error-messages="v$.nom.$errors.map(e => e.$message) as string[]"
                     required
                     @input="v$.nom.$touch"
                     @blur="v$.nom.$touch"/>
       <v-text-field v-model="selectedUser.prenom" type="text" label="prenom"
-                    :error-messages="v$.prenom.$errors.map(e => e.$message)"
+                    :error-messages="v$.prenom.$errors.map(e => e.$message) as string[]"
                     required
                     @blur="v$.prenom.$touch"/>
       <v-text-field v-model="selectedUser.surnom" type="text" label="surnom" />
       <v-text-field v-model="selectedUser.mail" type="text" label="mail"  :error="erreurMail.value"
-                    :error-messages="v$.mail.$errors.map(e => e.$message)"
+                    :error-messages="v$.mail.$errors.map(e => e.$message) as string[]"
                     required
                     @blur="v$.mail.$touch"/>
       <div v-if="mode === EDIT">
@@ -65,81 +64,65 @@
 
 <script setup lang="ts">
 
-import UserInterface from "~/interfaces/UserInterface";
-import Fetch from "~/services/FetchService";
-import PasswordChangeResponseInterface from "~/interfaces/PasswordChangeResponseInterface";
-import ProfilInterface from "~/interfaces/ProfilInterface";
-import profilInterface from "~/interfaces/ProfilInterface";
-import UserResponseInterface from "~/interfaces/UserResponseInterface";
-import ProfilsResponseInterface from "~/interfaces/ProfilsResponseInterface";
-import {storeToRefs} from "pinia";
-import {useSnackbarStore} from "~/stores/snackbarStore";
-import { useVuelidate } from '@vuelidate/core'
-import { required, email } from '@vuelidate/validators'
-import userInterface from "~/interfaces/UserInterface";
-import {SymbolKind} from "vscode-languageserver-types";
+import UserInterface from "~/interfaces/UserInterface"
+import Fetch from "~/services/FetchService"
+import PasswordChangeResponseInterface from "~/interfaces/PasswordChangeResponseInterface"
+import ProfilInterface from "~/interfaces/ProfilInterface"
+import UserResponseInterface from "~/interfaces/UserResponseInterface"
+import ProfilsResponseInterface from "~/interfaces/ProfilsResponseInterface"
+import {storeToRefs} from "pinia"
+import {useSnackbarStore} from "~/stores/snackbarStore"
+import {useVuelidate} from '@vuelidate/core'
+import {email, required} from '@vuelidate/validators'
+import {SymbolKind} from "vscode-languageserver-types"
 import Array = SymbolKind.Array;
-import {$} from "vue/macros";
+import {useMenuStore} from "~/stores/menuStore";
 
 const SHOW = 'show'
-const EDIT = 'edit';
-const CREATE = 'create';
-const selectedUser: Ref<UserInterface> = ref({} as userInterface)
-const openConfirmationDialog: Ref<boolean> = ref(false)
-const openConfirmationDefaultDialog: Ref<boolean> = ref(false)
-const openSnackUserForm: Ref<boolean> = ref(false)
-const erreurMail: Ref<boolean> = ref(false)
-const messageSnackUserForm: Ref<string> = ref("")
-const mode: Ref<string> = ref("")
-const titre: Ref<string> = ref("Aucun titre")
-const severity: Ref<string> = ref("")
-const profils: Ref<Array<ProfilInterface>> = ref([] as Array<ProfilInterface>)
-const {open: snackbarStoreOpen, message: snackbarStoreMessage} = storeToRefs(useSnackbarStore())
-
-const rules = {
-  nom: {required}, // Matches state.firstName
-  prenom: {required}, // Matches state.lastName
-  mail: {required, email} // Matches state.contact.email
-}
-
-const v$ = useVuelidate(rules, selectedUser)//valide si les propriétées de selectedUser respectent les règles
-
+const EDIT = 'edit'
+const CREATE = 'create'
 
 /**
  * userId : l'id de l'utilisateur à consulter/modifier
  * action : string qui détermine le mode du UserForm
  */
 const props = defineProps({
-  userId: {type: String},
-  action: {type: String, required: true},
+    userId: {type: String},
+    action: {type: String, required: true},
 })
 
+const selectedUser: Ref<UserInterface> = ref({} as UserInterface)
+const openConfirmationDialog: Ref<boolean> = ref(false)
+const openConfirmationDefaultDialog: Ref<boolean> = ref(false)
+const openSnackUserForm: Ref<boolean> = ref(false)
+const erreurMail: Ref<boolean> = ref(false)
+const messageSnackUserForm: Ref<string> = ref("")
+const mode: Ref<string> = ref(props.action)
+const severity: Ref<string> = ref("")
+const profils: Ref<Array<ProfilInterface>> = ref([] as Array<ProfilInterface>)
+
+const {open: snackbarStoreOpen, message: snackbarStoreMessage} = storeToRefs(useSnackbarStore())
+const {titleAppBar} = storeToRefs(useMenuStore())
+
+const rules = {
+  nom: {required}, // champs nom obligatoire
+  prenom: {required}, // champs prenom obligatoire
+  mail: {required, email} // champs mail obligatoire et de format email
+}
+
+const v$ = useVuelidate(rules, selectedUser)//valide si les propriétées de selectedUser respectent les règles
+
+// détermine le titre à afficher dans le appBar
+titleAppBar.value = props.action === 'edit' && "Modification du client"
+    || props.action === 'add' && "Ajout d'un client"
+    || "Informations du client"
+
 /**
- * avant que la page soit créée:
- * détermine en quel mode est le formulaire
- * si il n'est pas en mode création, charge l'utilisateur sélectionné
+ * avant que la page soit montée dans le DOM
+ * si le mode n'est pas en création, charge l'utilisateur sélectionné
  * sinon, créé un utilisateur vide
  */
 onBeforeMount(() => {
-  let title: string;
-  switch (props.action) {
-    case 'show':
-      title = "Informations client"
-      mode.value = SHOW;
-      break;
-    case 'edit':
-      title = "Modifier client"
-      mode.value = EDIT;
-      break;
-    case 'add':
-      title = "Ajouter client"
-      mode.value = CREATE;
-      break;
-    default:
-      title = "Informations client"
-      mode.value = SHOW;
-      break;
-  }
   if (mode.value !== CREATE) {
     Fetch.requete({url: `/users/${props.userId}`, method: 'GET'}, (resultUser: UserResponseInterface) => {
       selectedUser.value = resultUser.user
@@ -162,7 +145,6 @@ onBeforeMount(() => {
       profils.value = resultProfils.profils.map(profil => ({...profil, isValid:true}))
     }
   }, )
-  titre.value = title
 })
 
 /**
@@ -187,7 +169,9 @@ const handleDemandeConfirmationDefaut = () => {
 }
 
 /**
- * Envoie une requete de création d'utilisateur dans le back et ferme le formulaire
+ * Après vérification du formulaire
+ * Envoie une requete de création d'utilisateur dans le back
+ * et ferme le formulaire en cas de réussite
  */
 const creer = () => {
   v$.value.$validate()
@@ -195,13 +179,15 @@ const creer = () => {
         if (result && selectedUser.value !== null) {
           Fetch.requete({url: '/users/create', method: 'POST', data: {user: selectedUser.value}}, () => {
             fermer('Création OK')
-          });
+          })
         }}
       )
 }
 
 /**
- * Envoie une requete de modification d'utilisateur dans le back et ferme le formulaire
+ * Après vérification du formulaire
+ * Envoie une requete de modification d'utilisateur dans le back
+ * et ferme le formulaire en cas de réussite
  */
 const modifier = () => {
   v$.value.$validate()
@@ -211,14 +197,15 @@ const modifier = () => {
           url: `/users/${selectedUser.value._id}`,
           data: { user: selectedUser.value },
           method: 'PUT'}, () => {
-          fermer('Modification OK');
-        });
+          fermer('Modification OK')
+        })
       }
       })
 }
 
 /**
- * Envoie une requete de modification de mot de passe avec celui par défaut dans le back, ferme le dialog et active le snackbar du form
+ * Envoie une requete de modification de mot de passe avec celui par défaut dans le back,
+ * ferme le dialog et active le snackbar du form en cas de réussite
  */
 const envoyerNouveauPwdDefaut = () => {
   Fetch.requete({
@@ -233,11 +220,12 @@ const envoyerNouveauPwdDefaut = () => {
       openSnackUserForm.value = true
       messageSnackUserForm.value = 'Mot de passe remis à zéro'
     }
-  });
+  })
 }
 
 /**
- * Envoie une requete de modification de mot de passe dans le back, ferme le dialog et active le snackbar du form
+ * Envoie une requete de modification de mot de passe dans le back,
+ * ferme le dialog et active le snackbar du form
  */
 const envoyerNouveauPwd = () => {
   Fetch.requete({
@@ -260,7 +248,7 @@ const envoyerNouveauPwd = () => {
       openSnackUserForm.value = true
       messageSnackUserForm.value = 'Veuillez saisir une bonne adresse email'
     }
-  });
+  })
 }
 
 </script>
