@@ -3,7 +3,7 @@ interface ProduitInterface{
     _id?: string,
     nom: string,
     image: string,
-    type?: TypeProduitInterface,
+    type: TypeProduitInterface|string,
     prix: number,
     prixEuros: number,
     nombre: number,

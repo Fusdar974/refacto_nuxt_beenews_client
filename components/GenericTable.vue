@@ -13,7 +13,7 @@
         @click="navTest(obj._id)">
       <td v-for="(attrs, indexAttr) in attributes"
       :key="indexAttr" class="text-center">
-        <v-img  v-if="attributes[indexAttr].isImage" :src="serverconfig.concat(reachDepth(attrs.attr, obj))"></v-img>
+        <v-img v-if="attributes[indexAttr].isImage" aspect-ratio="16/9" :src="serverconfig.concat(reachDepth(attrs.attr, obj))"></v-img>
         <div v-else>{{ reachDepth(attrs.attr, obj) }}</div>
       </td>
       <slot v-if="actionsTd" :obj="obj"/>

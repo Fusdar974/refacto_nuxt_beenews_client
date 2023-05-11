@@ -8,19 +8,29 @@
                     sm="12"
                     @input="v$.nom.$touch"
                     @blur="v$.nom.$touch"/>
-      <v-text-field v-model="selectedProduit.prix" type="text" label="prix en BN"
+      <v-text-field v-model.number="selectedProduit.prix" type="number" label="prix en BN"
                     :error-messages="v$.prix.$errors.map(e => e.$message)"
+                    suffix="BN"
+                    min="0"
                     sm="4"
                     required
                     @blur="v$.prix.$touch"/>
       <v-text-field v-model="selectedProduit.prixEuros"
                     :error-messages="v$.prixEuros.$errors.map(e => e.$message)"
                     sm="4"
+                    step="0.25"
+                    suffix="€"
+                    min="0"
                     @blur="v$.prix.$touch"
-                    type="text"
+                    type="number"
                     label="prix en euros" />
-      <v-text-field v-model="selectedProduit.credit" type="text" label="credit" sm="4"/>
-      <v-text-field v-model="selectedProduit.nombre" type="text" label="stock" sm="6"
+      <v-text-field v-model="selectedProduit.credit"
+                    type="number"
+                    step="0.25"
+                    suffix="€"
+                    min="0"
+                    label="credit" sm="4"/>
+      <v-text-field v-model="selectedProduit.nombre" type="number" min="0"  label="stock" sm="6"
                     :error-messages="v$.nombre.$errors.map(e => e.$message)"
                     required
                     @blur="v$.nombre.$touch"/>
@@ -28,8 +38,20 @@
                 @change="handleChangeSelect"
                 :items="types"
                 item-title="nom"
-                item-value=""
-                return-object/>
+                item-value="_id"/>
+<!--      <v-img-->
+<!--          v-if="selectedProduit.image && selectedProduit.image.length > 0"-->
+<!--          :width="200"-->
+<!--          aspect-ratio="1/1"-->
+<!--          cover-->
+<!--      ></v-img>-->
+      <v-file-input
+          v-model="images"
+          accept="image/png, image/jpeg, image/bmp"
+          placeholder="Pick an image"
+          prepend-icon="mdi-camera"
+          label="Image"
+      ></v-file-input>
       <v-checkbox label="Archivé"
                   v-model="selectedProduit.archive"
                   color="red"
@@ -50,18 +72,19 @@
 
 <script setup lang="ts">
 
-import Fetch from "~/services/FetchService";
-import {storeToRefs} from "pinia";
-import {useSnackbarStore} from "~/stores/snackbarStore";
+import Fetch from "~/services/FetchService"
+import {storeToRefs} from "pinia"
+import {useSnackbarStore} from "~/stores/snackbarStore"
 import {useVuelidate} from '@vuelidate/core'
 import {required} from '@vuelidate/validators'
-import {SymbolKind} from "vscode-languageserver-types";
-import ProduitResponseInterface from "~/interfaces/ProduitResponseInterface";
-import ProduitInterface from "~/interfaces/ProduitInterface";
-import TypeProduitInterface from "~/interfaces/TypeProduitInterface";
-import TypesProduitsResponseInterface from "~/interfaces/TypesProduitsResponseInterface";
-import Array = SymbolKind.Array;
-import TypeInterface from "~/interfaces/TypeProduitInterface";
+import {SymbolKind} from "vscode-languageserver-types"
+import ProduitResponseInterface from "~/interfaces/ProduitResponseInterface"
+import ProduitInterface from "~/interfaces/ProduitInterface"
+import TypeProduitInterface from "~/interfaces/TypeProduitInterface"
+import TypesProduitsResponseInterface from "~/interfaces/TypesProduitsResponseInterface"
+import Array = SymbolKind.Array
+import TypeInterface from "~/interfaces/TypeProduitInterface"
+import {computed} from "#imports"
 
 
 /**
@@ -73,13 +96,14 @@ const props = defineProps({
   action: {type: String, required: true},
 })
 
-
+const fileInput: Ref<any> = ref()
 const SHOW = 'show'
-const EDIT = 'edit';
-const CREATE = 'add';
+const EDIT = 'edit'
+const CREATE = 'add'
 const selectedProduit: Ref<ProduitInterface> = ref({} as ProduitInterface)
 const mode: Ref<string> = ref(props.action)
 const titre: Ref<string> = ref("Aucun titre")
+const images: Ref<Array<File>> = ref([])
 const types: Ref<Array<TypeProduitInterface>> = ref([] as Array<TypeProduitInterface>)
 const {open: snackbarStoreOpen, message: snackbarStoreMessage} = storeToRefs(useSnackbarStore())
 const rules = {
@@ -87,10 +111,20 @@ const rules = {
   prix: {required},
   prixEuros: {required},
   nombre: {required},
-  type: {required}
+  type: {required},
 }
 
 const v$ = useVuelidate(rules, selectedProduit)//valide si les propriétées de selectedUser respectent les règles
+
+watch(images, newImages => console.log(changementImage(newImages[0])))
+
+// const imageComputed = computed({
+//   get:()=>{ return selectedProduit.value.image },
+//   set:(newImage)=>{
+//     console.log('newImage',newImage[0])
+//     //selectedProduit.value = {...selectedProduit.value, image: changementImage(newImage)}
+//   }
+// })
 
 /**
  * avant que la page soit créée:
@@ -99,20 +133,20 @@ const v$ = useVuelidate(rules, selectedProduit)//valide si les propriétées de 
  * sinon, créé un utilisateur vide
  */
 onBeforeMount(() => {
-  let title: string;
+  let title: string
   switch (props.action) {
     case 'show':
       title = "Informations produit"
-      break;
+      break
     case 'edit':
       title = "Modifier produit"
-      break;
+      break
     case 'add':
       title = "Ajouter produit"
-      break;
+      break
     default:
       title = "Informations produit"
-      break;
+      break
   }
   if (mode.value !== CREATE) {
     Fetch.requete({url: `/produits/${props.produitId}`, method: 'GET'}, (resultProduits: ProduitResponseInterface) => {
@@ -128,6 +162,7 @@ onBeforeMount(() => {
       credit: 0,
       effacable: false,
       archive: false,
+      type: '',
     }
   }
   Fetch.requete({ url: `/typeproduits`, method: 'POST' }, (result: [TypeInterface]) => {
@@ -156,19 +191,10 @@ const creer = () => {
   v$.value.$validate()
       .then( result => {
         if (result && selectedProduit.value !== null) {
-          let produit = {_id: selectedProduit.value._id,
-            nom: selectedProduit.value.nom,
-            image: selectedProduit.value.image,
-            type: selectedProduit.value.type?._id,
-            prix: selectedProduit.value.prix,
-            prixEuros: selectedProduit.value.prixEuros,
-            nombre: selectedProduit.value.nombre,
-            credit: selectedProduit.value.credit,
-            effacable: selectedProduit.value.effacable,
-            archive: selectedProduit.value.archive,}
-          Fetch.requete({url: '/produits/create', method: 'POST', data: {produit: produit}}, () => {
+          //selectedProduit.value.image = selectedProduit.value.image
+          Fetch.requete({url: '/produits/create', method: 'POST', data: {produit: selectedProduit.value}}, () => {
             fermer('Création OK')
-          });
+          })
         }}
       )
 }
@@ -184,54 +210,52 @@ const modifier = () => {
             url: `/produits/${selectedProduit.value._id}`,
             data: { produit: selectedProduit.value },
             method: 'PUT'}, () => {
-            fermer('Modification OK');
-          });
+            fermer('Modification OK')
+          })
         }
       })
 }
 
 const handleChangeSelect = (e: any) => {
-  const valeur = e.target;
-  selectedProduit.value.type = valeur.value;
+  const valeur = e.target
+  selectedProduit.value.type = valeur.value
   console.log(selectedProduit.value.type)
 }
 
-const changementImage = (event  : Event) => {
-  event.preventDefault();
-
-  const reader = new FileReader();
-  reader.readAsBinaryString(fileInput.current.files[0]);
-
-  let produit = this.state.produit;
+const changementImage = (file: File) => {
+  const reader = new FileReader()
+  reader.readAsBinaryString(file)
 
   reader.onload = () => {
-    var img = new Image();
-    img.src = window.URL.createObjectURL(this.fileInput.current.files[0]);
+    var img = new Image()
+    img.src = window.URL.createObjectURL(file)
     img.onload = () => {
-      const width = img.naturalWidth;
-      const height = img.naturalHeight;
+      const width = img.naturalWidth
+      const height = img.naturalHeight
 
       // unload it
-      window.URL.revokeObjectURL(img.src);
+      window.URL.revokeObjectURL(img.src)
 
       // check its dimensions
       if (width <= 200 && height <= 200) {
         // it fits
-        produit.imageBnr = reader.result;
-        produit.image = window.URL.createObjectURL(this.fileInput.current.files[0]);
-        this.setState({ produit });
+        return window.URL.createObjectURL(file)
       } else {
         // it doesn't fit, unset the value
         // post an error
-
         alert("Image maximum de 200x200")
+        return undefined
       }
-    };
-  };
+    }
+  }
   reader.onerror = function (error) {
-    console.error('Fichier error: ', error);
-  };
+    console.error('Fichier error: ', error)
+    return undefined
+  }
+  return undefined
 }
+
+
 
 </script>
 

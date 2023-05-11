@@ -182,7 +182,7 @@ const closeAction = (messageAfficher : string) => {
  * Supprime l'utilisateur , affiche un message de confirmation dans une snackbar et ferme le dialog
  */
 const handleConfirmerSuppression = () => {
-  Fetch.requete({ url: `/users/${identifiantASupp.value}`, method: 'DELETE' }, () => {
+  Fetch.requete({ url: `/produits/${identifiantASupp.value}`, method: 'DELETE' }, () => {
     closeAction('SUPPRESSION ok');
     openDialog.value = false
   });
