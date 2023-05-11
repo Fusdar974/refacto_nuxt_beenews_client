@@ -59,7 +59,6 @@
                                                v-model="pot.articles"
                                                :filters="[
                                                    {by:'type._id', value:filtre as string},
-                                                   {by:'nombre', value:0, type: 'isGreater'},
                                                    ] as Array<ProduitsListFilterInterface>"
                                                :produits-dispo-list="produitToScreen as ProduitInterface[]"/>
                             </div>

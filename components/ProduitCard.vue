@@ -1,29 +1,50 @@
 <template>
-<v-card v-show="shown" density="compact" width="110" height="200">
-    <v-card-actions>
-        <v-btn-group density="compact">
-            <v-btn density="compact"
-                   :disabled="productNull"
-                   @click="augmenterQuantite"
-                   icon="mdi:mdi-plus"/>
-            <v-btn class="ma-0"
-                   density="compact"
-                   :disabled="modelValue.quantite===0"
-                   @click="reduireQuantite"
-                   icon="mdi:mdi-minus"/>
-        </v-btn-group>
-        <v-spacer/>
-        <v-badge color="secondary"
-                 :model-value="!!modelValue.quantite"
-                 inline
-                 max="999"
-                 :content="modelValue.quantite"/>
-    </v-card-actions>
-    <v-card-item>
-        <v-img alt="test" :src="`${serverconfig}${modelValue.image}`" width="100" aspect-ratio="1/1"/>
-    </v-card-item>
-    <v-card-text class="text-center" >{{modelValue.nom}}</v-card-text>
-</v-card>
+    <v-card v-show="shown" density="compact" width="120" height="230">
+        <div
+            style="color: #3f51b5; position: absolute; z-index: 5; top: 0; left: 0; padding: 1px 5px; font-size: 12px; font-weight: bold">
+            20 BN
+        </div>
+        <v-card-item density="compact" style="min-height: 105px">
+            <v-img alt="test" style="max-height: 85px" :src="`${serverconfig}${modelValue.image}`" width="100"
+                   aspect-ratio="1/1"/>
+            <v-badge color="secondary"
+                     :model-value="!!modelValue.quantite"
+                     style="position: absolute; top: 10px; right: 15px;"
+                     max="999"
+                     :content="modelValue.quantite"/>
+
+        </v-card-item>
+        <v-divider/>
+        <v-card-text class="text-center align-center justify-center" style="display:flex ;padding:10px; height: 75px">
+            <p style="font-size: 12px; font-weight: bold">{{ modelValue.nom }}</p>
+        </v-card-text>
+        <v-card-actions style="height: 52px; padding: 10px" class="w-100">
+            <v-btn-group v-if="!productNull || modelValue.quantite!==0" style="width: 100%">
+                <v-btn :class="`ma-0 w-${productNull?'100':'50'}`"
+                       style="height: 40px"
+                       variant="outlined"
+                       v-if="modelValue.quantite!==0"
+                       @click="reduireQuantite"
+                       :icon="`mdi:mdi-${modelValue.quantite===1?'delete':'minus'}`"/>
+                <v-btn :class="`ma-0 w-${modelValue.quantite===0?'100':'50'}`"
+                       style="height: 40px"
+                       variant="outlined"
+                       v-if="!productNull"
+                       @click="augmenterQuantite"
+                       icon="mdi:mdi-plus"/>
+            </v-btn-group>
+            <v-btn-group v-else style="width: 100%">
+                <v-btn class="w-100"
+                       style="height: 40px"
+                       variant="outlined"
+                       color="secondary">STOCK
+                </v-btn>
+            </v-btn-group>
+        </v-card-actions>
+        <div v-if="modelValue.quantite!==0"
+             style="background-color:#ffce1c; position: absolute; bottom: 0; height: 4px;width: 100% "/>
+
+    </v-card>
 </template>
 
 <script setup lang="ts">
@@ -31,11 +52,11 @@ import serverconfig from "~/serverconfig";
 import ArticlePotInterface from "~/interfaces/potsInterfaces/ArticlePotInterface";
 
 const props = defineProps({
-    modelValue:{
+    modelValue: {
         type: Object as () => ArticlePotInterface,
         required: true
     },
-    shown: {type: Boolean, required:true}
+    shown: {type: Boolean, required: true}
 })
 
 const emits = defineEmits(['update:modelValue'])
@@ -46,13 +67,26 @@ const productNull = computed(() => {
 
 const inputValue = computed({
     get: () => props.modelValue,
-    set: newValue => emits('update:modelValue', newValue    )
+    set: newValue => emits('update:modelValue', newValue)
 })
 
 const reduireQuantite = () =>
-    inputValue.value = {...inputValue.value, quantite: inputValue.value?.quantite-1}
+    inputValue.value = {...inputValue.value, quantite: inputValue.value?.quantite - 1}
 const augmenterQuantite = () =>
-    inputValue.value = {...inputValue.value, quantite: inputValue.value?.quantite+1}
+    inputValue.value = {...inputValue.value, quantite: inputValue.value?.quantite + 1}
+
+// const texteComputed = computed(()=>{
+//     let temp = '', temp2 = '', temp3 = ''
+//     props.modelValue.nom.split(' ').forEach(nom => {
+//         if (temp.length < 15) {
+//             temp+= `${nom} `
+//         }
+//         else {
+//             temp2.concat(' ', nom)
+//         }
+//     })
+//     return [temp, temp2]
+// })
 
 </script>
 
