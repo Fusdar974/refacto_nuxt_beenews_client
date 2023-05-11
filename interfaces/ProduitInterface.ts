@@ -3,6 +3,7 @@ interface ProduitInterface{
     _id?: string,
     nom: string,
     image: string,
+    imageBnr?: string | ArrayBuffer
     type: TypeProduitInterface|string,
     prix: number,
     prixEuros: number,

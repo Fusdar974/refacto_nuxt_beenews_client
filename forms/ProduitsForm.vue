@@ -1,7 +1,7 @@
 <template>
   <div>
     <h2> {{ titre }} </h2>
-    <v-form v-if="selectedProduit" :disabled="mode === SHOW">
+    <v-form v-if="selectedProduit" :disabled="mode === SHOW" class="pa-5">
       <v-text-field v-model="selectedProduit.nom" type="text" label="nom"
                     :error-messages="v$.nom.$errors.map(e => e.$message)"
                     required
@@ -82,6 +82,7 @@ import ProduitInterface from "~/interfaces/ProduitInterface"
 import TypeProduitInterface from "~/interfaces/TypeProduitInterface"
 import TypeInterface from "~/interfaces/TypeProduitInterface"
 import Array = SymbolKind.Array;
+import ImageResultInterface from "~/interfaces/ImageResultInterface";
 
 
 /**
@@ -116,9 +117,12 @@ const v$ = useVuelidate(rules, selectedProduit)//valide si les propriétées de 
 watch(images, newImages => {
     if (newImages[0]) {
         changementImage(newImages[0])
-            .then((imageB64) => selectedProduit.value = {...selectedProduit.value, image: String(imageB64)})
+            .then((imageData) => {
+              const imageProperties = imageData as ImageResultInterface
+              selectedProduit.value = {...selectedProduit.value, image: imageProperties.img, imageBnr: imageProperties.bnr as string}
+            })
             .catch(error => console.error(error))
-    } else selectedProduit.value = {...selectedProduit.value, image: ''}
+    } else selectedProduit.value = {...selectedProduit.value, image: '', imageBnr:''}
 
 })
 
@@ -189,7 +193,7 @@ const creer = () => {
   v$.value.$validate()
       .then( result => {
         if (result && selectedProduit.value !== null) {
-          //selectedProduit.value.image = selectedProduit.value.image
+          console.log(selectedProduit)
           Fetch.requete({url: '/produits/create', method: 'POST', data: {produit: selectedProduit.value}}, () => {
             fermer('Création OK')
           })
@@ -222,7 +226,7 @@ const handleChangeSelect = (e: any) => {
 
 const changementImage = (file: File) => new Promise((resolve, reject) => {
     const reader = new FileReader()
-    reader.readAsDataURL(file)
+    reader.readAsBinaryString(file)
 
     reader.onload = () => {
         var img = new Image()
@@ -237,7 +241,11 @@ const changementImage = (file: File) => new Promise((resolve, reject) => {
             // check its dimensions
             if (width <= 200 && height <= 200) {
                 // it fits
-                return resolve(reader.result)
+              const result: ImageResultInterface = {
+                bnr: reader.result,
+                img: window.URL.createObjectURL(file)
+              }
+                return resolve(result)
             } else {
                 // it doesn't fit, unset the value
                 // post an error
