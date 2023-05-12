@@ -30,30 +30,33 @@
                     suffix="€"
                     min="0"
                     label="credit" sm="4"/>
-        <v-text-field v-model="selectedProduit.nombre" type="number" min="0" label="stock" sm="6"
-                      :error-messages="v$.nombre.$errors.map(e => e.$message)"
-                      required
-                      @blur="v$.nombre.$touch"/>
-        <v-select v-model="selectedProduit.type"
-                  @change="handleChangeSelect"
-                  :items="types"
-                  item-title="nom"
-                  item-value="_id"/>
-        <v-img
-                v-if="selectedProduit.image && selectedProduit.image.length > 0"
-                style="max-height: 200px; max-width: 200px"
-                :src="selectedProduit.image"
-        />
-        <v-file-input
-                v-model="images"
-                accept="image/png, image/jpeg, image/bmp"
-                placeholder="Pick an image"
-                prepend-icon="mdi:mdi-camera"
-                label="Image"
-        ></v-file-input>
-        <v-checkbox label="Archivé"
-                    v-model="selectedProduit.archive"
-                    color="red"
+      <v-text-field v-model="selectedProduit.nombre" type="number" min="0" label="stock" sm="6"
+                    :error-messages="v$.nombre.$errors.map(e => e.$message)"
+                    required
+                    @blur="v$.nombre.$touch"/>
+      <v-select v-model="selectedProduit.type"
+                @change="handleChangeSelect"
+                :items="types"
+                item-title="nom"
+                item-value="_id"/>
+      <v-img v-if="selectedProduit.image && selectedProduit.image.length > 0 && !imgChanged"
+             style="max-height: 200px; max-width: 200px"
+             :src="serverconfig.concat(selectedProduit.image)"/>
+      <v-img v-else-if="selectedProduit.image && selectedProduit.image.length > 0"
+             style="max-height: 200px; max-width: 200px"
+             :src="selectedProduit.image"
+      />
+      <v-file-input
+          v-model="images"
+          @change="imgChanged = true"
+          accept="image/png, image/jpeg, image/bmp"
+          placeholder="Pick an image"
+          prepend-icon="mdi:mdi-camera"
+          label="Image"
+      ></v-file-input>
+      <v-checkbox label="Archivé"
+                  v-model="selectedProduit.archive"
+                  color="red"
       ></v-checkbox>
       <div>
         <v-btn v-if="mode === SHOW" color="primary" class="ma-1" variant="outlined" key="edit" @click="mode = EDIT">
@@ -83,6 +86,7 @@ import TypeProduitInterface from "~/interfaces/TypeProduitInterface"
 import TypeInterface from "~/interfaces/TypeProduitInterface"
 import Array = SymbolKind.Array;
 import ImageResultInterface from "~/interfaces/ImageResultInterface";
+import serverconfig from "~/serverconfig";
 
 
 /**
@@ -94,7 +98,7 @@ const props = defineProps({
   action: {type: String, required: true},
 })
 
-const fileInput: Ref<any> = ref()
+const imgChanged: Ref<boolean> = ref(false)
 const SHOW = 'show'
 const EDIT = 'edit'
 const CREATE = 'add'
@@ -115,28 +119,28 @@ const rules = {
 const v$ = useVuelidate(rules, selectedProduit)//valide si les propriétées de selectedUser respectent les règles
 
 watch(images, newImages => {
-    if (newImages[0]) {
-        changementImage(newImages[0])
-            .then((imageData) => {
-              const imageProperties = imageData as ImageResultInterface
-              selectedProduit.value = {...selectedProduit.value, image: imageProperties.img, imageBnr: imageProperties.bnr as string}
-            })
-            .catch(error => console.error(error))
-    } else selectedProduit.value = {...selectedProduit.value, image: '', imageBnr:''}
+  if (newImages[0]) {
+    changementImage(newImages[0])
+        .then((imageData) => {
+          const imageProperties = imageData as ImageResultInterface
+          selectedProduit.value = {...selectedProduit.value, image: imageProperties.img, imageBnr: imageProperties.bnr as string}
+        })
+        .catch(error => console.error(error))
+  } else selectedProduit.value = {...selectedProduit.value, image: '', imageBnr:''}
 
 })
 
 watch(selectedProduit, newValue => console.log(newValue))
 
 /**
- * avant que la page soit créée:
+ * avant que la page soit montée:
  * détermine en quel mode est le formulaire
- * si il n'est pas en mode création, charge l'utilisateur sélectionné
- * sinon, créé un utilisateur vide
+ * si il n'est pas en mode création, charge le produit sélectionné
+ * sinon, créé un produit vide
  */
 onBeforeMount(() => {
-    let title: string
-    switch (props.action) {
+  let title: string
+  switch (props.action) {
     case 'show':
       title = "Informations produit"
       break
@@ -174,8 +178,8 @@ onBeforeMount(() => {
 })
 
 /**
- * ferme le formulaire et renvoie sur la page des clients, si un message est passé en paramètre
- * celui-ci est stocké dans le store ainsi qu'un booléen qui permet d'activer le snackbar de la page principale est afficher le message
+ * ferme le formulaire et renvoie sur la page du stock, si un message est passé en paramètre
+ * celui-ci est stocké dans le store ainsi qu'un booléen qui permet d'activer le snackbar de la page principale et afficher le message
  * @param messageAfficher message à afficher
  */
 const fermer = (messageAfficher: string) => {
@@ -187,7 +191,7 @@ const fermer = (messageAfficher: string) => {
 }
 
 /**
- * Envoie une requete de création d'utilisateur dans le back et ferme le formulaire
+ * Envoie une requete de création de produit dans le back et ferme le formulaire
  */
 const creer = () => {
   v$.value.$validate()
@@ -202,7 +206,7 @@ const creer = () => {
 }
 
 /**
- * Envoie une requete de modification d'utilisateur dans le back et ferme le formulaire
+ * Envoie une requete de modification de produit dans le back et ferme le formulaire
  */
 const modifier = () => {
   v$.value.$validate()
@@ -218,46 +222,56 @@ const modifier = () => {
       })
 }
 
+/**
+ * Change le type du produit
+ * @param e
+ */
 const handleChangeSelect = (e: any) => {
   const valeur = e.target
   selectedProduit.value.type = valeur.value
   console.log(selectedProduit.value.type)
 }
 
+/**
+ * Lorsque l'image est changée, créé un object temporaire dans le DOM pour vérifier sa taille et si l'image répond aux critères,
+ * renvoie une promesse contenant le lien vers l'image et son fichier en binaire dans le back
+ * @param file fichier de la nouvelle image
+ */
 const changementImage = (file: File) => new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.readAsBinaryString(file)
+  const reader = new FileReader()
+  reader.readAsBinaryString(file)
 
-    reader.onload = () => {
-        var img = new Image()
-        img.src = window.URL.createObjectURL(file)
-        img.onload = () => {
-            const width = img.naturalWidth
-            const height = img.naturalHeight
+  reader.onload = () => {
+    var img = new Image()
+    img.src = window.URL.createObjectURL(file)
+    img.onload = () => {
+      const width = img.naturalWidth
+      const height = img.naturalHeight
 
-            // unload it
-            window.URL.revokeObjectURL(img.src)
+      // unload it
+      window.URL.revokeObjectURL(img.src)
 
-            // check its dimensions
-            if (width <= 200 && height <= 200) {
-                // it fits
-              const result: ImageResultInterface = {
-                bnr: reader.result,
-                img: window.URL.createObjectURL(file)
-              }
-                return resolve(result)
-            } else {
-                // it doesn't fit, unset the value
-                // post an error
-                // alert("Image maximum de 200x200")
-                // return undefined
-                return reject(new Error("Image maximum de 200x200"))
-            }
+      // check its dimensions
+      if (width <= 200 && height <= 200) {
+        // it fits
+        const result: ImageResultInterface = {
+          bnr: reader.result,
+          img: window.URL.createObjectURL(file)
         }
-        reader.onerror = (error) => {
-            return reject(error)
-        }
+        return resolve(result)
+      } else {
+        // it doesn't fit, unset the value
+        images.value = []
+        // post an error
+        alert("Image maximum de 200x200")
+        // return undefined
+        return reject(new Error("Image maximum de 200x200"))
+      }
     }
+    reader.onerror = (error) => {
+      return reject(error)
+    }
+  }
 })
 
 

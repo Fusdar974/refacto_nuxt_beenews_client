@@ -15,7 +15,7 @@
                   append-inner-icon="mdi:mdi-magnify"/>
               <v-btn variant="tonal"
                      color="primary"
-                     @click="ajouter">Créer</v-btn>
+                     @click="navigateTo('/produits/add')">Créer</v-btn>
             </v-col>
           </v-row>
         </v-row>
@@ -71,11 +71,8 @@
 </template>
 
 <script setup lang="ts">
-import UserInterface from "~/interfaces/UserInterface";
-import ActionInterface from "~/interfaces/ActionInterface";
 import {watch} from "#imports";
 import Fetch from "~/services/FetchService";
-import UsersResponseInterface from "~/interfaces/UsersResponseInterface";
 import ProduitInterface from "~/interfaces/ProduitInterface";
 import TypeInterface from "~/interfaces/TypeProduitInterface";
 import ProduitsResponseInterface from "~/interfaces/ProduitsResponseInterface";
@@ -99,9 +96,6 @@ const identifiant: Ref<string> = ref("")
 const identifiantASupp: Ref<string> = ref("")
 const champRecherche: Ref<string> = ref("")
 const message: Ref<string> = ref("")
-/**
- * authenticate, booleén qui permet de savoir si l'utilisateur est authentifié
- */
 const props = defineProps({
   authenticate: Boolean,
 })
@@ -111,7 +105,7 @@ watch(nombreParPage, () => recharger())
 watch(champRecherche, () => recharger())
 
 /**
- * recharge la liste des utilisateurs lorsque la page est créée
+ * recharge la liste des produits lorsque la page est créée
  */
 onMounted(()=>{
   Fetch.requete({ url: '/typeproduits' }, (result: [TypeInterface]) =>
@@ -123,7 +117,7 @@ onMounted(()=>{
 
 /**
  * Recharge la page en envoyant une requète vers le back, si celle-ci réussie,
- * la liste des utilisateurs est mises à jour ainsi que la pagination
+ * la liste des produits est mises à jour ainsi que la pagination
  */
 const recharger = () => {
   loading.value = true
@@ -137,9 +131,9 @@ const recharger = () => {
 }
 
 /**
- * envoie sur le composant de modification d'utilisateur
+ * envoie sur le composant de modification du produit
  * @param event ici le click sur le bouton
- * @param id l'identifiant de l'utilisateur sélectionné
+ * @param id l'identifiant du produit sélectionné
  */
 const handleModifier = (event: Event, id: string) => {
   event.stopPropagation()
@@ -148,22 +142,14 @@ const handleModifier = (event: Event, id: string) => {
 }
 
 /**
- * Active le dialog de confirmation de suppression de client
+ * Active le dialog de confirmation de suppression de produit
  * @param event ici le click sur le bouton
- * @param id l'identifiant de l'utilisateur sélectionné
+ * @param id l'identifiant du produit sélectionné
  */
 const handleSupprimer = (event: Event , id: string) => {
   event.stopPropagation()
   openDialog.value = true
   identifiantASupp.value =  id
-}
-
-/**
- * envoie sur le composant de création d'utilisateur
- */
-const ajouter = () => {
-  message.value = "modification OK"
-  navigateTo('/produits/add')
 }
 
 /**
@@ -179,7 +165,7 @@ const closeAction = (messageAfficher : string) => {
 }
 
 /**
- * Supprime l'utilisateur , affiche un message de confirmation dans une snackbar et ferme le dialog
+ * Supprime le produit, affiche un message de confirmation dans une snackbar et ferme le dialog
  */
 const handleConfirmerSuppression = () => {
   Fetch.requete({ url: `/produits/${identifiantASupp.value}`, method: 'DELETE' }, () => {
@@ -188,6 +174,11 @@ const handleConfirmerSuppression = () => {
   });
 }
 
+/**
+ * Envoie une requete au back pour obtenir une liste des produits en stock ne contenant que ceux du/des type(s) demandé(s),
+ * télécharge cette liste sous forme d'un tableau en PDF
+ * et ferme le dialog de sélection des types à filtrer
+ */
 const confirmerInventairePartiel = () => {
   Fetch.requete({ url: '/produits/pdf', method: 'POST', data: { types:  types.value.filter(item => item.selectionne).map(item => item._id) } }, result => {
     window.open(`${serverconfig}v1/pdf/pdf?token=${result.ticket}`, '_blanck');
@@ -195,6 +186,10 @@ const confirmerInventairePartiel = () => {
   openInventairePartiel.value = !openInventairePartiel.value
 }
 
+/**
+ * Envoie une requete au back pour obtenir une liste des produits en stock et
+ * télécharge cette liste sous forme d'un tableau en PDF
+ */
 const afficherPDF = () => {
   Fetch.requete({ url: '/produits/pdf', method: 'POST' }, result => {
     window.open(`${serverconfig}v1/pdf/pdf?token=${result.ticket}`, '_blanck');

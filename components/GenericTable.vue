@@ -10,10 +10,10 @@
     <tbody>
     <tr v-for="(obj, index) in objects"
         :key="index"
-        @click="navTest(obj._id)">
+        @click="navigateTo(`${useRouter().currentRoute.value.path}/show/${obj._id}`)">
       <td v-for="(attrs, indexAttr) in attributes"
-      :key="indexAttr" class="text-center">
-        <v-img v-if="attributes[indexAttr].isImage" aspect-ratio="16/9" :src="serverconfig.concat(reachDepth(attrs.attr, obj))"></v-img>
+          :key="indexAttr" class="text-center">
+        <v-img v-if="attributes[indexAttr].isImage" style="max-height: 200px; max-width: 200px" :src="serverconfig.concat(reachDepth(attrs.attr, obj))"></v-img>
         <div v-else>{{ reachDepth(attrs.attr, obj) }}</div>
       </td>
       <slot v-if="actionsTd" :obj="obj"/>
@@ -40,9 +40,6 @@
 
 <script setup lang="ts">
 
-import {Ref} from "vue";
-import {SymbolKind} from "vscode-languageserver-types";
-import Array = SymbolKind.Array;
 import AttributeInterface from "~/interfaces/AttributeInterface";
 import reachDepth from "../functions/reachDepth";
 import serverconfig from "~/serverconfig";
@@ -56,10 +53,6 @@ const props = defineProps( {
   page: {type: Number, required: true},
   pageSize: {type: Number, required: true},
 })
-
-const navTest =(id : string)=>{
-  navigateTo(`${useRouter().currentRoute.value.path}/show/${id}`)
-}
 
 const emits = defineEmits(['update:nbParPage', 'update:page', 'update:pageSize'])
 
@@ -78,6 +71,10 @@ const paginationSize = computed({
   set: (newValue) => emits('update:pageSize', newValue)
 })
 
+/**
+ * Change le nombre d'objets affichés par pages lorsque la valeur du select est modifiée
+ * @param e un évênement
+ */
 const handleChangeSelect = (e: any) => {
   const valeur = e.target;
   nombreParPage.value = valeur.value;
