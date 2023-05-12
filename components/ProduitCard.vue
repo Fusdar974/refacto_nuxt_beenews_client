@@ -1,18 +1,19 @@
 <template>
     <v-card v-show="shown" density="compact" width="120" height="230">
-        <div
-            style="color: #3f51b5; position: absolute; z-index: 5; top: 0; left: 0; padding: 1px 5px; font-size: 12px; font-weight: bold">
-            20 BN
+        <div v-if="modelValue[tarifAttr]"
+             class="tarif">
+            {{ `${modelValue[tarifAttr]} ${tarifAttr.toLowerCase().includes('euro') ? '€' : 'BN'}` }}
         </div>
-        <v-card-item density="compact" style="min-height: 105px">
-            <v-img alt="test" style="max-height: 85px" :src="`${serverconfig}${modelValue.image}`" width="100"
-                   aspect-ratio="1/1"/>
+        <v-card-item density="compact" style="min-height: 105px;">
+            <v-img alt="test"
+                   style="max-height: 85px"
+                   :src="`${serverconfig}${modelValue.image}`" width="100"
+            />
             <v-badge color="secondary"
+                     class="badge"
                      :model-value="!!modelValue.quantite"
-                     style="position: absolute; top: 10px; right: 15px;"
-                     max="999"
+                     max="99"
                      :content="modelValue.quantite"/>
-
         </v-card-item>
         <v-divider/>
         <v-card-text class="text-center align-center justify-center" style="display:flex ;padding:10px; height: 75px">
@@ -37,7 +38,7 @@
                 <v-btn class="w-100"
                        style="height: 40px"
                        variant="outlined"
-                       color="secondary">STOCK
+                       color="grey">STOCK
                 </v-btn>
             </v-btn-group>
         </v-card-actions>
@@ -51,12 +52,15 @@
 import serverconfig from "~/serverconfig";
 import ArticlePotInterface from "~/interfaces/potsInterfaces/ArticlePotInterface";
 
+const attr = 'prix'
+
 const props = defineProps({
     modelValue: {
         type: Object as () => ArticlePotInterface,
         required: true
     },
-    shown: {type: Boolean, required: true}
+    shown: {type: Boolean, required: true},
+    tarifAttr: String
 })
 
 const emits = defineEmits(['update:modelValue'])
@@ -75,20 +79,27 @@ const reduireQuantite = () =>
 const augmenterQuantite = () =>
     inputValue.value = {...inputValue.value, quantite: inputValue.value?.quantite + 1}
 
-// const texteComputed = computed(()=>{
-//     let temp = '', temp2 = '', temp3 = ''
-//     props.modelValue.nom.split(' ').forEach(nom => {
-//         if (temp.length < 15) {
-//             temp+= `${nom} `
-//         }
-//         else {
-//             temp2.concat(' ', nom)
-//         }
-//     })
-//     return [temp, temp2]
-// })
-
 </script>
 
 <style scoped>
+.tarif {
+    color: #3f51b5;
+    background-color: white;
+    border-radius: 10px;
+    position: absolute;
+    z-index: 5;
+    top: 0;
+    left: 0;
+    padding: 1px 5px;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+
+.badge {
+    position: absolute;
+    top: 9px;
+    right: 15px;
+}
+
 </style>
