@@ -63,7 +63,7 @@
         </v-btn>
         <v-btn v-else-if="mode === CREATE" color="primary" class="ma-1" variant="outlined" key="create" @click="creer">Créer
         </v-btn>
-        <v-btn v-else-if="mode === SHOW" color="primary" class="ma-1" variant="outlined" key="edit" @click="mode = EDIT">
+        <v-btn v-else color="primary" class="ma-1" variant="outlined" @click="mode = EDIT">
         Modifier
       </v-btn>
         <v-btn color="primary" class="ma-1" variant="outlined" key="create" @click="fermer(null)">Fermer</v-btn>

@@ -21,7 +21,8 @@
         </v-row>
       </v-container>
       <generic-table :objects="produits" :attributes="attributes" :actions-td="true"
-                     v-model:page-size="paginationSize" v-model:page="page" v-model:nb-par-page="nombreParPage">
+                     v-model:page-size="paginationSize" v-model:page="page" v-model:nb-par-page="nombreParPage"
+                      :max-height-img="100" :max-width-img="200">
         <template v-slot:default="slotProps">
           <td>
             <v-btn-group variant="tonal">
