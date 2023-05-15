@@ -47,7 +47,9 @@
                 <v-btn v-if="mode === CREATE" color="primary" class="ma-1" variant="outlined" key="create"
                        @click="creer">Créer
                 </v-btn>
-                <v-btn color="primary" class="ma-1" variant="outlined" key="create" @click="fermer">Fermer</v-btn>
+                <v-btn color="primary" class="ma-1" variant="outlined" key="create" @click="navigateTo('/users')">
+                    Fermer
+                </v-btn>
             </div>
         </v-form>
 

@@ -65,7 +65,8 @@
         <v-btn v-else color="primary" class="ma-1" variant="outlined" @click="mode = EDIT">
         Modifier
       </v-btn>
-          <v-btn color="primary" class="ma-1" variant="outlined" key="create" @click="fermer">Fermer</v-btn>
+          <v-btn color="primary" class="ma-1" variant="outlined" key="create" @click="navigateTo('/produits')">Fermer
+          </v-btn>
       </div>
     </v-form>
   </div>
