@@ -45,8 +45,8 @@
       </div>
     </v-form>
 
-    <historique-client v-if="produitId" :user-id="produitId" type="SOUM"></historique-client>
-    <historique-client v-if="produitId" :user-id="produitId" type="POT"></historique-client>
+    <historique-client v-if="userId" :user-id="userId" type="SOUM"></historique-client>
+    <historique-client v-if="userId" :user-id="userId" type="POT"></historique-client>
     <ModalConfirmation v-model="openConfirmationDialog"
                        @confirmer="envoyerNouveauPwd"
                        titre="Envoyer nouveau mot de passe"
@@ -106,7 +106,7 @@ const v$ = useVuelidate(rules, selectedUser)//valide si les propriétées de sel
  * action : string qui détermine le mode du UserForm
  */
 const props = defineProps({
-  produitId: {type: String},
+  userId: {type: String},
   action: {type: String, required: true},
 })
 
@@ -137,7 +137,8 @@ onBeforeMount(() => {
       break;
   }
   if (mode.value !== CREATE) {
-    Fetch.requete({url: `/users/${props.produitId}`, method: 'GET'}, (resultUser: UserResponseInterface) => {
+    console.log(props.userId)
+    Fetch.requete({url: `/users/${props.userId}`, method: 'GET'}, (resultUser: UserResponseInterface) => {
       selectedUser.value = resultUser.user
     })
   } else {
