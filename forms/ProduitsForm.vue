@@ -1,22 +1,21 @@
 <template>
   <div>
-    <h2> {{ titre }} </h2>
     <v-form v-if="selectedProduit" :disabled="mode === SHOW" class="pa-5">
       <v-text-field v-model="selectedProduit.nom" type="text" label="nom"
-                    :error-messages="v$.nom.$errors.map(e => e.$message)"
+                    :error-messages="v$.nom.$errors.map(e => e.$message) as string[]"
                     required
                     sm="12"
                     @input="v$.nom.$touch"
                     @blur="v$.nom.$touch"/>
       <v-text-field v-model.number="selectedProduit.prix" type="number" label="prix en BN"
-                    :error-messages="v$.prix.$errors.map(e => e.$message)"
+                    :error-messages="v$.prix.$errors.map(e => e.$message) as string[]"
                     suffix="BN"
                     min="0"
                     sm="4"
                     required
                     @blur="v$.prix.$touch"/>
       <v-text-field v-model="selectedProduit.prixEuros"
-                    :error-messages="v$.prixEuros.$errors.map(e => e.$message)"
+                    :error-messages="v$.prixEuros.$errors.map(e => e.$message) as string[]"
                     sm="4"
                     step="0.25"
                     suffix="€"
@@ -31,12 +30,12 @@
                     min="0"
                     label="credit" sm="4"/>
       <v-text-field v-model="selectedProduit.nombre" type="number" min="0" label="stock" sm="6"
-                    :error-messages="v$.nombre.$errors.map(e => e.$message)"
+                    :error-messages="v$.nombre.$errors.map(e => e.$message) as string[]"
                     required
                     @blur="v$.nombre.$touch"/>
       <v-select v-model="selectedProduit.type"
                 @change="handleChangeSelect"
-                :items="types"
+                :items="types as Array<TypeInterface>"
                 item-title="nom"
                 item-value="_id"/>
       <v-img v-if="selectedProduit.image && selectedProduit.image.length > 0 && !imgChanged"
@@ -66,7 +65,7 @@
         <v-btn v-else color="primary" class="ma-1" variant="outlined" @click="mode = EDIT">
         Modifier
       </v-btn>
-        <v-btn color="primary" class="ma-1" variant="outlined" key="create" @click="fermer(null)">Fermer</v-btn>
+          <v-btn color="primary" class="ma-1" variant="outlined" key="create" @click="fermer">Fermer</v-btn>
       </div>
     </v-form>
   </div>
@@ -84,48 +83,61 @@ import ProduitResponseInterface from "~/interfaces/ProduitResponseInterface"
 import ProduitInterface from "~/interfaces/ProduitInterface"
 import TypeProduitInterface from "~/interfaces/TypeProduitInterface"
 import TypeInterface from "~/interfaces/TypeProduitInterface"
-import Array = SymbolKind.Array;
 import ImageResultInterface from "~/interfaces/ImageResultInterface";
 import serverconfig from "~/serverconfig";
+import {useMenuStore} from "~/stores/menuStore";
+import Array = SymbolKind.Array;
 
+const SHOW = 'show'
+const EDIT = 'edit'
+const CREATE = 'add'
 
 /**
  * userId : l'id de l'utilisateur à consulter/modifier
  * action : string qui détermine le mode du UserForm
  */
 const props = defineProps({
-  produitId: {type: String},
-  action: {type: String, required: true},
+    produitId: {type: String},
+    action: {type: String, required: true},
 })
 
 const imgChanged: Ref<boolean> = ref(false)
-const SHOW = 'show'
-const EDIT = 'edit'
-const CREATE = 'add'
 const selectedProduit: Ref<ProduitInterface> = ref({} as ProduitInterface)
 const mode: Ref<string> = ref(props.action)
-const titre: Ref<string> = ref("Aucun titre")
 const images: Ref<Array<File>> = ref([])
 const types: Ref<Array<TypeProduitInterface>> = ref([] as Array<TypeProduitInterface>)
-const {open: snackbarStoreOpen, message: snackbarStoreMessage} = storeToRefs(useSnackbarStore())
+
+const {putSnackBarMessage} = useSnackbarStore()
+const {titleAppBar} = storeToRefs(useMenuStore())
+
 const rules = {
-  nom: {required},
-  prix: {required},
-  prixEuros: {required},
-  nombre: {required},
-  type: {required},
+    nom: {required},
+    prix: {required},
+    prixEuros: {required},
+    nombre: {required},
+    type: {required},
 }
 
 const v$ = useVuelidate(rules, selectedProduit)//valide si les propriétées de selectedUser respectent les règles
 
+// détermine le titre à afficher dans le appBar
+titleAppBar.value = props.action === 'edit' && "Modification du produit"
+    || props.action === 'add' && "Ajout d'un produit"
+    || "Informations du produit"
+
+
 watch(images, newImages => {
-  if (newImages[0]) {
-    changementImage(newImages[0])
-        .then((imageData) => {
-          const imageProperties = imageData as ImageResultInterface
-          selectedProduit.value = {...selectedProduit.value, image: imageProperties.img, imageBnr: imageProperties.bnr as string}
-        })
-        .catch(error => console.error(error))
+    if (newImages[0]) {
+        changementImage(newImages[0])
+            .then((imageData) => {
+                const imageProperties = imageData as ImageResultInterface
+                selectedProduit.value = {
+                    ...selectedProduit.value,
+                    image: imageProperties.img,
+                    imageBnr: imageProperties.bnr as string
+                }
+            })
+            .catch(error => console.error(error))
   } else selectedProduit.value = {...selectedProduit.value, image: '', imageBnr:''}
 
 })
@@ -139,21 +151,6 @@ watch(selectedProduit, newValue => console.log(newValue))
  * sinon, créé un produit vide
  */
 onBeforeMount(() => {
-  let title: string
-  switch (props.action) {
-    case 'show':
-      title = "Informations produit"
-      break
-    case 'edit':
-      title = "Modifier produit"
-      break
-    case 'add':
-      title = "Ajouter produit"
-      break
-    default:
-      title = "Informations produit"
-      break
-  }
   if (mode.value !== CREATE) {
     Fetch.requete({url: `/produits/${props.produitId}`, method: 'GET'}, (resultProduits: ProduitResponseInterface) => {
       selectedProduit.value = resultProduits.produit
@@ -174,7 +171,6 @@ onBeforeMount(() => {
   Fetch.requete({ url: `/typeproduits`, method: 'POST' }, (result: [TypeInterface]) => {
     types.value = result
   })
-  titre.value = title
 })
 
 /**
@@ -182,12 +178,11 @@ onBeforeMount(() => {
  * celui-ci est stocké dans le store ainsi qu'un booléen qui permet d'activer le snackbar de la page principale et afficher le message
  * @param messageAfficher message à afficher
  */
-const fermer = (messageAfficher: string) => {
-  if (messageAfficher) {
-    snackbarStoreMessage.value = messageAfficher
-    snackbarStoreOpen.value = true
-  }
-  navigateTo('/produits')
+const fermer = (messageAfficher: string | undefined) => {
+    if (messageAfficher) {
+        putSnackBarMessage(messageAfficher)
+    }
+    navigateTo('/produits')
 }
 
 /**
@@ -229,7 +224,6 @@ const modifier = () => {
 const handleChangeSelect = (e: any) => {
   const valeur = e.target
   selectedProduit.value.type = valeur.value
-  console.log(selectedProduit.value.type)
 }
 
 /**
