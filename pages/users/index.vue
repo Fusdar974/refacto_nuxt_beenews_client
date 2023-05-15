@@ -1,7 +1,7 @@
 <template>
   <private-route>
     <div>
-        <v-container class="maxW800 align-center align-content-lg-space-between ma-3">
+        <v-container class="maxW1000 align-center align-content-lg-space-between ma-3">
           <v-row>
             <v-col>
               <h3 class="d-lg-none">Clients </h3>
@@ -21,55 +21,21 @@
           </v-row>
         </v-container>
           <div v-if="!loading" class="maxW1000" >
-            <v-table density="comfortable" hover>
-              <thead>
-              <tr>
-                <th class="align-center">Nom</th>
-                <th class="align-center">Prenom</th>
-                <th class="align-center">BN</th>
-                <th class="align-center hidden-md-and-down">Profils</th>
-                <th class="align-center">Actions</th>
-              </tr>
-              </thead>
-              <tbody v-if="users !== null">
-                <tr v-for="(user, index) in users as Array<UserInterface>"
-                    :key="index" @click="navigateTo(`/users/show/${user._id}`)">
-                    <td class="align-center">
-                        <v-icon v-if="user.isDesactive" icon="mdi:mdi_small" color="red"/>
-                        {{ user.nom }}
-                    </td>
-                    <td class="align-center">{{ user.prenom }}</td>
-                    <td class="align-center">{{ user.compte }}</td>
-                    <td class="align-center hidden-md-and-down">{{ user.profils.map(item => item.nom).join(',') }}</td>
-                    <td class="align-center">
-                        <v-btn-group variant="tonal">
-                            <v-btn @click="handleModifier($event, user._id)" class="ma-1">
-                                <v-icon icon="mdi mdi_small mdi-pencil"></v-icon>
-                            </v-btn>
-                            <v-btn v-if="user.supprimable" @click="handleSupprimer($event, user._id)" class="ma-1">
-                                <v-icon icon="mdi mdi_small mdi-delete"></v-icon>
-                            </v-btn>
-                        </v-btn-group>
-                    </td>
-                </tr>
-              </tbody>
-            </v-table>
-            <v-pagination v-if="nombreParPage !== 'all'"
-                          v-model="page"
-                          :length="paginationSize as number"
-                          prev-icon="mdi:mdi-arrow-left"
-                          next-icon="mdi:mdi-arrow-right"/>
-            <v-select v-model="nombreParPage"
-                      @change="handleChangeSelect"
-                      :items="[
-                          {value:'10', title: '10'},
-                          {value:'20', title: '20'},
-                          {value:'30', title: '30'},
-                          {value:'all', title: 'Tous'},
-                          ]"
-                      item-title="title"
-                      item-value="value"/>
-
+            <generic-table :objects="users"
+                           :attributes="attributes"
+                           :actions-td="true"
+                           v-model:page-size="paginationSize"
+                           v-model:page="page"
+                           v-model:nb-par-page="nombreParPage">
+              <template v-slot:default="slotProps">
+                <td>
+                  <v-btn-group variant="tonal">
+                    <v-btn @click="handleModifier($event,slotProps.obj._id)" class="ma-1"><v-icon icon="mdi mdi_small mdi-pencil"></v-icon></v-btn>
+                    <v-btn v-if="slotProps.obj.supprimable" @click="handleSupprimer($event, slotProps.obj._id)" class="ma-1"><v-icon icon="mdi mdi_small mdi-delete"></v-icon></v-btn>
+                  </v-btn-group>
+                </td>
+              </template>
+            </generic-table>
           </div>
         <v-container v-if="loading" class="align-center">
           <v-row>
@@ -92,6 +58,8 @@
 
 import UserInterface from "~/interfaces/UserInterface";
 import UsersResponseInterface from "~/interfaces/UsersResponseInterface";
+import AttributeInterface from "~/interfaces/AttributeInterface";
+import GenericTable from "~/components/GenericTable.vue";
 import Fetch from "~/services/FetchService";
 import {watch} from "#imports";
 import {storeToRefs} from "pinia";
@@ -107,6 +75,10 @@ const paginationSize: Ref<number> = ref(1)
 const openDialogConfirmationSuppression: Ref<boolean> = ref(false)
 const identifiantASupp: Ref<string> = ref("")
 const champRecherche: Ref<string> = ref("")
+
+const attributes: Ref<Array<AttributeInterface>> = ref([{header: 'Nom', attr:'nom',},
+    {header: 'Prenom', attr: 'prenom'}, {header: 'BN', attr: 'compte'}, {header: 'Profils', attr: 'profils.nom'}] as Array<AttributeInterface>)
+
 
   const {
       open: snackbarStoreOpen,
@@ -180,16 +152,6 @@ const handleSupprimer = (event: Event, id: string | undefined) => {
         recharger();
         openDialogConfirmationSuppression.value = false
     })
-  }
-
-  /**
-   * Change le nombre d'utilisateurs affichés par pages lorsque la valeur du select est modifiée
-   * @param e
-   */
-  const handleChangeSelect = (e: any) => {
-    const valeur = e.target;
-      nombreParPage.value = valeur.value;
-      return { nombreParPage: valeur.value, loading: true }
   }
 
 </script>
