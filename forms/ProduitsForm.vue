@@ -79,7 +79,6 @@ import {storeToRefs} from "pinia"
 import {useSnackbarStore} from "~/stores/snackbarStore"
 import {useVuelidate} from '@vuelidate/core'
 import {required} from '@vuelidate/validators'
-import {SymbolKind} from "vscode-languageserver-types"
 import ProduitResponseInterface from "~/interfaces/ProduitResponseInterface"
 import ProduitInterface from "~/interfaces/ProduitInterface"
 import TypeProduitInterface from "~/interfaces/TypeProduitInterface"
@@ -87,7 +86,6 @@ import TypeInterface from "~/interfaces/TypeProduitInterface"
 import ImageResultInterface from "~/interfaces/ImageResultInterface";
 import serverconfig from "~/serverconfig";
 import {useMenuStore} from "~/stores/menuStore";
-import Array = SymbolKind.Array;
 
 const SHOW = 'show'
 const EDIT = 'edit'
