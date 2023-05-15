@@ -142,6 +142,7 @@ import TypeProduitInterface from "~/interfaces/TypeProduitInterface";
 import ProduitsListFilterInterface from "~/interfaces/ProduitsListFilterInterface";
 
 definePageMeta({
+    /** teste la route avant la céation de la page */
     validate: async (route) => {
         // Check if the id is made up of digits
         return ['show', 'edit'].includes(route.params.action as string)
@@ -156,15 +157,11 @@ const SHOW = 'show'
 const EDIT = 'edit'
 const CREATE = 'add'
 
-const {titleAppBar} = storeToRefs(useMenuStore())
-titleAppBar.value =  action === 'show' && "Informations du pot"
-    || action === 'edit' && "Modification du pot"
-    || action === 'add' && "Ajout d'un pot"
-    || "Informations du pot"
-
+/** Teste le format de l'_id dans la route */
 const isIdValid = ['show', 'edit'].includes(action as string)
     && /[0-9a-zA-Z]{16}/.test(id as string)
 
+/** REFS */
 const pot: Ref<PotInterface> = ref({
     titre: '',
     participants: [],
@@ -181,11 +178,20 @@ const valeurPoint: Ref<number> = ref(0)
 const show: Ref<boolean> = ref(false)
 const openDialogValidation: Ref<boolean> = ref(false)
 
+/** STORES */
+
+/** Gestion du Titre dans l'APPBAR*/
+const {titleAppBar} = storeToRefs(useMenuStore())
+titleAppBar.value = action === 'edit' && "Modification du pot"
+    || action === 'add' && "Ajout d'un pot"
+    || "Informations du pot"
+
+/** Gestion du message success or error de App.vue */
 const {
-    open: snackbarStoreOpen,
-    message: snackbarStoreMessage,
-    couleur: snackbarStoreCouleur
-} = storeToRefs(useSnackbarStore())
+    putSnackBarMessage
+} = useSnackbarStore()
+
+/** VUELIDATE */
 
 /** Règles vuelidate utilisées pour la création et la modification */
 const rules = {
@@ -196,19 +202,20 @@ const rules = {
 /** Règles vuelidate utilisées pour l'encaissement */
 const rulesEncaisser = {
     ...rules,
-    articles:{required}
+    articles: {required}
 }
 
 const v$ = useVuelidate(rules, pot)
-
 const v$Encaisser = useVuelidate(rulesEncaisser, pot)
 
+/** COMPUTED */
+
 /** Calcul du total en euro */
-const total = computed(()=>{
+const total = computed(() => {
     let result = 0
     pot.value?.articles
         .map(article => article.prixEuros * article.quantite + article.prix * article.quantite * valeurPoint.value)
-        .forEach(valeurEuros => result+=valeurEuros)
+        .forEach(valeurEuros => result += valeurEuros)
     return Number(result)
 })
 
@@ -238,14 +245,22 @@ const formatedDateComputed = computed({
 const paiementEnCoursComputed = computed(() =>
     pot.value.etat === 'Paiement' || pot.value.etat === 'Payé')
 
+/** LIFECYCLE */
+
 /** Chargement des données après le montage du composant dans le dom */
 onMounted(() => {
-    Fetch.requete({ url: '/parametre/valeurBN', method: 'GET' }, (resultBN: ValeurBNResponseInterface) => {
+    Fetch.requete({url: '/parametre/valeurBN', method: 'GET'}, (resultBN: ValeurBNResponseInterface) => {
         valeurPoint.value = resultBN.valeur
     })
 
-    Fetch.requete({url: '/typeproduits', method: 'POST',data: {"proposablePot":true}}, (resultTypeproduits: Array<TypeProduitInterface>) => {
-        Fetch.requete({url: '/pots/produits', method: 'POST'}, (resultProduits: { produits: Array<ProduitInterface> }) => {
+    Fetch.requete({
+        url: '/typeproduits',
+        method: 'POST',
+        data: {"proposablePot": true}
+    }, (resultTypeproduits: Array<TypeProduitInterface>) => {
+        Fetch.requete({url: '/pots/produits', method: 'POST'}, (resultProduits: {
+            produits: Array<ProduitInterface>
+        }) => {
             typeproduits.value = resultTypeproduits
             filtre.value = resultTypeproduits[0]._id || ''
             produitToScreen.value = resultProduits.produits
@@ -277,6 +292,8 @@ onMounted(() => {
     })
 })
 
+/** METHODS */
+
 /**
  * Permet la création ou la modification si ID
  */
@@ -284,7 +301,7 @@ const handleCreateUpdatePot = () => {
 
     v$.value.$validate()
         .then(isValid => {
-            if(isValid){
+            if (isValid) {
                 const data = pot.value._id ?
                     {url: `/pots/${pot.value._id}`, data: {pot: pot.value}, method: 'PUT'}
                     :
@@ -313,14 +330,12 @@ const demanderEncaisser = () => {
 }
 
 /**
- * permet l'affichage de la snackbar de app.vue au retour su /pots
+ * permet l'affichage de la snackbar de app.vue au retour sur /pots
  * @param messageAfficher
  */
 const fermer = (messageAfficher: string) => {
     if (messageAfficher) {
-        snackbarStoreMessage.value = messageAfficher
-        snackbarStoreCouleur.value = 'success'
-        snackbarStoreOpen.value = true
+        putSnackBarMessage(messageAfficher)
     }
     navigateTo(`/pots`)
 }
@@ -329,11 +344,11 @@ const fermer = (messageAfficher: string) => {
  * En cas d'erreur dans la requête HTTP
  * @param type
  */
-const erreur = (type: string) => {
-    snackbarStoreMessage.value = `Une erreur a eu lieu dans la ${type}`
-    snackbarStoreOpen.value = true
-    snackbarStoreCouleur.value = 'error'
-}
+const erreur = (type: string) => putSnackBarMessage(
+    `Une erreur a eu lieu dans la ${type}`,
+    'error'
+)
+
 
 /**
  * A la validation de l'encaissement, transmet le nouvel état sur le serveur
@@ -360,24 +375,24 @@ const payer = (identifiant: string) => {
     if (participant) {
         participant.paye = true
         participant.datePaiement = new Date()
-    }
-    const paye = pot.value.participants.map(item => item.paye).reduce((a, b) => a && b);
+        const paye = pot.value.participants.map(item => item.paye).reduce((a, b) => a && b);
 
-    if (paye) {
-        pot.value.etat = "Payé"
+        if (paye) {
+            pot.value.etat = "Payé"
+        }
+        Fetch.requete({
+                url: `/pots/${pot.value._id}`,
+                data: {pot: pot.value},
+                method: 'PUT'
+            }, () => putSnackBarMessage(`Le pot a été payé par ${participant.nom}`),
+            () => putSnackBarMessage(
+                `Il y a eu un problème dans le paiement de ${participant.nom}`,
+                'error')
+        )
     }
-
-    Fetch.requete({
-        url: `/pots/${pot.value._id}`,
-        data: {pot: pot.value},
-        method: 'PUT'
-    }, () => {
-        console.log('reussite')
-    })
 }
 
 </script>
-
 <style scoped>
 .btn-group {
     position: fixed;

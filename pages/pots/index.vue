@@ -70,6 +70,7 @@ import {storeToRefs} from "pinia";
 import {useSnackbarStore} from "~/stores/snackbarStore";
 import {useMenuStore} from "~/stores/menuStore";
 
+/** REFS */
 const loading: Ref<boolean> = ref(false)
 const pots: Ref<Array<PotInterface>> = ref([] as Array<PotInterface>)
 const nombreParPage: Ref<number> = ref(10)
@@ -80,18 +81,18 @@ const paginationSize: Ref<number> = ref(1)
 const identifiantASupp: Ref<string> = ref('')
 const openDialogSuppression: Ref<boolean> = ref(false)
 
-const {
-    open: snackbarStoreOpen,
-    message: snackbarStoreMessage,
-    couleur: snackbarStoreCouleur
-} = storeToRefs(useSnackbarStore())
+/** STORES */
+const {putSnackBarMessage} = useSnackbarStore()
 
 const {titleAppBar} = storeToRefs(useMenuStore())
 titleAppBar.value = 'Pots'
 
+/** Gestion des données du tableau Pots */
 watch(page, () => rechargerPotsList())
 watch(nombreParPage, () => rechargerPotsList())
 onMounted(() => rechargerPotsList())
+
+/** METHODS */
 
 /**
  * Méthode permettant de récupérer la liste des pots
@@ -139,9 +140,7 @@ const handleClickSupprimerPot = (event: Event, id: string) => {
  */
 const handleConfirmerSuppression = () => {
     Fetch.requete({url: `/pots/${identifiantASupp.value}`, method: 'DELETE'}, () => {
-        snackbarStoreMessage.value = 'Suppression ok'
-        snackbarStoreCouleur.value = 'success'
-        snackbarStoreOpen.value = true
+        putSnackBarMessage('Suppression ok')
         openDialogSuppression.value = false
         rechargerPotsList()
     })
@@ -150,6 +149,4 @@ const handleConfirmerSuppression = () => {
 </script>
 
 <style scoped>
-
-
 </style>
