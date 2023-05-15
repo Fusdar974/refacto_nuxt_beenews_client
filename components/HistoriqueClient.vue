@@ -183,7 +183,7 @@ const historique: Ref<Array<HistoriqueLigneInterface> | null> = ref(null)
 const commande: Ref<HistoriqueLigneInterface | null> = ref(null)
 
 const props = defineProps({
-  produitId: {type: String, required: true},
+  userId: {type: String, required: true},
   type: {type: String, required: true},
 })
 
@@ -198,7 +198,7 @@ const setHistorique = (histo: HistoriqueInterface) =>{
 const majUser = () => {
   Fetch.requete(
       {
-        url:`/users/historique/${props.type}/${props.produitId}?page=${page.value}`,
+        url:`/users/historique/${props.type}/${props.userId}?page=${page.value}`,
         data: { page: page.value },
         method: 'GET',
       },
@@ -227,7 +227,7 @@ const handleClose = () => {
  */
 const afficherPage = (id: number) => {
   loading.value = true
-  Fetch.requete({ url: `/users/historique/SOUM/${props.produitId}?page=${id}`, method: 'GET' }, setHistorique);
+  Fetch.requete({ url: `/users/historique/SOUM/${props.userId}?page=${id}`, method: 'GET' }, setHistorique);
 }
 
 </script>

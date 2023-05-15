@@ -78,9 +78,7 @@ import {storeToRefs} from "pinia"
 import {useSnackbarStore} from "~/stores/snackbarStore"
 import {useVuelidate} from '@vuelidate/core'
 import {email, required} from '@vuelidate/validators'
-import {SymbolKind} from "vscode-languageserver-types"
 import {useMenuStore} from "~/stores/menuStore";
-import Array = SymbolKind.Array;
 
 const SHOW = 'show'
 const EDIT = 'edit'
