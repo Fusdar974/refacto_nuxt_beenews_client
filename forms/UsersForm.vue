@@ -45,8 +45,8 @@
       </div>
     </v-form>
 
-    <historique-client v-if="userId" :user-id="userId" type="SOUM"></historique-client>
-    <historique-client v-if="userId" :user-id="userId" type="POT"></historique-client>
+    <historique-client v-if="produitId" :user-id="produitId" type="SOUM"></historique-client>
+    <historique-client v-if="produitId" :user-id="produitId" type="POT"></historique-client>
     <ModalConfirmation v-model="openConfirmationDialog"
                        @confirmer="envoyerNouveauPwd"
                        titre="Envoyer nouveau mot de passe"
@@ -69,22 +69,19 @@ import UserInterface from "~/interfaces/UserInterface";
 import Fetch from "~/services/FetchService";
 import PasswordChangeResponseInterface from "~/interfaces/PasswordChangeResponseInterface";
 import ProfilInterface from "~/interfaces/ProfilInterface";
-import profilInterface from "~/interfaces/ProfilInterface";
 import UserResponseInterface from "~/interfaces/UserResponseInterface";
 import ProfilsResponseInterface from "~/interfaces/ProfilsResponseInterface";
 import {storeToRefs} from "pinia";
 import {useSnackbarStore} from "~/stores/snackbarStore";
-import { useVuelidate } from '@vuelidate/core'
-import { required, email } from '@vuelidate/validators'
-import userInterface from "~/interfaces/UserInterface";
+import {useVuelidate} from '@vuelidate/core'
+import {email, required} from '@vuelidate/validators'
 import {SymbolKind} from "vscode-languageserver-types";
 import Array = SymbolKind.Array;
-import {$} from "vue/macros";
 
 const SHOW = 'show'
 const EDIT = 'edit';
 const CREATE = 'create';
-const selectedUser: Ref<UserInterface> = ref({} as userInterface)
+const selectedUser: Ref<UserInterface> = ref({} as UserInterface)
 const openConfirmationDialog: Ref<boolean> = ref(false)
 const openConfirmationDefaultDialog: Ref<boolean> = ref(false)
 const openSnackUserForm: Ref<boolean> = ref(false)
@@ -109,7 +106,7 @@ const v$ = useVuelidate(rules, selectedUser)//valide si les propriétées de sel
  * action : string qui détermine le mode du UserForm
  */
 const props = defineProps({
-  userId: {type: String},
+  produitId: {type: String},
   action: {type: String, required: true},
 })
 
@@ -140,7 +137,7 @@ onBeforeMount(() => {
       break;
   }
   if (mode.value !== CREATE) {
-    Fetch.requete({url: `/users/${props.userId}`, method: 'GET'}, (resultUser: UserResponseInterface) => {
+    Fetch.requete({url: `/users/${props.produitId}`, method: 'GET'}, (resultUser: UserResponseInterface) => {
       selectedUser.value = resultUser.user
     })
   } else {
