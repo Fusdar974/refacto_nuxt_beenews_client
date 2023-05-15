@@ -13,19 +13,21 @@
         @click="navigateTo(`${useRouter().currentRoute.value.path}/show/${obj._id}`)">
       <td v-for="(attrs, indexAttr) in attributes"
           :key="indexAttr" class="text-center">
-        <v-img v-if="attributes[indexAttr].isImage" style="max-height: 200px; max-width: 200px" :src="serverconfig.concat(reachDepth(attrs.attr, obj))"></v-img>
+        <v-img v-if="attributes[indexAttr].isImage"
+               :style="`max-height: ${maxHeightImg}px; max-width: ${maxWidthImg}px`"
+               :src="serverconfig.concat(reachDepth(attrs.attr, obj))"></v-img>
         <div v-else>{{ reachDepth(attrs.attr, obj) }}</div>
       </td>
       <slot v-if="actionsTd" :obj="obj"/>
     </tr>
     </tbody>
   </v-table>
-  <v-pagination v-if="nombreParPage !== 'all'"
-                v-model="page"
-                :length="paginationSize"
+  <v-pagination v-if="nombreParPageComputed !== 'all'"
+                v-model="pageComputed"
+                :length="paginationSizeComputed"
                 prev-icon="mdi:mdi-arrow-left"
                 next-icon="mdi:mdi-arrow-right"/>
-  <v-select v-model="nombreParPage"
+  <v-select v-model="nombreParPageComputed"
             @change="handleChangeSelect"
             :items="[
                           {value:'10', title: '10'},
@@ -46,27 +48,29 @@ import serverconfig from "~/serverconfig";
 import {useRouter} from "#app";
 
 const props = defineProps( {
-  objects: {type: Object  as Object[], required: true},
+  objects: {type: Object  as () => Array<Object>, required: true},
   attributes: {type: Object as () => AttributeInterface[], required: true},
   actionsTd: {type: Boolean, default: false},
   nbParPage: {type: Number, required: true},
   page: {type: Number, required: true},
   pageSize: {type: Number, required: true},
+  maxHeightImg: {type: Number, default: 200},
+  maxWidthImg: {type: Number, default: 200},
 })
 
 const emits = defineEmits(['update:nbParPage', 'update:page', 'update:pageSize'])
 
-const nombreParPage = computed({
+const nombreParPageComputed = computed({
   get: ()=> props.nbParPage,
   set: (newValueNbP) => emits('update:nbParPage', newValueNbP)
 })
 
-const page = computed({
+const pageComputed = computed({
   get: ()=> props.page,
   set: (newValue) => emits('update:page', newValue)
 })
 
-const paginationSize = computed({
+const paginationSizeComputed = computed({
   get: ()=> props.pageSize,
   set: (newValue) => emits('update:pageSize', newValue)
 })
@@ -77,7 +81,7 @@ const paginationSize = computed({
  */
 const handleChangeSelect = (e: any) => {
   const valeur = e.target;
-  nombreParPage.value = valeur.value;
+  nombreParPageComputed.value = valeur.value;
   return { nombreParPage: valeur.value, loading: true }
 }
 

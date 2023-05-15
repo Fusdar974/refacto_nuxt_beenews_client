@@ -59,13 +59,13 @@
                   color="red"
       ></v-checkbox>
       <div>
-        <v-btn v-if="mode === SHOW" color="primary" class="ma-1" variant="outlined" key="edit" @click="mode = EDIT">
-          Modifier
-        </v-btn>
         <v-btn v-if="mode === EDIT" color="primary" class="ma-1" variant="outlined" key="edit" @click="modifier">Valider
         </v-btn>
-        <v-btn v-if="mode === CREATE" color="primary" class="ma-1" variant="outlined" key="create" @click="creer">Créer
+        <v-btn v-else-if="mode === CREATE" color="primary" class="ma-1" variant="outlined" key="create" @click="creer">Créer
         </v-btn>
+        <v-btn v-else-if="mode === SHOW" color="primary" class="ma-1" variant="outlined" key="edit" @click="mode = EDIT">
+        Modifier
+      </v-btn>
         <v-btn color="primary" class="ma-1" variant="outlined" key="create" @click="fermer(null)">Fermer</v-btn>
       </div>
     </v-form>
@@ -109,7 +109,7 @@ const images: Ref<Array<File>> = ref([])
 const types: Ref<Array<TypeProduitInterface>> = ref([] as Array<TypeProduitInterface>)
 const {open: snackbarStoreOpen, message: snackbarStoreMessage} = storeToRefs(useSnackbarStore())
 const rules = {
-  nom: {required}, // Matches state.firstName
+  nom: {required},
   prix: {required},
   prixEuros: {required},
   nombre: {required},
