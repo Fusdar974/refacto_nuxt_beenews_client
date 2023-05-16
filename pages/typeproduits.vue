@@ -25,7 +25,7 @@
           </thead>
           <tbody>
             <tr v-for="type in types" :key="type._id">
-              <td>
+              <td >
                 <v-text-field
                   v-model="type.nom"
                   :rules="[(v) => !!v || 'Veuillez rentrer un nom']"
@@ -77,20 +77,21 @@
       <v-col cols="auto">
         <v-btn color="primary" @click="consoSoum()">Conso Soum</v-btn>
       </v-col>
-      <v-col>
-        <v-text-field
-          type="date"
-          v-model="dateDebutConsoSoum"
-          label="Date de début"
-        ></v-text-field>
+        <v-col cols="auto">
+          <v-text-field
+            type="date"
+            v-model="dateDebutConsoSoum"
+            label="Date de début"
+          ></v-text-field>
+        </v-col>
+        <v-col cols="auto">
+          <v-text-field
+            type="date"
+            v-model="dateFinConsoSoum"
+            label="Date de fin"
+          ></v-text-field>
       </v-col>
-      <v-col>
-        <v-text-field
-          type="date"
-          v-model="dateFinConsoSoum"
-          label="Date de fin"
-        ></v-text-field>
-      </v-col>
+
     </v-row>
     <v-row justify="space-between" align="start">
       <v-col cols="auto">
@@ -102,7 +103,7 @@
     </v-row>
 
     <v-row align="start">
-      <v-col>
+      <v-col cols="auto">
         <v-text-field
           type="number"
           v-model="nombreBnOfferts"
@@ -112,7 +113,7 @@
           ]"
         ></v-text-field>
       </v-col>
-      <v-col>
+      <v-col cols="auto">
         <v-select
           v-model="selectedReciever"
           :items="users"
@@ -136,12 +137,20 @@
       </v-col>
     </v-row>
     <v-row align="start">
-      <v-col>
+      <v-col cols="auto">
         <v-text-field
-          type="number"
+          type="text"
+          :rules="[
+              (v) => v !> 0 || 'Veuillez rentrer un nombre positif',
+          ]"
           v-model="valeurBn"
           @change="setValeurBN"
         ></v-text-field>
+      </v-col>
+      <v-col cols="auto" align-self="center">
+          <span v-if="typeof valeurBn && valeurBn > 0">
+            1 Bn = {{ valeurBn }}€
+          </span>
       </v-col>
     </v-row>
   </v-container>
@@ -154,6 +163,7 @@ import serverconfig from "~/serverconfig";
 import UserInterface from "~/interfaces/UserInterface";
 import TypeProduitInterface from "~/interfaces/TypeProduitInterface";
 import ValeurBnInterface from "~/interfaces/ValeurBnInterface";
+import {useSnackbarStore} from "~/stores/snackbarStore";
 
 const types: Ref<Array<TypeProduitInterface>> = ref([]);
 const dateDebutConsoSoum: Ref<Date> = ref(new Date());
@@ -223,7 +233,7 @@ function consoSoum() {
           fin: new Date(dateFinConsoSoum.value).getTime(),
         },
       },
-      (res: { ticket: any }) => {
+      (res: { ticket: string }) => {
         window.open(
           `${serverconfig}v1/pdf/consoSoum?token=${res.ticket}`,
           "_blanck"
@@ -246,6 +256,8 @@ function offrirBN() {
       },
       () => {
         nombreBnOfferts.value = 0;
+      }, (error: string) => {
+            useSnackbarStore(error)
       }
     );
   }
