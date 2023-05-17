@@ -236,4 +236,10 @@ onMounted(() => {
     animation: 1s clignotementFG linear infinite;
 }
 
+.centerCard {
+    width: 300px;
+    align-items: center;
+    align-self: center;
+}
+
 </style>
