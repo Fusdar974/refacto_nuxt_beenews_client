@@ -61,7 +61,8 @@
         <v-card-actions class="justify-center">
           <v-btn-group>
             <v-btn @click="handleSubmit"
-                   class="mt-2 couleur-or">Consommer</v-btn>
+                   color="secondary"
+                   class="mt-2">Consommer</v-btn>
             <v-btn @click="handleClose"
                    variant="outlined"
                    color="primary"

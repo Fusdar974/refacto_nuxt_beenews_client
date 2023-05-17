@@ -1,6 +1,6 @@
 <template>
-  <slot v-if="token"/>
-  <v-progress-linear v-else indeterminate :height="5"></v-progress-linear>
+    <slot v-if="token"/>
+    <v-progress-linear v-else indeterminate :height="5"></v-progress-linear>
 </template>
 
 <script setup lang="ts">

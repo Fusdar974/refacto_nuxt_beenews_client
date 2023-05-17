@@ -2,7 +2,7 @@
   <PrivateRoute>
     <div class="imageFond"></div>
     <v-container class="ma-1">
-        <v-row v-if="connecter">
+        <v-row v-if="isAuthenticated">
           <v-col cols="12" class="text-center">
             <h2>Bonjour {{user.nom}} {{user.prenom}}, tu as {{ user.compte }} BN(s) sur ton compte.</h2>
           </v-col>
@@ -22,12 +22,14 @@ import UserInterface from "~/interfaces/UserInterface";
 import Fetch from "~/services/FetchService";
 import UserResponseInterface from "~/interfaces/UserResponseInterface";
 import {onMounted} from "#imports";
+import {storeToRefs} from "pinia";
+import {useAuthenticateStore} from "~/stores/authenticateStore";
+import {useMenuStore} from "~/stores/menuStore";
 
-const props = defineProps({
-  authenticate: Boolean,
-})
+const {isAuthenticated} = storeToRefs(useAuthenticateStore())
+const {titleAppBar} = storeToRefs(useMenuStore())
+titleAppBar.value = 'Accueil'
 
-const connecter: Ref<boolean> = ref(false)
 const messageHumourMylene: Ref<string> =  ref('')
 const user: Ref<UserInterface> = ref({} as UserInterface)
 
@@ -56,7 +58,6 @@ const majUser = (id: string | null) => {
 }
 
 onMounted(()=>{
-  connecter.value = props.authenticate
   majUser(localStorage.getItem('idCompte'))
 })
 
