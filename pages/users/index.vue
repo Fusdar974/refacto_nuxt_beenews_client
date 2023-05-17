@@ -61,6 +61,8 @@ import ActionInterface from "~/interfaces/ActionInterface";
 import {watch} from "#imports";
 import AttributeInterface from "~/interfaces/AttributeInterface";
 import GenericTable from "~/components/GenericTable.vue";
+import {useDisplay} from "vuetify";
+import {Ref} from "vue";
 
 const loading : Ref<boolean> = ref(false)
   const users: Ref<Array<UserInterface> | null> = ref(null)
@@ -77,7 +79,11 @@ const loading : Ref<boolean> = ref(false)
   const champRecherche: Ref<string> = ref("")
   const message: Ref<string> = ref("")
   const attributes: Ref<Array<AttributeInterface>> = ref([{header: 'Nom', attr:'nom',},
-    {header: 'Prenom', attr: 'prenom'}, {header: 'BN', attr: 'compte'}, {header: 'Profils', attr: 'profils.nom'}] as Array<AttributeInterface>)
+    {header: 'Prenom', attr: 'prenom'}, {header: 'BN', attr: 'compte'}] as Array<AttributeInterface>)
+const attributesMdandUp: Ref<Array<AttributeInterface>> = ref([{header: 'Nom', attr:'nom',},
+  {header: 'Image', attr: 'image', isImage: true}, {header: 'Stock', attr: 'nombre'}, {header: 'Type', attr: 'type.nom'}] as Array<AttributeInterface>)
+
+const {mdAndUp} = useDisplay()
 
   /**
    * authenticate, booleén qui permet de savoir si l'utilisateur est authentifié
@@ -85,6 +91,11 @@ const loading : Ref<boolean> = ref(false)
   const props = defineProps({
     authenticate: Boolean,
   })
+
+/**
+ * Liste d'attributs à afficher en fonction de la taille de l'écran
+ */
+const attributesComputed = computed(() => mdAndUp.value ? attributesMdandUp.value : attributes.value)
 
   watch(page, () => recharger())
   watch(nombreParPage, () => recharger())

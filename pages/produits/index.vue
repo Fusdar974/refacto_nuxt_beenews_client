@@ -20,7 +20,7 @@
           </v-row>
         </v-row>
       </v-container>
-      <generic-table :objects="produits" :attributes="attributes" :actions-td="true"
+      <generic-table :objects="produits" :attributes="attributesComputed" :actions-td="true"
                      v-model:page-size="paginationSize" v-model:page="page" v-model:nb-par-page="nombreParPage"
                       :max-height-img="100" :max-width-img="200">
         <template v-slot:default="slotProps">
@@ -79,13 +79,16 @@ import TypeInterface from "~/interfaces/TypeProduitInterface";
 import ProduitsResponseInterface from "~/interfaces/ProduitsResponseInterface";
 import AttributeInterface from "~/interfaces/AttributeInterface";
 import serverconfig from "~/serverconfig";
+import {useDisplay} from "vuetify";
+import {Ref} from "vue";
 
 
 const loading : Ref<boolean> = ref(false)
 const produits: Ref<Array<ProduitInterface> | null> = ref(null)
 const nombreParPage: Ref<string>= ref('10')
 const types: Ref<Array<TypeInterface> >= ref([{}] as TypeInterface[])
-const attributes: Ref<Array<AttributeInterface>> = ref([{header: 'Nom', attr:'nom',},
+const attributes: Ref<Array<AttributeInterface>> = ref([{header: 'Nom', attr:'nom'},{header: 'Stock', attr: 'nombre'}] as Array<AttributeInterface>)
+const attributesMdandUp: Ref<Array<AttributeInterface>> = ref([{header: 'Nom', attr:'nom',},
   {header: 'Image', attr: 'image', isImage: true}, {header: 'Stock', attr: 'nombre'}, {header: 'Type', attr: 'type.nom'}] as Array<AttributeInterface>)
 const total: Ref<number> = ref(0)
 const page: Ref<number> = ref(1)
@@ -101,9 +104,16 @@ const props = defineProps({
   authenticate: Boolean,
 })
 
+const {mdAndUp} = useDisplay()
+
 watch(page, () => recharger())
 watch(nombreParPage, () => recharger())
 watch(champRecherche, () => recharger())
+
+/**
+ * Liste d'attributs à afficher en fonction de la taille de l'écran
+ */
+const attributesComputed = computed(() => mdAndUp.value ? attributesMdandUp.value : attributes.value)
 
 /**
  * recharge la liste des produits lorsque la page est créée
