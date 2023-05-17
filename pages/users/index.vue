@@ -31,7 +31,10 @@
                 <td>
                   <v-btn-group variant="tonal">
                     <v-btn @click="handleModifier($event,slotProps.obj._id)" class="ma-1"><v-icon icon="mdi mdi_small mdi-pencil"></v-icon></v-btn>
-                    <v-btn v-if="slotProps.obj.supprimable" @click="handleSupprimer($event, slotProps.obj._id)" class="ma-1"><v-icon icon="mdi mdi_small mdi-delete"></v-icon></v-btn>
+                    <v-btn v-if="(slotProps.obj as UserInterface).supprimable"
+                           @click="handleSupprimer($event, slotProps.obj._id)" class="ma-1">
+                        <v-icon icon="mdi mdi_small mdi-delete"></v-icon>
+                    </v-btn>
                   </v-btn-group>
                 </td>
               </template>

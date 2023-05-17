@@ -46,23 +46,30 @@ import AttributeInterface from "~/interfaces/AttributeInterface";
 import reachDepth from "../functions/reachDepth";
 import serverconfig from "~/serverconfig";
 import {useRouter} from "#app";
+import GenericInterface from "~/interfaces/GenericInterface";
 
-const props = defineProps( {
-  objects: {type: Object  as () => Array<Object>, required: true},
-  attributes: {type: Object as () => AttributeInterface[], required: true},
-  actionsTd: {type: Boolean, default: false},
-  nbParPage: {type: Number, required: true},
-  page: {type: Number, required: true},
-  pageSize: {type: Number, required: true},
-  maxHeightImg: {type: Number, default: 200},
-  maxWidthImg: {type: Number, default: 200},
+interface PropsInterface {
+    objects: Array<GenericInterface>
+    attributes: AttributeInterface[]
+    actionsTd?: boolean
+    nbParPage: string
+    page: number
+    pageSize: number
+    maxHeightImg?: number
+    maxWidthImg?: number
+}
+
+const props = withDefaults(defineProps<PropsInterface>(), {
+    actionsTd: false,
+    maxHeightImg: 200,
+    maxWidthImg: 200
 })
 
 const emits = defineEmits(['update:nbParPage', 'update:page', 'update:pageSize'])
 
 const nombreParPageComputed = computed({
-  get: ()=> props.nbParPage,
-  set: (newValueNbP) => emits('update:nbParPage', newValueNbP)
+    get: () => props.nbParPage,
+    set: (newValueNbP) => emits('update:nbParPage', newValueNbP)
 })
 
 const pageComputed = computed({

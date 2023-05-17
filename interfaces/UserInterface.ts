@@ -1,7 +1,7 @@
 import ProfilInterface from "~/interfaces/ProfilInterface";
-import exp from "constants";
+import GenericInterface from "~/interfaces/GenericInterface";
 
-interface UserInterface {
+interface UserInterface extends GenericInterface {
     compte: number
     isDesactive: boolean
     mail: string
@@ -11,7 +11,6 @@ interface UserInterface {
     profils: Array<ProfilInterface>
     supprimable: boolean
     surnom: string
-    _id?: string
 }
 
 export default UserInterface

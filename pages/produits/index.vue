@@ -83,13 +83,20 @@ import {useDisplay} from "vuetify";
 import {Ref} from "vue";
 
 
-const loading : Ref<boolean> = ref(false)
-const produits: Ref<Array<ProduitInterface> | null> = ref(null)
-const nombreParPage: Ref<string>= ref('10')
-const types: Ref<Array<TypeInterface> >= ref([{}] as TypeInterface[])
-const attributes: Ref<Array<AttributeInterface>> = ref([{header: 'Nom', attr:'nom'},{header: 'Stock', attr: 'nombre'}] as Array<AttributeInterface>)
-const attributesMdandUp: Ref<Array<AttributeInterface>> = ref([{header: 'Nom', attr:'nom',},
-  {header: 'Image', attr: 'image', isImage: true}, {header: 'Stock', attr: 'nombre'}, {header: 'Type', attr: 'type.nom'}] as Array<AttributeInterface>)
+const loading: Ref<boolean> = ref(false)
+const produits: Ref<Array<ProduitInterface>> = ref([])
+const nombreParPage: Ref<string> = ref('10')
+const types: Ref<Array<TypeInterface>> = ref([{}] as TypeInterface[])
+
+const attributes: Ref<Array<AttributeInterface>> = ref([
+    {header: 'Nom', attr: 'nom'},
+    {header: 'Stock', attr: 'nombre'}] as Array<AttributeInterface>)
+const attributesMdandUp: Ref<Array<AttributeInterface>> = ref([
+    {header: 'Nom', attr: 'nom'},
+    {header: 'Image', attr: 'image', isImage: true},
+    {header: 'Stock', attr: 'nombre'},
+    {header: 'Type', attr: 'type.nom'}] as Array<AttributeInterface>)
+
 const total: Ref<number> = ref(0)
 const page: Ref<number> = ref(1)
 const paginationSize: Ref<number> = ref(1)
