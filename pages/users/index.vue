@@ -21,7 +21,7 @@
           </v-row>
         </v-container>
           <div v-if="!loading" class="maxW1000" >
-            <generic-table :objects="users" :attributes="attributes" :actions-td="true"
+            <generic-table :objects="users" :attributes="attributesComputed" :actions-td="true"
                            v-model:page-size="paginationSize" v-model:page="page" v-model:nb-par-page="nombreParPage">
               <template v-slot:default="slotProps">
                 <td>
@@ -81,7 +81,7 @@ const loading : Ref<boolean> = ref(false)
   const attributes: Ref<Array<AttributeInterface>> = ref([{header: 'Nom', attr:'nom',},
     {header: 'Prenom', attr: 'prenom'}, {header: 'BN', attr: 'compte'}] as Array<AttributeInterface>)
 const attributesMdandUp: Ref<Array<AttributeInterface>> = ref([{header: 'Nom', attr:'nom',},
-  {header: 'Image', attr: 'image', isImage: true}, {header: 'Stock', attr: 'nombre'}, {header: 'Type', attr: 'type.nom'}] as Array<AttributeInterface>)
+  {header: 'Prenom', attr: 'prenom'}, {header: 'BN', attr: 'compte'}, {header: "Profils", attr: "profils.nom"}] as Array<AttributeInterface>)
 
 const {mdAndUp} = useDisplay()
 
