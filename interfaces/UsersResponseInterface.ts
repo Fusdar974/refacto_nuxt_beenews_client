@@ -1,11 +1,9 @@
 import UserInterface from "~/interfaces/UserInterface";
 
-
-interface UsersResponseInterface{
-    documents: UserInterface[],
-    nombre: number,
-    page: number,
-    total: number,
+interface  UsersResponseInterface{
+    documents:Array<UserInterface>
+    nombre: number
+    page: number
+    total: number
 }
-
 export default UsersResponseInterface

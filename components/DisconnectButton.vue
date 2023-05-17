@@ -10,7 +10,7 @@
 </template>
 
 <script setup lang="ts">
-import LoginForm from "~/components/LoginForm.vue";
+import LoginForm from "~/forms/LoginForm.vue";
 
 const props = defineProps({
   foncDeco: {type: Function, required: true},
