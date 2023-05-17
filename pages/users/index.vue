@@ -67,7 +67,7 @@ import {useMenuStore} from "~/stores/menuStore";
 import {useSnackbarStore} from "~/stores/snackbarStore";
 
 const loading: Ref<boolean> = ref(false)
-const users: Ref<Array<UserInterface> | null> = ref(null)
+const users: Ref<Array<UserInterface>> = ref([])
 const nombreParPage: Ref<string> = ref('10')
 const total: Ref<number> = ref(0)
 const page: Ref<number> = ref(1)

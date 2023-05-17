@@ -250,7 +250,7 @@ const paiementEnCoursComputed = computed(() =>
 /** Chargement des données après le montage du composant dans le dom */
 onMounted(() => {
     Fetch.requete({url: '/parametre/valeurBN', method: 'GET'}, (resultBN: ValeurBNResponseInterface) => {
-        valeurPoint.value = resultBN.valeur
+        valeurPoint.value = Number(resultBN.valeur)
     })
 
     Fetch.requete({

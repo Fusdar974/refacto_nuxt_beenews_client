@@ -1,5 +1,5 @@
 <template>
-    <div v-if="mdAndUp">
+    <v-col cols="12" v-if="mdAndUp">
         <v-row>
             <v-col cols="2">
                 Nom
@@ -18,7 +18,7 @@
             </v-col>
         </v-row>
         <slot/>
-    </div>
+    </v-col>
     <v-expansion-panels v-else
                         v-model="panel"
                         multiple>
