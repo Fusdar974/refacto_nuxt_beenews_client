@@ -1,11 +1,11 @@
 import TypeProduitInterface from "~/interfaces/TypeProduitInterface";
+import GenericInterface from "~/interfaces/GenericInterface";
 
-interface ProduitInterface{
-    _id?: string
+interface ProduitInterface extends GenericInterface {
     nom: string
     image: string
     imageBnr?: string | ArrayBuffer
-    type: TypeProduitInterface|string
+    type: TypeProduitInterface | string
     prix: number
     prixEuros: number
     nombre: number

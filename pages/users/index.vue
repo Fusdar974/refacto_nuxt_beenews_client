@@ -22,7 +22,7 @@
         </v-container>
           <div v-if="!loading" class="maxW1000" >
             <generic-table :objects="users"
-                           :attributes="attributes"
+                           :attributes="attributesComputed"
                            :actions-td="true"
                            v-model:page-size="paginationSize"
                            v-model:page="page"
@@ -31,7 +31,10 @@
                 <td>
                   <v-btn-group variant="tonal">
                     <v-btn @click="handleModifier($event,slotProps.obj._id)" class="ma-1"><v-icon icon="mdi mdi_small mdi-pencil"></v-icon></v-btn>
-                    <v-btn v-if="slotProps.obj.supprimable" @click="handleSupprimer($event, slotProps.obj._id)" class="ma-1"><v-icon icon="mdi mdi_small mdi-delete"></v-icon></v-btn>
+                    <v-btn v-if="(slotProps.obj as UserInterface).supprimable"
+                           @click="handleSupprimer($event, slotProps.obj._id)" class="ma-1">
+                        <v-icon icon="mdi mdi_small mdi-delete"></v-icon>
+                    </v-btn>
                   </v-btn-group>
                 </td>
               </template>
@@ -65,6 +68,8 @@ import {watch} from "#imports";
 import {storeToRefs} from "pinia";
 import {useMenuStore} from "~/stores/menuStore";
 import {useSnackbarStore} from "~/stores/snackbarStore";
+import {useDisplay} from "vuetify";
+import {Ref} from "vue";
 
 const loading: Ref<boolean> = ref(false)
 const users: Ref<Array<UserInterface>> = ref([])
@@ -77,8 +82,11 @@ const identifiantASupp: Ref<string> = ref("")
 const champRecherche: Ref<string> = ref("")
 
 const attributes: Ref<Array<AttributeInterface>> = ref([{header: 'Nom', attr:'nom',},
-    {header: 'Prenom', attr: 'prenom'}, {header: 'BN', attr: 'compte'}, {header: 'Profils', attr: 'profils.nom'}] as Array<AttributeInterface>)
+    {header: 'Prenom', attr: 'prenom'}, {header: 'BN', attr: 'compte'}] as Array<AttributeInterface>)
+const attributesMdandUp: Ref<Array<AttributeInterface>> = ref([{header: 'Nom', attr:'nom',},
+    {header: 'Prenom', attr: 'prenom'}, {header: 'BN', attr: 'compte'}, {header: "Profils", attr: "profils.nom"}] as Array<AttributeInterface>)
 
+const {mdAndUp} = useDisplay()
 
   const {
       open: snackbarStoreOpen,
@@ -87,6 +95,11 @@ const attributes: Ref<Array<AttributeInterface>> = ref([{header: 'Nom', attr:'no
 
   const {titleAppBar} = storeToRefs(useMenuStore())
   titleAppBar.value = 'Clients'
+
+/**
+ * Liste d'attributs à afficher en fonction de la taille de l'écran
+ */
+const attributesComputed = computed(() => mdAndUp.value ? attributesMdandUp.value : attributes.value)
 
   watch(page, () => recharger())
   watch(nombreParPage, () => recharger())
