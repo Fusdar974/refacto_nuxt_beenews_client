@@ -10,9 +10,7 @@
 <script setup lang="ts">
 import ArticlePotInterface from "~/interfaces/potsInterfaces/ArticlePotInterface"
 import ProduitInterface from "~/interfaces/ProduitInterface"
-import {SymbolKind} from "vscode-languageserver-types";
 import ProduitsListFilterInterface from "~/interfaces/ProduitsListFilterInterface";
-import Array = SymbolKind.Array;
 
 const props = defineProps({
     modelValue: {type: Object as () => Array<ArticlePotInterface>, required: true},
