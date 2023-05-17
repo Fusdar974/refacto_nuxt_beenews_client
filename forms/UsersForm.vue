@@ -84,7 +84,7 @@ import {useMenuStore} from "~/stores/menuStore";
 
 const SHOW = 'show'
 const EDIT = 'edit'
-const CREATE = 'create'
+const CREATE = 'add'
 
 /**
  * userId : l'id de l'utilisateur à consulter/modifier
@@ -113,10 +113,17 @@ const rules = {
 
 const v$ = useVuelidate(rules, selectedUser)//valide si les propriétées de selectedUser respectent les règles
 
-// détermine le titre à afficher dans le appBar
-titleAppBar.value = props.action === 'edit' && "Modification du client"
-    || props.action === 'add' && "Ajout d'un client"
-    || "Informations du client"
+watch(mode, () => majTitle())
+
+/**
+ * détermine le titre à afficher dans le appBar
+ */
+const majTitle = () => {
+  titleAppBar.value = mode.value === 'edit' && "Modification du client"
+      || mode.value === 'add' && "Ajout d'un client"
+      || "Informations du client"
+}
+
 
 /**
  * avant que la page soit montée dans le DOM
@@ -124,6 +131,7 @@ titleAppBar.value = props.action === 'edit' && "Modification du client"
  * sinon, créé un utilisateur vide
  */
 onBeforeMount(() => {
+  majTitle()
     if (mode.value !== CREATE) {
         Fetch.requete({url: `/users/${props.userId}`, method: 'GET'}, (resultUser: UserResponseInterface) => {
             selectedUser.value = resultUser.user

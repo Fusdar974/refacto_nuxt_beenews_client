@@ -117,12 +117,15 @@ const rules = {
     type: {required},
 }
 
+watch(mode, () => majTitle())
+
 const v$ = useVuelidate(rules, selectedProduit)//valide si les propriétées de selectedUser respectent les règles
 
-// détermine le titre à afficher dans le appBar
-titleAppBar.value = props.action === 'edit' && "Modification du produit"
-    || props.action === 'add' && "Ajout d'un produit"
-    || "Informations du produit"
+const majTitle = () => {
+  titleAppBar.value = mode.value === 'edit' && "Modification du produit"
+      || mode.value === 'add' && "Ajout d'un produit"
+      || "Informations du produit"
+}
 
 
 watch(images, newImages => {
@@ -150,6 +153,7 @@ watch(selectedProduit, newValue => console.log(newValue))
  * sinon, créé un produit vide
  */
 onBeforeMount(() => {
+  majTitle()
   if (mode.value !== CREATE) {
     Fetch.requete({url: `/produits/${props.produitId}`, method: 'GET'}, (resultProduits: ProduitResponseInterface) => {
       selectedProduit.value = resultProduits.produit
