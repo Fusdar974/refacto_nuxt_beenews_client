@@ -331,7 +331,8 @@ const getValeurBn = () => {
   Fetch.requete(
     { url: "/parametre/valeurBN", method: "GET" },
     (resultat: ValeurBnInterface) => {
-      valeurBnActuelle.value = resultat.valeur;
+      valeurBnActuelle.value = resultat.valeur
+      valeurBn.value = resultat.valeur
     },() => {
           putSnackBarMessage("erreur serveur lors de la récupération de la valeur du BN","error")
       }
