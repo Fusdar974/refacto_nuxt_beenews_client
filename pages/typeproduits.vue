@@ -272,7 +272,7 @@ function offrirBN() {
         },
       },
       () => {
-          putSnackBarMessage("transaction efféctuée","success")
+          putSnackBarMessage("transaction effectuée")
         nombreBnOfferts.value = 1;
       }, () => {
             putSnackBarMessage("erreur serveur","error")
