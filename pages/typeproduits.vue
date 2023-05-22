@@ -298,7 +298,7 @@ function setValeurBN() {
               valeur: valeurBn.value,
           },
       }, () => {
-          putSnackBarMessage("valeur BN modifiée","success")
+          putSnackBarMessage("valeur BN modifiée")
           valeurBnActuelle.value = valeurBn.value
       }, () => {
           putSnackBarMessage("erreur serveur","error")
