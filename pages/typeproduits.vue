@@ -185,7 +185,7 @@ async function modifierType(type: TypeProduitInterface) {
       method: "PUT",
       data: { typeproduit: type },
     },() => {
-      putSnackBarMessage("type modifié","success")
+      putSnackBarMessage("type modifié")
     },() => {
         putSnackBarMessage("erreur serveur","error")
     });
