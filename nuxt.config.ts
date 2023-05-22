@@ -1,4 +1,4 @@
-import { defineNuxtConfig } from 'nuxt/config'
+import {defineNuxtConfig} from 'nuxt/config'
 import vuetify from 'vite-plugin-vuetify'
 
 // https://v3.nuxtjs.org/api/configuration/nuxt.config
@@ -14,6 +14,12 @@ export default defineNuxtConfig({
         transpile: ['vuetify'],
     },
     vite: {
+        vue: {
+            script: {
+                defineModel: true,
+                propsDestructure: true,
+            },
+        },
         // @ts-ignore
         // curently this will lead to a type error, but hopefully will be fixed soon #justBetaThings
         ssr: {
