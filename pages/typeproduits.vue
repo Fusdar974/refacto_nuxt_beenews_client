@@ -1,5 +1,7 @@
+
 <template>
-  <v-container>
+    <private-route>
+      <v-container>
     <v-row justify="space-between" align="start">
       <v-col cols="auto">
         <v-sheet class="pa-2 ma-2">
@@ -80,14 +82,14 @@
         <v-col cols="auto">
           <v-text-field
             type="date"
-            v-model="dateDebutConsoSoum"
+            v-model="dateDebutConsoSoumComputed"
             label="Date de début"
           ></v-text-field>
         </v-col>
         <v-col cols="auto">
           <v-text-field
             type="date"
-            v-model="dateFinConsoSoum"
+            v-model="dateFinConsoSoumComputed"
             label="Date de fin"
           ></v-text-field>
       </v-col>
@@ -137,7 +139,10 @@
       </v-col>
     </v-row>
     <v-row align="start">
-      <v-col cols="auto">
+        <v-col
+                cols="auto"
+                sm="4"
+        >
         <v-text-field
           type="number"
           min="0"
@@ -149,14 +154,13 @@
           label="modifier"
           @change="setValeurBN"
         ></v-text-field>
-      </v-col>
-      <v-col cols="auto" align-self="center">
           <span v-if="typeof valeurBnActuelle && valeurBnActuelle > 0">
             Actuellement 1 Bn équivaut à {{ valeurBnActuelle }}€
           </span>
       </v-col>
     </v-row>
   </v-container>
+    </private-route>
 </template>
 
 <script setup lang="ts">
@@ -169,14 +173,40 @@ import ValeurBnInterface from "~/interfaces/ValeurBnInterface";
 import {useSnackbarStore} from "~/stores/snackbarStore";
 
 const types: Ref<Array<TypeProduitInterface>> = ref([]);
-const dateDebutConsoSoum: Ref<Date> = ref(new Date());
-const dateFinConsoSoum: Ref<Date> = ref(new Date());
+const dateDebutConsoSoum: Ref<string> = ref(new Date().toISOString());
+const dateFinConsoSoum: Ref<string> = ref(new Date().toISOString());
 const users: Ref<Array<UserInterface>> = ref([]);
 const selectedReciever: Ref<UserInterface | undefined> = ref();
 const nombreBnOfferts: Ref<number> = ref(1);
 const valeurBnActuelle: Ref<number> = ref(0);
 const valeurBn: Ref<number> = ref(valeurBnActuelle.value);
 const {putSnackBarMessage} = useSnackbarStore()
+
+function formatDate(date: string): string {
+    const dateToFormat = new Date(date)
+    const day = dateToFormat.getDate()
+    const month = dateToFormat.getMonth() + 1
+    const year = dateToFormat.getFullYear()
+
+    return `${year}-${month < 10 ? '0' : ''}${month}-${day < 10 ? '0' : ''}${day}`
+}
+
+const dateDebutConsoSoumComputed = computed({
+    get: () => {
+        return formatDate(dateDebutConsoSoum.value);
+    },
+    set: newDateFromTextField => {
+        dateDebutConsoSoum.value = new Date(newDateFromTextField).toISOString()
+    }
+})
+const dateFinConsoSoumComputed = computed({
+    get: () => {
+        return formatDate(dateFinConsoSoum.value);
+    },
+    set: newDateFromTextField => {
+        dateFinConsoSoum.value = new Date(newDateFromTextField).toISOString()
+    }
+})
 
 async function modifierType(type: TypeProduitInterface) {
   if (type.nom !== "") {
