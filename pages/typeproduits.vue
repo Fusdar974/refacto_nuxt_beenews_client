@@ -139,7 +139,9 @@
     <v-row align="start">
       <v-col cols="auto">
         <v-text-field
-          type="text"
+          type="number"
+          min="0"
+          step="0.01"
           :rules="[
               (v) => v !> 0 || 'Veuillez rentrer un nombre positif',
           ]"
