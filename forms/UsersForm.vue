@@ -1,6 +1,6 @@
 <template>
     <div>
-        <v-form v-if="selectedUser" :disabled="mode === SHOW">
+        <v-form v-if="selectedUser" :disabled="mode === SHOW" class="ma-3">
             <v-text-field v-model="selectedUser.nom" type="text" label="nom"
                           :error-messages="v$.nom.$errors.map(e => e.$message) as string[]"
                           required

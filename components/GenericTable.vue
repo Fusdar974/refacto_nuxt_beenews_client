@@ -3,7 +3,11 @@
   <v-table density="compact" :hover="true">
     <thead>
     <tr>
-      <th v-for="(attrs, index) in attributes " :key="index" class="text-center">{{attrs.header}}</th>
+      <th v-for="(attrs, index) in attributes " :key="index" class="text-center">
+        {{attrs.header}}
+        <v-btn v-if="attrs.isSortable" size="x-small" @click="handleSortDesc(attrs)">up</v-btn>
+        <v-btn v-if="attrs.isSortable"  @click="handleSortDesc(attrs)" size="x-small">down</v-btn>
+        </th>
       <th v-if="actionsTd">Actions</th>
     </tr>
     </thead>
@@ -90,6 +94,18 @@ const handleChangeSelect = (e: any) => {
   const valeur = e.target;
   nombreParPageComputed.value = valeur.value;
   return { nombreParPage: valeur.value, loading: true }
+}
+
+const handleSortDesc = (attr: AttributeInterface) => {
+  if(typeof reachDepth(attr.attr,props.objects[0]) === ""){
+
+  }
+}
+
+const handleSortASC = (attr: AttributeInterface) => {
+  if(typeof reachDepth(attr.attr,props.objects[0]) === ""){
+
+  }
 }
 
 </script>

@@ -4,23 +4,19 @@
         <v-container class="maxW1000 align-center align-content-lg-space-between ma-3">
           <v-row>
             <v-col>
-              <h3 class="d-lg-none">Clients </h3>
-              <h1 class="d-none d-lg-block">Clients</h1>
+              <v-btn variant="tonal"
+                     color="primary"
+                     @click="navigateTo('/users/add')">Créer</v-btn>
             </v-col>
-            <v-row>
-              <v-col>
+            <v-col>
                 <v-text-field
                               name="champderecherche"
                               v-model="champRecherche"
                               append-inner-icon="mdi:mdi-magnify"/>
-                <v-btn variant="tonal"
-                       color="primary"
-                       @click="navigateTo('/users/add')">Créer</v-btn>
-              </v-col>
-            </v-row>
+            </v-col>
           </v-row>
         </v-container>
-          <div v-if="!loading" class="maxW1000" >
+          <div v-if="!loading" class="maxW1000 ma-3" >
             <generic-table :objects="users"
                            :attributes="attributesComputed"
                            :actions-td="true"
