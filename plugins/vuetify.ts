@@ -1,15 +1,15 @@
 import {createVuetify} from "vuetify"
 import * as components from "vuetify/components"
 import * as directives from "vuetify/directives"
-import { aliases, fa } from 'vuetify/iconsets/fa'
-import { mdi } from 'vuetify/iconsets/mdi'
+import {aliases, fa} from 'vuetify/iconsets/fa'
+import {mdi} from 'vuetify/iconsets/mdi'
 
 const BeeNewsLightTheme = {
     dark: false,
     colors: {
         background: '#FFFFFF',
         surface: '#FFFFFF',
-        primary: '#6200EE',
+        primary: '#3f51b5',
         'primary-darken-1': '#3700B3',
         secondary: '#ffce1c',
         'secondary-darken-1': '#CE9e0c',

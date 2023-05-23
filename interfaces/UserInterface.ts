@@ -1,17 +1,16 @@
 import ProfilInterface from "~/interfaces/ProfilInterface";
-import exp from "constants";
+import GenericInterface from "./GenericInterface";
 
-interface UserInterface {
-    compte: number
+interface UserInterface extends GenericInterface {
+    compte?: number
     isDesactive: boolean
     mail: string
     nom: string
     password: string
     prenom: string
-    profils: Array<ProfilInterface>
+    profils?: Array<ProfilInterface>
     supprimable: boolean
-    surnom: string
-    _id?: string
+    surnom?: string
 }
 
 export default UserInterface
