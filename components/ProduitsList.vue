@@ -62,6 +62,7 @@ const isShownArticle = (article: ArticlePotInterface) => {
 const inputValue = computed({
     get: () => props.modelValue,
     set: newValue => emits('update:modelValue', newValue)
+
 })
 
 watch(() => [...articles.value], newValue => {

@@ -1,9 +1,4 @@
 <template>
-    <v-select v-model="panier.utilisateur"
-              :items="users"
-              :item-title="(user) => `${user.nom}  ${user.prenom}`"
-              return-object
-              label="Client"/>
     <v-container>
         <v-row>
             <v-col>
@@ -23,86 +18,12 @@
                 <!--                Pas d'articles sélectionnés.-->
                 <!--            </v-alert>-->
             </v-col>
-            <v-menu
-                    v-model="menu"
-                    :close-on-content-click="false"
-                    location="end"
-            >
-                <template v-slot:activator="{ props }">
-                    <v-btn
-                            color="indigo"
-                            v-bind="props"
-                            icon="mdi:mdi-cart"
-                    />
-                </template>
-
-                <v-card min-width="400">
-                    <v-list>
-                        <v-list-item
-                                prepend-avatar="/192.png"
-                                :title="stepPaiement?'Paiement panier':'Total panier'"
-                                subtitle="Soum"
-                        >
-                            <!--                        <template v-slot:append>-->
-                            <!--                            <v-btn-->
-                            <!--                                    variant="text"-->
-                            <!--                                    :class="fav ? 'text-red' : ''"-->
-                            <!--                                    icon="mdi:mdi-content-save"-->
-                            <!--                                    @click="fav = !fav"-->
-                            <!--                            ></v-btn>-->
-                            <!--                        </template>-->
-                        </v-list-item>
-                    </v-list>
-                    <v-divider></v-divider>
-                    <div v-if="panier.articles.length === 0">Pas d'article dans le panier.</div>
-                    <v-list v-else-if="!stepPaiement">
-                        <v-list-item v-for="(article, index) in panier.articles"
-                                     :key="index"
-                        >
-                            <v-container>
-                                <v-row class="align-center justify-space-between">
-                                    {{ `${article.quantite}x ${article.nom}` }}
-                                    <v-btn-group>
-                                        <v-btn icon="mdi:mdi-plus"/>
-                                        <v-btn icon="mdi:mdi-minus"/>
-                                        <v-btn icon="mdi:mdi-delete"/>
-                                    </v-btn-group>
-                                </v-row>
-                            </v-container>
-                        </v-list-item>
-                    </v-list>
-                    <v-list v-else>
-                        <v-list-item>
-
-                        </v-list-item>
-                    </v-list>
-
-                    <v-card-actions>
-                        <v-spacer></v-spacer>
-
-                        <v-btn
-                                variant="text"
-                                @click="menu = false"
-                        >
-                            Cancel
-                        </v-btn>
-                        <v-btn
-                                color="primary"
-                                variant="text"
-                                @click="()=> stepPaiement?'':stepPaiement=true "
-                        >
-                            Save
-                        </v-btn>
-                    </v-card-actions>
-                </v-card>
-            </v-menu>
         </v-row>
         <v-row>
             <v-col>
                 <div v-if="produitToScreen.length === 0" class="imageFondChargement"/>
                 <div v-else>
-                    <produits-list :key="panier"
-                                   v-model="panier.articles"
+                    <produits-list v-model="articles"
                                    :filters="[
                                                    {by:'type._id', value:filtre as string},
                                                    ] as Array<ProduitsListFilterInterface>"
@@ -119,34 +40,14 @@ import TypeProduitInterface from "~/interfaces/TypeProduitInterface";
 import UserInterface from "~/interfaces/UserInterface";
 import ProduitInterface from "~/interfaces/ProduitInterface";
 import Fetch from "~/services/FetchService";
-import UsersResponseInterface from "~/interfaces/UsersResponseInterface";
-import ValeurBNResponseInterface from "~/interfaces/ValeurBNResponseInterface";
 import ProduitsListFilterInterface from "~/interfaces/ProduitsListFilterInterface";
 import {useMenuStore} from "~/stores/menuStore";
 import {storeToRefs} from "pinia";
 import {useSnackbarStore} from "~/stores/snackbarStore";
-import ArticlePotInterface from "~/interfaces/potsInterfaces/ArticlePotInterface";
-
-interface PanierSoumInterface {
-    articles: Array<ArticlePotInterface>
-    utilisateur?: UserInterface
-    paiementCompte: number
-    paiementCheque: number
-    paiementEspece: number
-    paiementVirement: number
-    rendreMonnaie: number
-}
+import {usePanierStore} from "~/stores/panierStore";
 
 /** REFS */
-const panier = ref<PanierSoumInterface>({
-    articles: [],
-    utilisateur: undefined,
-    paiementCompte: 0,
-    paiementCheque: 0,
-    paiementEspece: 0,
-    paiementVirement: 0,
-    rendreMonnaie: 0,
-})
+
 const users = ref<Array<UserInterface>>([])
 const typeproduits = ref<Array<TypeProduitInterface>>([])
 const produitToScreen = ref<Array<ProduitInterface>>([])
@@ -164,6 +65,9 @@ const stepPaiement = ref<boolean>(false)
 /** Gestion du Titre dans l'APPBAR*/
 const {titleAppBar} = storeToRefs(useMenuStore())
 titleAppBar.value = "Soum"
+
+const {articles, utilisateur} = storeToRefs(usePanierStore())
+
 
 /** Gestion du message success or error de App.vue */
 const {
@@ -183,10 +87,6 @@ const {
 
 /** Chargement des données après le montage du composant dans le dom */
 onMounted(() => {
-    Fetch.requete({url: '/parametre/valeurBN', method: 'GET'}, (resultBN: ValeurBNResponseInterface) => {
-        valeurPoint.value = Number(resultBN.valeur)
-    })
-
     Fetch.requete({
         url: '/typeproduits',
         method: 'POST',
@@ -202,15 +102,7 @@ onMounted(() => {
             produitToScreen.value = produitsWithStock.concat(produitsWithoutStock)
         })
     })
-    Fetch.requete({
-        url: '/users',
-        data: {page: 1, nombre: 1000, isDesactive: false}
-    }, (resultUtil: UsersResponseInterface) => {
-        users.value = resultUtil.documents
-    })
 })
-
-watch(() => panier.value.articles, nv => console.log(nv))
 
 // const loading: Ref<boolean> = ref(false)
 // const openDialog: Ref<boolean> = ref(false)
