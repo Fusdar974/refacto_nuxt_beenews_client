@@ -11,7 +11,7 @@
       </v-col>
       <v-col cols="auto">
         <v-sheet class="pa-2 ma-2">
-          <v-btn color="pink" @click="ajouterType()"> + CRÉER </v-btn>
+          <v-btn color="primary" variant="flat" append-icon="mdi:mdi-plus" @click="ajouterType()">CRÉER</v-btn>
         </v-sheet>
       </v-col>
     </v-row>
@@ -38,14 +38,14 @@
                 <v-checkbox
                   v-model="type.proposablePot"
                   @change="modifierType(type)"
-                  color="pink"
+                  color="primary"
                 ></v-checkbox>
               </td>
               <td>
                 <v-checkbox
                   v-model="type.proposableSoum"
                   @change="modifierType(type)"
-                  color="pink"
+                  color="primary"
                 ></v-checkbox>
               </td>
               <td v-if="type.nombreProduits >= 1">
@@ -53,7 +53,7 @@
               </td>
               <td v-if="type.nombreProduits < 1">
                 <v-btn
-                  color="pink"
+                  color="primary"
                   icon="mdi:mdi-delete"
                   @click="supprimerType(type._id)"
                 >
@@ -171,6 +171,8 @@ import UserInterface from "~/interfaces/UserInterface";
 import TypeProduitInterface from "~/interfaces/TypeProduitInterface";
 import ValeurBnInterface from "~/interfaces/ValeurBnInterface";
 import {useSnackbarStore} from "~/stores/snackbarStore";
+import {storeToRefs} from "pinia";
+import {useMenuStore} from "~/stores/menuStore";
 
 const types: Ref<Array<TypeProduitInterface>> = ref([]);
 const dateDebutConsoSoum: Ref<string> = ref(new Date().toISOString());
@@ -180,8 +182,10 @@ const selectedReciever: Ref<UserInterface | undefined> = ref();
 const nombreBnOfferts: Ref<number> = ref(1);
 const valeurBnActuelle: Ref<number> = ref(0);
 const valeurBn: Ref<number> = ref(valeurBnActuelle.value);
-const {putSnackBarMessage} = useSnackbarStore()
 
+const {putSnackBarMessage} = useSnackbarStore()
+const {titleAppBar} = storeToRefs(useMenuStore())
+titleAppBar.value = "Paramètres"
 function formatDate(date: string): string {
     const dateToFormat = new Date(date)
     const day = dateToFormat.getDate()

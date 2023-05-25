@@ -1,23 +1,39 @@
 <template>
   <private-route>
-    <div>
-      <v-container class="maxW1000 align-center align-content-lg-space-between ma-3">
-        <v-row>
-          <v-col>
-            <h3 class="d-lg-none">Stock </h3>
-            <h1 class="d-none d-lg-block">Stock</h1>
+    <div class="ma-3">
+      <v-container class="hidden-sm-and-down">
+        <v-row class="justify-space-between ">
+          <v-col cols="5">
+            <v-text-field
+                name="champderecherche"
+                density="compact"
+                variant="outlined"
+                v-model="champRecherche"
+                append-inner-icon="mdi:mdi-magnify"/>
           </v-col>
-          <v-row>
-            <v-col>
-              <v-text-field
-                  name="champderecherche"
-                  v-model="champRecherche"
-                  append-inner-icon="mdi:mdi-magnify"/>
-              <v-btn variant="tonal"
-                     color="primary"
-                     @click="navigateTo('/produits/add')">Créer</v-btn>
-            </v-col>
-          </v-row>
+          <v-col cols="3" class="text-end">
+            <v-btn variant="flat"
+                   color="secondary"
+                   prepend-icon="mdi:mdi-plus"
+                   @click="navigateTo('/produits/add')">Créer</v-btn>
+          </v-col>
+        </v-row>
+      </v-container>
+      <v-container sm class="hidden-md-and-up">
+        <v-row class="justify-space-between">
+          <v-text-field
+              name="champderecherche"
+              density="compact"
+              variant="outlined"
+              v-model="champRecherche"
+              append-inner-icon="mdi:mdi-magnify"/>
+        </v-row>
+        <v-row class="text-end">
+          <v-btn variant="flat"
+                 class="w-100"
+                 color="secondary"
+                 prepend-icon="mdi:mdi-plus"
+                 @click="navigateTo('/produits/add')">Créer</v-btn>
         </v-row>
       </v-container>
       <generic-table :objects="produits" :attributes="attributesComputed" :actions-td="true"
@@ -81,6 +97,9 @@ import AttributeInterface from "~/interfaces/AttributeInterface";
 import serverconfig from "~/serverconfig";
 import {useDisplay} from "vuetify";
 import {Ref} from "vue";
+import {useSnackbarStore} from "~/stores/snackbarStore";
+import {storeToRefs} from "pinia";
+import {useMenuStore} from "~/stores/menuStore";
 
 
 const loading: Ref<boolean> = ref(false)
@@ -112,6 +131,9 @@ const props = defineProps({
 })
 
 const {mdAndUp} = useDisplay()
+const {putSnackBarMessage} = useSnackbarStore()
+const {titleAppBar} = storeToRefs(useMenuStore())
+titleAppBar.value = "Stocks"
 
 watch(page, () => recharger())
 watch(nombreParPage, () => recharger())
