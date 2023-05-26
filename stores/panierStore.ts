@@ -6,7 +6,6 @@ export const usePanierStore = defineStore('panier', () => {
 
     const articles = ref<Array<ArticlePotInterface>>([])
     const utilisateur = ref<UserInterface>()
-    const utilisateurs = ref<Array<UserInterface>>()
     const paiementCompte = ref<number | '' | undefined>()
     const paiementCheque = ref<number | '' | undefined>()
     const paiementEspece = ref<number | '' | undefined>()
@@ -26,30 +25,27 @@ export const usePanierStore = defineStore('panier', () => {
     const formatToNumber = (value: number | '' | undefined) =>
         Number((value !== '' && value) ?? 0)
 
-    const panier = computed(() => {
-        return {
-            articles: articles.value,
-            utilisateur: utilisateur.value,
-            paiementCompte: formatToNumber(paiementCompte.value),
-            paiementCheque: formatToNumber(paiementCheque.value),
-            paiementEspece: formatToNumber(paiementEspece.value),
-            paiementVirement: formatToNumber(paiementVirement.value),
-            rendreMonnaie: rendreMonnaie.value,
-        }
-    })
+    const $reset = () => {
+        articles.value = []
+        utilisateur.value = undefined
+        paiementCompte.value = undefined
+        paiementCheque.value = undefined
+        paiementEspece.value = undefined
+        paiementVirement.value = undefined
+        rendreMonnaie.value = undefined
+    }
 
     return {
         utilisateur,
-        utilisateurs,
-        panier,
         articles,
-        panierVide,
         nombreTotalArticles,
         paiementCompte,
         paiementCheque,
         paiementEspece,
         paiementVirement,
         rendreMonnaie,
+        panierVide,
+        $reset,
         formatToNumber,
     }
 })

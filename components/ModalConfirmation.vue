@@ -18,7 +18,7 @@ const props = defineProps({
     modelValue: Boolean,
     titre: String,
     question: String,
-    classCard: String,
+    classCard: {type: String, default: ""},
 })
 
 const emits = defineEmits(['update:modelValue', 'confirmer'])

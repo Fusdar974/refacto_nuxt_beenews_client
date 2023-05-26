@@ -22,8 +22,6 @@ const articles: Ref<Array<ArticlePotInterface>> = ref([] as Array<ArticlePotInte
 
 const emits = defineEmits(['update:modelValue'])
 
-
-
 const isShownArticle = (article: ArticlePotInterface) => {
     return props.filters?.every(filter => {
         if (filter.by && (filter.value || filter.value === 0)) {
@@ -62,15 +60,24 @@ const isShownArticle = (article: ArticlePotInterface) => {
 const inputValue = computed({
     get: () => props.modelValue,
     set: newValue => emits('update:modelValue', newValue)
-
 })
 
-watch(() => [...articles.value], newValue => {
-    inputValue.value = newValue.filter(article => !!article.quantite)
-})
+watch(() => [...articles.value], newValue =>
+    inputValue.value = newValue.filter(article => !!article.quantite))
 
-onMounted(()=>{
-    articles.value = props.produitsDispoList.map(item => ({...item, quantite: props.modelValue?.find(article => article._id === item._id)?.quantite ?? 0} as ArticlePotInterface))
+watch(() => inputValue.value?.length === 0, () => articles.value = props.produitsDispoList.map(item =>
+    ({
+        ...item,
+        quantite: props.modelValue?.find(article => article._id === item._id)?.quantite ?? 0
+    } as ArticlePotInterface))
+)
+
+onMounted(() => {
+    articles.value = props.produitsDispoList.map(item =>
+        ({
+            ...item,
+            quantite: props.modelValue?.find(article => article._id === item._id)?.quantite ?? 0
+        } as ArticlePotInterface))
 })
 
 </script>

@@ -87,7 +87,7 @@ import {storeToRefs} from "pinia";
 import Fetch from "~/services/FetchService";
 import {useAuthenticateStore} from "~/stores/authenticateStore";
 import {useMenuStore} from "~/stores/menuStore";
-import PanierSoum from "~/components/PanierSoum.vue";
+import PanierSoum from "~/components/panierSoum/PanierSoum.vue";
 import {usePanierStore} from "~/stores/panierStore";
 
 const konamiChaine1 = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65].join('/')

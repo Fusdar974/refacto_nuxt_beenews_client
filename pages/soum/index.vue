@@ -23,11 +23,11 @@
             <v-col>
                 <div v-if="produitToScreen.length === 0" class="imageFondChargement"/>
                 <div v-else>
-                    <produits-list v-model="articles"
-                                   :filters="[
+                    <lazy-produits-list v-model="articles"
+                                        :filters="[
                                                    {by:'type._id', value:filtre as string},
                                                    ] as Array<ProduitsListFilterInterface>"
-                                   :produits-dispo-list="produitToScreen"/>
+                                        :produits-dispo-list="produitToScreen"/>
                 </div>
             </v-col>
         </v-row>
@@ -66,8 +66,7 @@ const stepPaiement = ref<boolean>(false)
 const {titleAppBar} = storeToRefs(useMenuStore())
 titleAppBar.value = "Soum"
 
-const {articles, utilisateur} = storeToRefs(usePanierStore())
-
+const {articles} = storeToRefs(usePanierStore())
 
 /** Gestion du message success or error de App.vue */
 const {
