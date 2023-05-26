@@ -16,25 +16,41 @@
 </template>
 
 <script setup lang="ts">
-
 import ArticlePotInterface from "~/interfaces/potsInterfaces/ArticlePotInterface";
 
+/** PROPS */
 const props = defineProps<{
     article: ArticlePotInterface
 }>()
 
+/** EMITS */
 const emit = defineEmits(['emptied'])
 
+/** METHODS */
+
+/**
+ * Vérifie si l'article est dispo dans le stock
+ * @param article
+ */
 const articleExists = (article: ArticlePotInterface) => {
     return article.quantite < article.nombre
 }
 
+/**
+ * Ajoute un élément de l'article
+ * @param article
+ */
 const ajouter = (article: ArticlePotInterface) => {
     if (articleExists(article)) {
         article.quantite += 1
     }
 }
 
+/**
+ * Retire un ou tout élément de l'article
+ * @param article
+ * @param all
+ */
 const retirer = (article: ArticlePotInterface, all: boolean = false) => {
     if (all) {
         article.quantite = 0
