@@ -17,17 +17,17 @@
         </v-card-title>
         <v-divider/>
         <v-card-text>
-          <v-form @submit="handleSubmit">
-            <v-container>
-              <v-row align="center"
-                     justify="center">
-                <v-col>
-                  <v-text-field
-                      v-model="login"
-                      variant="outlined"
-                      density="compact"
-                      type="text"
-                      label="Login"
+          <v-form @submit="handleSubmit($event)">
+              <v-container>
+                  <v-row align="center"
+                         justify="center">
+                      <v-col>
+                          <v-text-field
+                                  v-model="login"
+                                  variant="outlined"
+                                  density="compact"
+                                  type="text"
+                                  label="Login"
                       name="login"
                       @change="handleChange"
                       @keydown="keyPress"/>
@@ -80,6 +80,7 @@
 import LoginResponseInterface from "~/interfaces/LoginResponseInterface";
 import IdentificationInterface from "~/interfaces/IdentificationInterface";
 import Fetch from "~/services/FetchService";
+import {useAuthenticateStore} from "~/stores/authenticateStore";
 
 const login: Ref<string> = ref('')
 const password: Ref<string> = ref('')
@@ -87,9 +88,7 @@ const enCoursDeConnexion: Ref<boolean> = ref(false)
 const openDialog: Ref<boolean> = ref(false)
 const message: Ref<string> = ref('')
 
-const props = defineProps({
-  submit: {type: Function, required: true}, //TODO:: a retirer
-})
+const {login: submit} = useAuthenticateStore()
 
 const connexionServeur = () =>{
   const identification: IdentificationInterface = {
@@ -99,8 +98,8 @@ const connexionServeur = () =>{
   const reussite = (retour: LoginResponseInterface) => {
     enCoursDeConnexion.value = false
     if(retour){
-      localStorage.setItem("token", retour.token)
-      props.submit()
+        localStorage.setItem("token", retour.token)
+        submit()
     }else message.value = "Login/Password incorrect"
   }
   Fetch.requete({ url: "/login", data: identification }, reussite)

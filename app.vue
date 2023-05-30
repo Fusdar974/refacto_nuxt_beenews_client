@@ -7,7 +7,7 @@
                     <v-row class="flex-column h-100">
                         <v-col>
                             <v-list>
-                                <v-list-item v-for="(menu, index) in menus"
+                                <v-list-item v-for="(menu, index) in menus as Array<MenuInterface>"
                                              :key="index"
                                              :value="menu"
                                              @click="handleOnClick(menu)"
@@ -65,7 +65,7 @@
                     </v-col>
                 </v-row>
                 <v-row class="flex-grow-0">
-                    <login-form :submit="login"/>
+                    <login-form/>
                 </v-row>
             </v-container>
         </v-layout>
@@ -92,9 +92,7 @@ import {usePanierStore} from "~/stores/panierStore";
 
 const konamiChaine1 = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65].join('/')
 const konamiChaine2 = [38, 38, 40, 40, 37, 39, 37, 39, 98, 97].join('/')
-const initMenu: Array<MenuInterface> = [{_id: 1, to: "/", libelle: 'Accueil', auth: false}]
 
-const menus: Ref<Array<MenuInterface>> = ref(initMenu)
 const mobileOpen: Ref<boolean> = ref(false)
 const isLoading: Ref<boolean> = ref(false)
 const lettres: Ref<Array<number>> = ref([])
@@ -109,44 +107,14 @@ const {
     couleur: snackbarStoreCouleur
 } = storeToRefs(useSnackbarStore())
 
-const {isAuthenticated} = storeToRefs(useAuthenticateStore())
+const {isAuthenticated, menus} = storeToRefs(useAuthenticateStore())
+const {logout} = useAuthenticateStore()
 const {titleAppBar} = storeToRefs(useMenuStore())
 // const {isLoading} = useLoadingStore()
 
 const handleDrawerToggle = () => {
     mobileOpen.value = !mobileOpen.value
 }
-
-const setAuthenticate = (boolAuth: boolean, newMenus: Array<MenuInterface>) => {
-    isAuthenticated.value = boolAuth
-    menus.value = newMenus
-    isLoading.value = false
-}
-const login = () => {
-    isLoading.value = true
-    const token = localStorage.getItem('token');
-    if (token) {
-        const tokenDecode: JwtPayloadInterface = jwtDecode(token);
-        localStorage.setItem('idCompte', tokenDecode.userId);
-        const expire = new Date((tokenDecode.exp || 0) * 1000) < new Date();
-        if (!expire) {
-            setAuthenticate(true, tokenDecode.droits);
-        } else {
-            console.error('Token expiré');
-            console.error("Connecté...:", new Date((tokenDecode.iat || 0) * 1000));
-            console.error("Expire.....:", new Date((tokenDecode.exp || 0) * 1000));
-        }
-    }
-}
-
-const logout = () => {
-    isLoading.value = true
-    setAuthenticate(false, initMenu);
-    useRouter().push('/');
-    localStorage.clear();
-}
-
-Fetch.setFonctionDeco(logout);
 
 const isClickedBtn = (path: string) => useRouter().currentRoute.value.path === path
 
@@ -168,11 +136,6 @@ const handleOnClick = (item: MenuInterface) => {
     }
 }
 
-onMounted(() => {
-    if (typeof localStorage.getItem('token') === 'string') {
-        login();
-    }
-})
 </script>
 <style>
 .root {
