@@ -1,5 +1,3 @@
-
-
 interface ActionInterface{
     action: string,
     id: any,

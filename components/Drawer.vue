@@ -14,7 +14,6 @@
 
 <script setup lang="ts">
 import {useDisplay} from "vuetify";
-import {onMounted} from "#imports";
 
 const props = defineProps({
   modelValue: Boolean,
@@ -31,10 +30,6 @@ const drawer = computed({
   set(value) {
     emit('update:modelValue', value)
   }
-})
-
-onMounted(() => {
-  console.log('mounted')
 })
 
 </script>

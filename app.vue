@@ -1,20 +1,29 @@
 <template>
     <NuxtLayout>
-<!--        <div class="imageFondChargement"/>-->
+        <!--        <div class="imageFondChargement"/>-->
         <v-layout v-if="isAuthenticated" class="root">
             <drawer v-model="mobileOpen">
-                <v-list>
-                    <v-list-item v-for="(menu, index) in menus"
-                                 :key="index"
-                                 :value="menu"
-                                 @click="handleOnClick(menu)"
-                                 :class="isClickedBtn(menu.to) ? 'current-route' : ''">
-                        <template v-slot:prepend>
-                            <v-icon v-if="menu.icone" :icon="menu.icone.replace(' ',':')"></v-icon>
-                        </template>
-                        <v-list-item-title v-if="menu.libelle" v-text="menu.libelle"></v-list-item-title>
-                    </v-list-item>
-                </v-list>
+                <v-container style="height: calc(100% - 65px)" class="pb-1">
+                    <v-row class="h-100">
+                        <v-col>
+                            <v-list>
+                                <v-list-item v-for="(menu, index) in menus"
+                                             :key="index"
+                                             :value="menu"
+                                             @click="handleOnClick(menu)"
+                                             :class="isClickedBtn(menu.to) ? 'current-route' : ''">
+                                    <template v-slot:prepend>
+                                        <v-icon v-if="menu.icone" :icon="menu.icone.replace(' ',':')"></v-icon>
+                                    </template>
+                                    <v-list-item-title v-if="menu.libelle" v-text="menu.libelle"></v-list-item-title>
+                                </v-list-item>
+                            </v-list>
+                        </v-col>
+                        <v-col class="d-flex align-end justify-center mr-0">
+                            <disconnect-button :fonc-deco="logout"/>
+                        </v-col>
+                    </v-row>
+                </v-container>
             </drawer>
             <v-app-bar color="primary" class="appBar">
                 <template v-slot:prepend>
@@ -24,27 +33,27 @@
                 </template>
                 <v-app-bar-title>{{ titleAppBar }}</v-app-bar-title>
                 <v-spacer></v-spacer>
-                <disconnect-button :fonc-deco="logout"
-                                   class="mr-2"/>
+                <panier-soum v-if="!panierVide"/>
             </v-app-bar>
             <v-main style="min-height: 300px;">
                 <NuxtPage/>
             </v-main>
-        <v-snackbar v-model="snackbarStoreOpen"
-                    :color="snackbarStoreCouleur"
-                    timeout="3000">
-            <v-container class="pa-0">
-                <v-row class="align-center">
-                    <v-col cols="2">
-                        <v-icon
-                            :icon="`mdi:mdi-${
+            <v-snackbar v-model="snackbarStoreOpen"
+                        :color="snackbarStoreCouleur"
+                        timeout="3000">
+                <v-container class="pa-0">
+                    <v-row class="align-center">
+                        <v-col cols="2">
+                            <v-icon
+                                :icon="`mdi:mdi-${
                                 snackbarStoreCouleur==='success'?'check':'close'
-                            }-circle-outline`"/></v-col>
-                    <v-col>{{ snackbarStoreMessage }}</v-col>
-                </v-row>
-            </v-container>
-      </v-snackbar>
-    </v-layout>
+                            }-circle-outline`"/>
+                        </v-col>
+                        <v-col>{{ snackbarStoreMessage }}</v-col>
+                    </v-row>
+                </v-container>
+            </v-snackbar>
+        </v-layout>
         <v-layout v-else class="rootDeco">
             <v-container class="container-deco">
                 <v-row class="flex-grow-0">
@@ -64,20 +73,21 @@
 </template>
 
 <script setup lang="ts">
-import jwtDecode from "jwt-decode";
 import {useRouter} from "#app";
-import {onMounted} from "#imports";
 import MenuInterface from "~/interfaces/MenuInterface";
-import JwtPayloadInterface from "~/interfaces/JwtPayloadInterface";
 import DisconnectButton from "~/components/DisconnectButton.vue";
 import Drawer from "~/components/Drawer.vue"
 import LoginForm from "~/forms/LoginForm.vue";
 import {useDisplay} from "vuetify";
 import {useSnackbarStore} from "~/stores/snackbarStore";
 import {storeToRefs} from "pinia";
-import Fetch from "~/services/FetchService";
 import {useAuthenticateStore} from "~/stores/authenticateStore";
 import {useMenuStore} from "~/stores/menuStore";
+import PanierSoum from "~/components/panierSoum/PanierSoum.vue";
+import {usePanierStore} from "~/stores/panierStore";
+import Fetch from "~/services/FetchService";
+import JwtPayloadInterface from "~/interfaces/JwtPayloadInterface";
+import jwtDecode from "jwt-decode";
 
 const konamiChaine1 = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65].join('/')
 const konamiChaine2 = [38, 38, 40, 40, 37, 39, 37, 39, 98, 97].join('/')
@@ -90,6 +100,7 @@ const lettres: Ref<Array<number>> = ref([])
 const konami: Ref<boolean> = ref(false)
 
 const {mdAndUp} = useDisplay()
+const {panierVide} = storeToRefs(usePanierStore())
 
 const {
     open: snackbarStoreOpen,
