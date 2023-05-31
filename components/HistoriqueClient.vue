@@ -75,10 +75,10 @@
           <v-divider/>
         </v-row>
 
-        <v-row v-if="commande.historique.length > 0">
-          <v-col sm="12">Articles</v-col>
-          <ligne-article :items="commande.historique"/>
-          <v-divider/>
+        <v-row v-if="commande.historique?.length > 0">
+            <v-col sm="12">Articles</v-col>
+            <ligne-article v-if="commande.historique" :items="commande.historique"/>
+            <v-divider/>
         </v-row>
         <v-row>
           <v-col sm="12">Paiement</v-col>
@@ -92,11 +92,11 @@
           <v-col sm="6">{{commande.paiementEspece}} €</v-col>
         </v-row>
         <v-row v-if="commande.paiementCheque">
-          <v-col sm="6">Espèce</v-col>
+          <v-col sm="6">Chèque</v-col>
           <v-col sm="6">{{commande.paiementCheque}} €</v-col>
         </v-row>
         <v-row v-if="commande.paiementVirement">
-          <v-col sm="6">Espèce</v-col>
+          <v-col sm="6">Virement</v-col>
           <v-col sm="6">{{commande.paiementVirement}} €</v-col>
         </v-row>
         <v-row>
@@ -126,11 +126,11 @@
 <!--          <v-col sm="9">{{commande.participants.map((value, index) =>
               (<Chip key={index + "participant"} size="small" label={value.nom + " " + value.prenom} />)}}</v-col>-->
 <!--          TODO::a modifier après vérification sur l'application en prod, participant n'existe pas dans commande-->
-          <v-row v-if="commande.historique.length > 0">
-            <v-col sm="12">Articles</v-col>
-            <ligne-article :items="commande.historique"/>
-            <v-divider/>
-          </v-row>
+            <v-row v-if="commande.historique?.length > 0">
+                <v-col sm="12">Articles</v-col>
+                <ligne-article v-if="commande.historique" :items="commande.historique"/>
+                <v-divider/>
+            </v-row>
           <v-row>
             <v-col sm="12">Paiement</v-col>
           </v-row>
@@ -173,24 +173,24 @@ import HistoriqueLigneInterface from "~/interfaces/HistoriqueLigneInterface";
 import HistoriqueLigneResponseInterface from "~/interfaces/HistoriqueLigneResponseInterface";
 import LigneArticle from "~/components/LigneArticle.vue";
 
-const loading: Ref<boolean>  = ref(true)
-const openDialog: Ref<boolean> = ref(false)
-const nombreParPage: Ref<number> = ref(10)
-const total: Ref<number> = ref(0)
-const page: Ref<number> = ref(1)
-const paginationSize: Ref<number> = ref(1)
-const historique: Ref<Array<HistoriqueLigneInterface> | null> = ref(null)
-const commande: Ref<HistoriqueLigneInterface | null> = ref(null)
+const loading = ref<boolean>(true)
+const openDialog = ref<boolean>(false)
+const nombreParPage = ref<number>(10)
+const total = ref<number>(0)
+const page = ref<number>(1)
+const paginationSize = ref<number>(1)
+const historique = ref<Array<HistoriqueLigneInterface>>([])
+const commande = ref<HistoriqueLigneInterface>({} as HistoriqueLigneInterface)
 
 const props = defineProps({
-  userId: {type: String, required: true},
-  type: {type: String, required: true},
+    userId: {type: String, required: true},
+    type: {type: String, required: true},
 })
 
-const setHistorique = (histo: HistoriqueInterface) =>{
-  page.value = histo.page
-  nombreParPage.value = histo.nombre
-  total.value = histo.count
+const setHistorique = (histo: HistoriqueInterface) => {
+    page.value = histo.page
+    nombreParPage.value = histo.nombre
+    total.value = histo.count
   historique.value = histo.histo
   paginationSize.value = Math.ceil(histo.count / histo.nombre)
 }
