@@ -16,6 +16,10 @@
         <v-img v-if="attributes[indexAttr].isImage"
                :style="`max-height: ${maxHeightImg}px; max-width: ${maxWidthImg}px`"
                :src="serverconfig.concat(reachDepth(attrs.attr, obj))"></v-img>
+        <div v-else-if="attributes[indexAttr].isArchive">
+          <div v-if="reachDepth(attrs.attr, obj)"><v-icon icon="mdi:mdi-archive"></v-icon></div>
+          <div v-else"><v-icon icon="mdi:mdi-archive"></v-icon></div>
+        </div>
         <div v-else>{{ reachDepth(attrs.attr, obj) }}</div>
       </td>
       <slot v-if="actionsTd" :obj="obj"/>
