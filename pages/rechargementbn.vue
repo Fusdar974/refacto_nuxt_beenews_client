@@ -70,6 +70,7 @@ import ValeurBNResponseInterface from "~/interfaces/ValeurBNResponseInterface";
 import {useDisplay} from "vuetify";
 
 /** REFS */
+
 const users = ref<Array<UserInterface>>([]);
 const selectedReciever = ref<UserInterface | null>(null);
 const nombreBn = ref<number>(0);

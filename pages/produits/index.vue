@@ -22,33 +22,45 @@
       <v-container sm class="hidden-md-and-up">
         <v-row class="justify-space-between">
           <v-text-field
-              name="champderecherche"
-              density="compact"
-              variant="outlined"
-              v-model="champRecherche"
-              append-inner-icon="mdi:mdi-magnify"/>
+                  name="champderecherche"
+                  density="compact"
+                  variant="outlined"
+                  v-model="champRecherche"
+                  append-inner-icon="mdi:mdi-magnify"/>
         </v-row>
-        <v-row class="text-end">
-          <v-btn variant="flat"
-                 class="w-100"
-                 color="secondary"
-                 prepend-icon="mdi:mdi-plus"
-                 @click="navigateTo('/produits/add')">Créer</v-btn>
-        </v-row>
+          <v-row class="text-end">
+              <v-btn variant="flat"
+                     class="w-100"
+                     color="secondary"
+                     prepend-icon="mdi:mdi-plus"
+                     @click="navigateTo('/produits/add')">Créer
+              </v-btn>
+          </v-row>
       </v-container>
-      <generic-table :objects="produits" :attributes="attributesComputed" :actions-td="true"
-                     v-model:page-size="paginationSize" v-model:page="page" v-model:nb-par-page="nombreParPage"
-                      :max-height-img="100" :max-width-img="200">
-        <template v-slot:default="slotProps">
-          <td>
-            <v-btn-group variant="tonal">
-              <v-btn @click="handleModifier($event,slotProps.obj._id)" class="ma-1"><v-icon icon="mdi mdi_small mdi-pencil"></v-icon></v-btn>
-              <v-btn v-if="slotProps.obj.effacable" @click="handleSupprimer($event, slotProps.obj._id)" class="ma-1"><v-icon icon="mdi mdi_small mdi-delete"></v-icon></v-btn>
-            </v-btn-group>
-          </td>
-        </template>
-      </generic-table>
-      <v-container class="align-center">
+        <generic-table :objects="produits"
+                       :attributes="attributesComputed"
+                       :actions-td="true"
+                       v-model:pagination-size="paginationSize"
+                       v-model:page="page"
+                       v-model:nb-par-page="nombreParPage"
+                       :max-height-img="100"
+                       :max-width-img="200"
+                       @consulter="(_id) => navigateTo(`produits/show/${_id}`)">
+            <template v-slot:default="slotProps">
+                <td>
+                    <v-btn-group variant="tonal">
+                        <v-btn @click="handleModifier($event,slotProps.obj._id)" class="ma-1">
+                            <v-icon icon="mdi mdi_small mdi-pencil"></v-icon>
+                        </v-btn>
+                        <v-btn v-if="slotProps.obj.effacable" @click="handleSupprimer($event, slotProps.obj._id)"
+                               class="ma-1">
+                            <v-icon icon="mdi mdi_small mdi-delete"></v-icon>
+                        </v-btn>
+                    </v-btn-group>
+                </td>
+            </template>
+        </generic-table>
+        <v-container class="align-center">
         <v-btn @click="openInventairePartiel = !openInventairePartiel" variant="tonal" color="primary" class="ma-1">
           Inventaire partiel
         </v-btn>
