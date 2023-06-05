@@ -1,42 +1,61 @@
 <template>
   <private-route>
-    <div>
-        <v-container class="maxW1000 align-center align-content-lg-space-between ma-3">
-          <v-row>
-            <v-col>
-              <h3 class="d-lg-none">Clients </h3>
-              <h1 class="d-none d-lg-block">Clients</h1>
-            </v-col>
-            <v-row>
-              <v-col>
-                <v-text-field
-                              name="champderecherche"
-                              v-model="champRecherche"
-                              append-inner-icon="mdi:mdi-magnify"/>
-                <v-btn variant="tonal"
-                       color="primary"
-                       @click="navigateTo('/users/add')">Créer</v-btn>
-              </v-col>
-            </v-row>
-          </v-row>
-        </v-container>
-          <div v-if="!loading" class="maxW1000" >
+    <div class="ma-3">
+      <v-container class="hidden-sm-and-down">
+        <v-row class="justify-space-between ">
+          <v-col cols="5">
+            <v-text-field
+                name="champderecherche"
+                density="compact"
+                variant="outlined"
+                v-model="champRecherche"
+                append-inner-icon="mdi:mdi-magnify"/>
+          </v-col>
+          <v-col cols="3" class="text-end">
+            <v-btn variant="flat"
+                   color="secondary"
+                   prepend-icon="mdi:mdi-plus"
+                   @click="navigateTo('/users/add')">Créer</v-btn>
+          </v-col>
+        </v-row>
+      </v-container>
+      <v-container sm class="hidden-md-and-up">
+        <v-row class="justify-space-between">
+          <v-text-field
+              name="champderecherche"
+              density="compact"
+              variant="outlined"
+              v-model="champRecherche"
+              append-inner-icon="mdi:mdi-magnify"/>
+        </v-row>
+        <v-row class="text-end">
+          <v-btn variant="flat"
+                 class="w-100"
+                 color="secondary"
+                 prepend-icon="mdi:mdi-plus"
+                 @click="navigateTo('/users/add')">Créer</v-btn>
+        </v-row>
+      </v-container>
+          <div v-if="!loading" >
             <generic-table :objects="users"
                            :attributes="attributesComputed"
                            :actions-td="true"
-                           v-model:page-size="paginationSize"
+                           v-model:pagination-size="paginationSize"
                            v-model:page="page"
-                           v-model:nb-par-page="nombreParPage">
-              <template v-slot:default="slotProps">
-                <td>
-                  <v-btn-group variant="tonal">
-                    <v-btn @click="handleModifier($event,slotProps.obj._id)" class="ma-1"><v-icon icon="mdi mdi_small mdi-pencil"></v-icon></v-btn>
-                    <v-btn v-if="(slotProps.obj as UserInterface).supprimable"
-                           @click="handleSupprimer($event, slotProps.obj._id)" class="ma-1">
-                        <v-icon icon="mdi mdi_small mdi-delete"></v-icon>
-                    </v-btn>
-                  </v-btn-group>
-                </td>
+                           v-model:nb-par-page="nombreParPage"
+                           @consulter="(_id) => navigateTo(`users/show/${_id}`)">
+                <template v-slot:default="slotProps">
+                    <td>
+                        <v-btn-group variant="tonal">
+                            <v-btn @click="handleModifier($event,slotProps.obj._id)" class="ma-1">
+                                <v-icon icon="mdi mdi_small mdi-pencil"></v-icon>
+                            </v-btn>
+                            <v-btn v-if="(slotProps.obj as UserInterface).supprimable"
+                                   @click="handleSupprimer($event, slotProps.obj._id)" class="ma-1">
+                                <v-icon icon="mdi mdi_small mdi-delete"></v-icon>
+                            </v-btn>
+                        </v-btn-group>
+                    </td>
               </template>
             </generic-table>
           </div>

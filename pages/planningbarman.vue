@@ -48,6 +48,9 @@ import Fetch from "~/services/FetchService";
 import CalendrierResponseInterface from "~/interfaces/CalendrierInterfaces/CalendrierResponseInterface";
 import BarmansResponseInterface from "~/interfaces/BarmansResponseInterface";
 import {Ref} from "vue";
+import {useSnackbarStore} from "~/stores/snackbarStore";
+import {storeToRefs} from "pinia";
+import {useMenuStore} from "~/stores/menuStore";
 
 const date = new Date()
 const openDialog: Ref<boolean> = ref(false)
@@ -58,6 +61,10 @@ const barmans: Ref<Array<UserInterface>> = ref([])
 const barmanSelectionne: Ref<UserInterface | undefined> = ref()
 const jourSelectionne: Ref<number> = ref(0)
 const libelleMois: Ref<string> = ref('')
+
+const {putSnackBarMessage} = useSnackbarStore()
+const {titleAppBar} = storeToRefs(useMenuStore())
+titleAppBar.value = "Planning barman"
 
 const jourAffichage = computed(() =>
     calendrier.value.length && `${

@@ -1,10 +1,10 @@
 <template>
-    <v-dialog v-model="open">
+    <v-dialog v-model="open" width="auto">
         <v-card :class="classCard">
             <v-card-title>{{ titre }}</v-card-title>
             <v-card-text v-if="question">{{ question }}</v-card-text>
             <slot/>
-            <v-card-actions>
+            <v-card-actions class="justify-center">
                 <v-btn @click="emits('confirmer')" color="primary">Valider</v-btn>
                 <v-btn @click="open = false" color="primary">Annuler</v-btn>
             </v-card-actions>
@@ -14,14 +14,20 @@
 
 <script setup lang="ts">
 
+/**REFS*/
+
 const props = defineProps({
     modelValue: Boolean,
     titre: String,
     question: String,
-    classCard: String,
+    classCard: {type: String, default: ""},
 })
 
+/**EMITS*/
+
 const emits = defineEmits(['update:modelValue', 'confirmer'])
+
+/**COMPUTEDS*/
 
 const open = computed({
     get: () => props.modelValue,

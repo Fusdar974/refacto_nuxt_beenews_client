@@ -1,5 +1,5 @@
 interface TypeProduitInterface{
-    _id: string
+    _id?: string
     nom: string
     proposablePot: boolean
     proposableSoum: boolean
