@@ -86,7 +86,7 @@ import {useMenuStore} from "~/stores/menuStore";
 import PanierSoum from "~/components/panierSoum/PanierSoum.vue";
 import {usePanierStore} from "~/stores/panierStore";
 import Fetch from "~/services/FetchService";
-import JwtPayloadInterface from "~/interfaces/JwtPayloadInterface";
+import JwtPayloadInterface from "~/interfaces/loginInterfaces/JwtPayloadInterface";
 import jwtDecode from "jwt-decode";
 
 const konamiChaine1 = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65].join('/')

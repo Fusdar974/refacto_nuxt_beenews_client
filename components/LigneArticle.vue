@@ -16,7 +16,7 @@
 </template>
 
 <script setup lang="ts">
-import HistoriqueDetailInterface from "~/interfaces/HistoriqueDetailInterface";
+import HistoriqueDetailInterface from "~/interfaces/historiqueInterfaces/HistoriqueDetailInterface";
 
 const props = defineProps({
   items: {type: Object as () => Array<HistoriqueDetailInterface>, required: true},

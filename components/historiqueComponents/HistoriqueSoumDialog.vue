@@ -62,7 +62,7 @@
 
 <script setup lang="ts">
 
-import HistoriqueLigneInterface from "~/interfaces/HistoriqueLigneInterface";
+import HistoriqueLigneInterface from "~/interfaces/historiqueInterfaces/HistoriqueLigneInterface";
 
 /** REFS */
 

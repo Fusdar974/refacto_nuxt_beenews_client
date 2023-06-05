@@ -6,7 +6,7 @@
 <script setup lang="ts">
 
 import jwtDecode from "jwt-decode";
-import JwtPayloadInterface from "~/interfaces/JwtPayloadInterface";
+import JwtPayloadInterface from "~/interfaces/loginInterfaces/JwtPayloadInterface";
 import {navigateTo, useRouter} from "#app";
 import {onBeforeMount} from "#imports";
 

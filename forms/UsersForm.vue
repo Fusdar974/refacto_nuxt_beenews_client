@@ -70,12 +70,12 @@
 
 <script setup lang="ts">
 
-import UserInterface from "~/interfaces/UserInterface"
+import UserInterface from "~/interfaces/userInterfaces/UserInterface"
 import Fetch from "~/services/FetchService"
-import PasswordChangeResponseInterface from "~/interfaces/PasswordChangeResponseInterface"
-import ProfilInterface from "~/interfaces/ProfilInterface"
-import UserResponseInterface from "~/interfaces/UserResponseInterface"
-import ProfilsResponseInterface from "~/interfaces/ProfilsResponseInterface"
+import PasswordChangeResponseInterface from "~/interfaces/loginInterfaces/PasswordChangeResponseInterface"
+import ProfilInterface from "~/interfaces/userInterfaces/ProfilInterface"
+import UserResponseInterface from "~/interfaces/userInterfaces/UserResponseInterface"
+import ProfilsResponseInterface from "~/interfaces/userInterfaces/ProfilsResponseInterface"
 import {storeToRefs} from "pinia"
 import {useSnackbarStore} from "~/stores/snackbarStore"
 import {useVuelidate} from '@vuelidate/core'

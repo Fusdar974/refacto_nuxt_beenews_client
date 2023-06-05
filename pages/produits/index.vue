@@ -102,9 +102,9 @@
 <script setup lang="ts">
 import {watch} from "#imports";
 import Fetch from "~/services/FetchService";
-import ProduitInterface from "~/interfaces/ProduitInterface";
-import TypeInterface from "~/interfaces/TypeProduitInterface";
-import ProduitsResponseInterface from "~/interfaces/ProduitsResponseInterface";
+import ProduitInterface from "~/interfaces/produitInterfaces/ProduitInterface";
+import TypeInterface from "~/interfaces/produitInterfaces/TypeProduitInterface";
+import ProduitsResponseInterface from "~/interfaces/produitInterfaces/ProduitsResponseInterface";
 import AttributeInterface from "~/interfaces/AttributeInterface";
 import serverconfig from "~/serverconfig";
 import {useDisplay} from "vuetify";

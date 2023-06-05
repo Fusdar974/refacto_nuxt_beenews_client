@@ -78,8 +78,8 @@
 
 <script setup lang="ts">
 
-import UserInterface from "~/interfaces/UserInterface";
-import UsersResponseInterface from "~/interfaces/UsersResponseInterface";
+import UserInterface from "~/interfaces/userInterfaces/UserInterface";
+import UsersResponseInterface from "~/interfaces/userInterfaces/UsersResponseInterface";
 import AttributeInterface from "~/interfaces/AttributeInterface";
 import GenericTable from "~/components/GenericTable.vue";
 import Fetch from "~/services/FetchService";

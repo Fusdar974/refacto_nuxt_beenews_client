@@ -167,8 +167,8 @@
 import Fetch from "~/services/FetchService";
 import { Ref } from "vue";
 import serverconfig from "~/serverconfig";
-import UserInterface from "~/interfaces/UserInterface";
-import TypeProduitInterface from "~/interfaces/TypeProduitInterface";
+import UserInterface from "~/interfaces/userInterfaces/UserInterface";
+import TypeProduitInterface from "~/interfaces/produitInterfaces/TypeProduitInterface";
 import ValeurBnInterface from "~/interfaces/ValeurBnInterface";
 import {useSnackbarStore} from "~/stores/snackbarStore";
 import {storeToRefs} from "pinia";

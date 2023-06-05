@@ -1,4 +1,4 @@
-import ProfilInterface from "~/interfaces/ProfilInterface";
+import ProfilInterface from "~/interfaces/userInterfaces/ProfilInterface";
 
 interface ProfilsResponseInterface{
     profils: ProfilInterface[],

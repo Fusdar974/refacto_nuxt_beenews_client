@@ -58,12 +58,12 @@
 <script setup lang="ts">
 
 import Fetch from "~/services/FetchService";
-import UserInterface from "~/interfaces/UserInterface";
-import UserResponseInterface from "~/interfaces/UserResponseInterface";
+import UserInterface from "~/interfaces/userInterfaces/UserInterface";
+import UserResponseInterface from "~/interfaces/userInterfaces/UserResponseInterface";
 import {onMounted} from "#imports";
 import PrivateRoute from "~/components/PrivateRoute.vue";
-import PasswordChangeResponseInterface from "~/interfaces/PasswordChangeResponseInterface";
-import HistoriqueClient from "~/components/HistoriqueClient.vue";
+import PasswordChangeResponseInterface from "~/interfaces/loginInterfaces/PasswordChangeResponseInterface";
+import HistoriqueClient from "~/components/historiqueComponents/HistoriqueClient.vue";
 import {storeToRefs} from "pinia";
 import {useMenuStore} from "~/stores/menuStore";
 

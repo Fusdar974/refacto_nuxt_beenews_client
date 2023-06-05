@@ -77,8 +77,8 @@
 </template>
 
 <script setup lang="ts">
-import LoginResponseInterface from "~/interfaces/LoginResponseInterface";
-import IdentificationInterface from "~/interfaces/IdentificationInterface";
+import LoginResponseInterface from "~/interfaces/loginInterfaces/LoginResponseInterface";
+import IdentificationInterface from "~/interfaces/loginInterfaces/IdentificationInterface";
 import Fetch from "~/services/FetchService";
 
 const login: Ref<string> = ref('')

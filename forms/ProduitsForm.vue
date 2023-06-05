@@ -79,10 +79,10 @@ import {storeToRefs} from "pinia"
 import {useSnackbarStore} from "~/stores/snackbarStore"
 import {useVuelidate} from '@vuelidate/core'
 import {required} from '@vuelidate/validators'
-import ProduitResponseInterface from "~/interfaces/ProduitResponseInterface"
-import ProduitInterface from "~/interfaces/ProduitInterface"
-import TypeProduitInterface from "~/interfaces/TypeProduitInterface"
-import TypeInterface from "~/interfaces/TypeProduitInterface"
+import ProduitResponseInterface from "~/interfaces/produitInterfaces/ProduitResponseInterface"
+import ProduitInterface from "~/interfaces/produitInterfaces/ProduitInterface"
+import TypeProduitInterface from "~/interfaces/produitInterfaces/TypeProduitInterface"
+import TypeInterface from "~/interfaces/produitInterfaces/TypeProduitInterface"
 import ImageResultInterface from "~/interfaces/ImageResultInterface";
 import serverconfig from "~/serverconfig";
 import {useMenuStore} from "~/stores/menuStore";

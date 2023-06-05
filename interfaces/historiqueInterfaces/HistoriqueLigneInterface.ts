@@ -1,4 +1,4 @@
-import HistoriqueDetailInterface from "~/interfaces/HistoriqueDetailInterface";
+import HistoriqueDetailInterface from "~/interfaces/historiqueInterfaces/HistoriqueDetailInterface";
 
 interface HistoriqueLigneInterface{
     ancienSolde: number,

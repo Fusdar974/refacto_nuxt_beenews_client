@@ -96,8 +96,8 @@ import {storeToRefs} from "pinia";
 import {useSnackbarStore} from "~/stores/snackbarStore";
 import ArticlePotInterface from "~/interfaces/potsInterfaces/ArticlePotInterface";
 import Fetch from "~/services/FetchService";
-import UsersResponseInterface from "~/interfaces/UsersResponseInterface";
-import UserInterface from "~/interfaces/UserInterface";
+import UsersResponseInterface from "~/interfaces/userInterfaces/UsersResponseInterface";
+import UserInterface from "~/interfaces/userInterfaces/UserInterface";
 import ValeurBNResponseInterface from "~/interfaces/ValeurBNResponseInterface";
 import PanierSoumPaimentStep from "~/components/panierSoum/PanierSoumPaimentStep.vue";
 

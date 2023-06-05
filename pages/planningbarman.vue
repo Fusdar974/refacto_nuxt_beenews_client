@@ -42,11 +42,11 @@
 
 <script setup lang="ts">
 
-import UserInterface from "~/interfaces/UserInterface";
-import CalendrierJourInterface from "~/interfaces/CalendrierInterfaces/CalendrierJourInterface";
+import UserInterface from "~/interfaces/userInterfaces/UserInterface";
+import CalendrierJourInterface from "~/interfaces/calendrierInterfaces/CalendrierJourInterface";
 import Fetch from "~/services/FetchService";
-import CalendrierResponseInterface from "~/interfaces/CalendrierInterfaces/CalendrierResponseInterface";
-import BarmansResponseInterface from "~/interfaces/BarmansResponseInterface";
+import CalendrierResponseInterface from "~/interfaces/calendrierInterfaces/CalendrierResponseInterface";
+import BarmansResponseInterface from "~/interfaces/userInterfaces/BarmansResponseInterface";
 import {Ref} from "vue";
 import {useSnackbarStore} from "~/stores/snackbarStore";
 import {storeToRefs} from "pinia";

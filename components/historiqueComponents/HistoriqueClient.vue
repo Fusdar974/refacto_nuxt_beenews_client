@@ -52,10 +52,10 @@
 
 import Fetch from "~/services/FetchService";
 import {onMounted, watch} from "#imports";
-import HistoriqueInterface from "~/interfaces/HistoriqueInterface";
-import HistoriqueLigneInterface from "~/interfaces/HistoriqueLigneInterface";
-import HistoriqueLigneResponseInterface from "~/interfaces/HistoriqueLigneResponseInterface";
-import HistoriquePotDialog from "~/components/HistoriquePotDialog.vue";
+import HistoriqueInterface from "~/interfaces/historiqueInterfaces/HistoriqueInterface";
+import HistoriqueLigneInterface from "~/interfaces/historiqueInterfaces/HistoriqueLigneInterface";
+import HistoriqueLigneResponseInterface from "~/interfaces/historiqueInterfaces/HistoriqueLigneResponseInterface";
+import HistoriquePotDialog from "~/components/historiqueComponents/HistoriquePotDialog.vue";
 import {Ref} from "vue";
 import AttributeInterface from "~/interfaces/AttributeInterface";
 

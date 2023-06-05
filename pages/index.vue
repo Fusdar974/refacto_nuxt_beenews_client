@@ -18,9 +18,9 @@
 
 <script setup lang="ts">
 import PrivateRoute from "~/components/PrivateRoute.vue";
-import UserInterface from "~/interfaces/UserInterface";
+import UserInterface from "~/interfaces/userInterfaces/UserInterface";
 import Fetch from "~/services/FetchService";
-import UserResponseInterface from "~/interfaces/UserResponseInterface";
+import UserResponseInterface from "~/interfaces/userInterfaces/UserResponseInterface";
 import {onMounted} from "#imports";
 import {storeToRefs} from "pinia";
 import {useAuthenticateStore} from "~/stores/authenticateStore";

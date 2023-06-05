@@ -1,6 +1,6 @@
 import {defineStore} from 'pinia'
 import ArticlePotInterface from "~/interfaces/potsInterfaces/ArticlePotInterface";
-import UserInterface from "~/interfaces/UserInterface";
+import UserInterface from "~/interfaces/userInterfaces/UserInterface";
 
 export const usePanierStore = defineStore('panier', () => {
 
