@@ -51,7 +51,7 @@
       </v-row>
     </v-container>
     <historique-client v-if="user" :userId="user._id" type="SOUM" />
-    <HistoriqueClient v-if="user" :userId="user._id" type="POT" />
+    <historique-client v-if="user" :userId="user._id" type="POT"/>
   </private-route>
 </template>
 

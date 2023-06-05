@@ -1,166 +1,50 @@
 <template>
     <v-container class="ma-1">
-      <v-row>
-        <v-col v-if="historique && historique.length > 0" sm="12">
-            <h3>Historique {{ type }}</h3>
-              <v-table density="compact">
-                <thead>
-                  <tr v-if="type === 'SOUM'">
-                    <th class="text-center">Date</th>
-                    <th class="text-center">Ancien solde</th>
-                    <th class="text-center disparaitre">BN crédité(s)</th>
-                    <th class="text-center disparaitre">BN débité(s)</th>
-                    <th class="text-center">Nouveau Solde</th>
-                    <th class="text-center disparaitre">Espece</th>
-                    <th class="text-center disparaitre">Chèque</th>
-                    <th class="text-center disparaitre">Virement</th>
-                    <th class="text-center disparaitre">Monnaie rendue</th>
-                    <th class="text-center"></th>
-                  </tr>
-                  <tr v-else-if="type === 'POT'">
-                    <th class="text-center">Date</th>
-                    <th class="text-center">Nom</th>
-                    <th class="text-center"></th>
-                  </tr>
-                </thead>
-                <tbody v-if="type === 'SOUM'">
-                  <tr v-for="(item, index) in historique"
-                      :key="`SOUM${index}`"
-                      @click="() => afficherDetail(item._id)">
-                    <td class="text-center">{{ new Date(item.date).toLocaleString() }}</td>
-                    <td class="text-center">{{ item.ancienSolde }}</td>
-                    <td class="text-center disparaitre">{{ item.nouveauCredit }}</td>
-                    <td class="text-center disparaitre">{{ item.paiementCompte }}</td>
-                    <td class="text-center">{{ item.nouveauSolde }}</td>
-                    <td class="text-center disparaitre">{{ item.paiementEspece }}</td>
-                    <td class="text-center disparaitre">{{ item.paiementCheque }}</td>
-                    <td class="text-center disparaitre">{{ item.paiementVirement }}</td>
-                    <td class="text-center disparaitre">{{ item.rendreMonnaie }}</td>
-                    <td class="text-center"><v-btn icon="mdi:mdi-eye" variant="text"/></td>
-                  </tr>
-                </tbody>
-                <tbody v-if="type === 'POT'">
-                  <tr v-for="(item, index) in historique"
-                      :key="`POT${index}`"
-                      @click="() => afficherDetail(item._id)">
-                  <td class="text-center">{{ new Date(item.date).toLocaleString() }}</td>
-                  <td class="text-center">{{ item.nom }}</td>
-                  <td class="text-center">
-                    <div v-if="item.rendreMonnaie < 0">
-                      Vous devez {{ item.rendreMonnaie * (-1) }} €
-                      <v-btn icon="mdi:mdi-eye" variant="text"/></div>
-                    <div v-else>Payé <v-btn icon="mdi:mdi-eye" variant="text"/></div>
-                  </td>
-                  </tr>
-                </tbody>
-              </v-table>
-            <br />
-          <v-pagination v-model="page"
-                        :length="paginationSize"
-                        prev-icon="mdi:mdi-arrow-left"
-                        next-icon="mdi:mdi-arrow-right"/>
-        </v-col>
-      </v-row>
+        <v-row>
+            <v-col v-if="historique && historique.length > 0" sm="12">
+                <h3>Historique {{ type }}</h3>
+                <generic-table v-if="type === 'SOUM'"
+                               :objects="historique"
+                               :attributes="attributesSoum"
+                               :actions-td="true"
+                               :dialog="true"
+                               v-model:pagination-size="paginationSize"
+                               v-model:page="page"
+                               v-model:nb-par-page="nombreParPage"
+                               @consulter="afficherDetail">
+                    <template v-slot:default="slotProps">
+                        <td>
+                            <v-btn-group variant="tonal">
+                                <v-btn icon="mdi:mdi-eye" variant="text"/>
+                            </v-btn-group>
+                        </td>
+                    </template>
+                </generic-table>
+                <generic-table v-if="type === 'POT'"
+                               :objects="historique"
+                               :attributes="attributesPot"
+                               :actions-td="true"
+                               :dialog="true"
+                               v-model:pagination-size="paginationSize"
+                               v-model:page="page"
+                               v-model:nb-par-page="nombreParPage"
+                               @consulter="afficherDetail">
+                    <template v-slot:default="slotProps">
+                        <td>
+                            <v-btn-group variant="tonal">
+                                <v-btn icon="mdi:mdi-eye" variant="text"/>
+                            </v-btn-group>
+                        </td>
+                    </template>
+                </generic-table>
+            </v-col>
+        </v-row>
     </v-container>
 
-  <v-dialog v-model="openDialog" class="v-container">
-    <v-card v-if="commande !== null">
-      <v-card-title>Détail commande</v-card-title>
-      <v-container v-if="type==='SOUM'">
-        <v-row>
-          <v-col sm="3">Barman</v-col>
-          <v-col sm="9">{{commande.barman.nom}} {{commande.barman.prenom}}</v-col>
-          <v-col sm="3">Date:</v-col>
-          <v-col sm="9">{{ new Date(commande.date).toLocaleString() }}</v-col>
-          <v-divider/>
-        </v-row>
-
-        <v-row v-if="commande.historique?.length > 0">
-            <v-col sm="12">Articles</v-col>
-            <ligne-article v-if="commande.historique" :items="commande.historique"/>
-            <v-divider/>
-        </v-row>
-        <v-row>
-          <v-col sm="12">Paiement</v-col>
-        </v-row>
-        <v-row v-if="commande.paiementCompte">
-          <v-col sm="6">Compte</v-col>
-          <v-col sm="6">{{commande.paiementCompte}} BN</v-col>
-        </v-row>
-        <v-row v-if="commande.paiementEspece">
-          <v-col sm="6">Espèce</v-col>
-          <v-col sm="6">{{commande.paiementEspece}} €</v-col>
-        </v-row>
-        <v-row v-if="commande.paiementCheque">
-          <v-col sm="6">Chèque</v-col>
-          <v-col sm="6">{{commande.paiementCheque}} €</v-col>
-        </v-row>
-        <v-row v-if="commande.paiementVirement">
-          <v-col sm="6">Virement</v-col>
-          <v-col sm="6">{{commande.paiementVirement}} €</v-col>
-        </v-row>
-        <v-row>
-          <v-col sm="6">Monnaie rendue</v-col>
-          <v-col sm="6">{{commande.rendreMonnaie}} €</v-col>
-        </v-row>
-        <v-divider/>
-        <v-row>
-          <v-col sm="6">Ancien solde</v-col>
-          <v-col sm="6">{{commande.ancienSolde}} BN</v-col>
-        </v-row>
-        <v-row>
-          <v-col sm="6">Nouveau solde</v-col>
-          <v-col sm="6">{{commande.nouveauSolde}} BN</v-col>
-        </v-row>
-        <v-row v-if="commande.commentaires">
-          <v-col sm="6">Commentaires</v-col>
-          <v-col sm="6">{{commande.commentaires}}</v-col>
-        </v-row>
-
-        <v-row v-if="type==='POT'">
-          <v-col sm="3">Date:</v-col>
-          <v-col sm="9">{{new Date(commande.date).toLocaleString()}}</v-col>
-          <v-col sm="3">Nom:</v-col>
-          <v-col sm="9">{{commande.nom}}</v-col>
-          <v-col sm="3">Participants:</v-col>
-<!--          <v-col sm="9">{{commande.participants.map((value, index) =>
-              (<Chip key={index + "participant"} size="small" label={value.nom + " " + value.prenom} />)}}</v-col>-->
-<!--          TODO::a modifier après vérification sur l'application en prod, participant n'existe pas dans commande-->
-            <v-row v-if="commande.historique?.length > 0">
-                <v-col sm="12">Articles</v-col>
-                <ligne-article v-if="commande.historique" :items="commande.historique"/>
-                <v-divider/>
-            </v-row>
-          <v-row>
-            <v-col sm="12">Paiement</v-col>
-          </v-row>
-          <v-row v-if="commande.paiementCompte">
-            <v-col sm="6">Compte</v-col>
-            <v-col sm="6">{{commande.paiementCompte}} BN</v-col>
-          </v-row>
-          <v-row v-if="commande.paiementEspece">
-            <v-col sm="6">Espèce</v-col>
-            <v-col sm="6">{{commande.paiementEspece}} €</v-col>
-          </v-row>
-          <v-row v-if="commande.paiementCheque">
-            <v-col sm="6">Espèce</v-col>
-            <v-col sm="6">{{commande.paiementCheque}} €</v-col>
-          </v-row>
-          <v-row v-if="commande.paiementVirement">
-            <v-col sm="6">Espèce</v-col>
-            <v-col sm="6">{{commande.paiementVirement}} €</v-col>
-          </v-row>
-          <v-row>
-            <v-col sm="6">Monnaie rendue</v-col>
-            <v-col sm="6">{{commande.rendreMonnaie}} €</v-col>
-          </v-row>
-        </v-row>
-      </v-container>
-      <v-card-actions class="justify-end">
-        <v-btn @click="handleClose" color="primary">Fermer</v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
+    <historique-soum-dialog v-model:open-dialog="openDialog" v-if="type === 'SOUM'"
+                            :commande="commande"></historique-soum-dialog>
+    <historique-pot-dialog v-model:open-dialog="openDialog" v-if="type === 'POT'"
+                           :commande="commande"></historique-pot-dialog>
 
 </template>
 
@@ -171,77 +55,105 @@ import {onMounted, watch} from "#imports";
 import HistoriqueInterface from "~/interfaces/HistoriqueInterface";
 import HistoriqueLigneInterface from "~/interfaces/HistoriqueLigneInterface";
 import HistoriqueLigneResponseInterface from "~/interfaces/HistoriqueLigneResponseInterface";
-import LigneArticle from "~/components/LigneArticle.vue";
+import HistoriquePotDialog from "~/components/HistoriquePotDialog.vue";
+import {Ref} from "vue";
+import AttributeInterface from "~/interfaces/AttributeInterface";
 
-const loading = ref<boolean>(true)
-const openDialog = ref<boolean>(false)
-const nombreParPage = ref<number>(10)
-const total = ref<number>(0)
-const page = ref<number>(1)
-const paginationSize = ref<number>(1)
-const historique = ref<Array<HistoriqueLigneInterface>>([])
-const commande = ref<HistoriqueLigneInterface>({} as HistoriqueLigneInterface)
+/**REFS*/
+
+const loading: Ref<boolean> = ref(true)
+const openDialog: Ref<boolean> = ref(false)
+const nombreParPage: Ref<string> = ref('10')
+const total: Ref<number> = ref(0)
+const page: Ref<number> = ref(1)
+const paginationSize: Ref<number> = ref(1)
+const historique: Ref<Array<HistoriqueLigneInterface>> = ref([])
+const commande: Ref<HistoriqueLigneInterface> = ref({} as HistoriqueLigneInterface)
+//atributs à afficher sur un écran de grande taille
+const attributesSoum: Ref<Array<AttributeInterface>> = ref([
+    {header: 'Date', attr: 'date', isDate: true},
+    {header: 'Ancien solde', attr: 'ancienSolde'},
+    {header: 'BN crédité(s)', attr: 'nouveauCredit'},
+    {header: 'BN débité(s)', attr: 'paiementCompte'},
+    {header: 'Nouveau solde', attr: 'nouveauSolde'},
+    {header: 'Espèce', attr: 'paiementEspece'},
+    {header: 'Chèque', attr: 'paiementCheque'},
+    {header: 'Virement', attr: 'paiementVirement'},
+    {header: 'Monnaie rendue', attr: 'rendreMonnaie'}] as Array<AttributeInterface>)
+//atributs à afficher sur un écran de petite taille
+const attributesPot: Ref<Array<AttributeInterface>> = ref([
+    {header: 'Date', attr: 'date', isDate: true},
+    {header: 'Nom', attr: 'nom'},
+    {header: 'Vous devez', attr: 'rendreMonnaie'}] as Array<AttributeInterface>)
 
 const props = defineProps({
     userId: {type: String, required: true},
     type: {type: String, required: true},
 })
 
-const setHistorique = (histo: HistoriqueInterface) => {
-    page.value = histo.page
-    nombreParPage.value = histo.nombre
-    total.value = histo.count
-  historique.value = histo.histo
-  paginationSize.value = Math.ceil(histo.count / histo.nombre)
-}
-
-const majUser = () => {
-  Fetch.requete(
-      {
-        url:`/users/historique/${props.type}/${props.userId}?page=${page.value}`,
-        data: { page: page.value },
-        method: 'GET',
-      },
-      setHistorique)
-}
-
-onMounted(()=>{
-  majUser()
-})
+/** WATCHES */
 
 watch(page, () => majUser())
+watch(nombreParPage, () => majUser())
 
-const afficherDetail = (identifiantHistorique: string) => {
-  Fetch.requete({ url: `/historique/${identifiantHistorique}`, method: 'GET' }, (resultat: HistoriqueLigneResponseInterface) => {
-    commande.value = resultat.doc
-    openDialog.value = true
-  })
-}
+/** LYFECYCLE */
 
-const handleClose = () => {
-  openDialog.value = false
+onMounted(() => {
+    majUser()
+})
+
+/** METHODS */
+
+/**
+ * Met à jour l'historique et la pagination
+ * @param histo l'historique de l'utilisateur
+ */
+const setHistorique = (histo: HistoriqueInterface) => {
+    total.value = histo.count
+    historique.value = histo.histo
+    paginationSize.value = Math.ceil(histo.count / histo.nombre)
 }
 
 /**
- * Affiche la page demandée
+ * Envoie une requète qui demande l'historique de l'utilisateur et actualise l'historique affiché
  */
-const afficherPage = (id: number) => {
-  loading.value = true
-  Fetch.requete({ url: `/users/historique/SOUM/${props.userId}?page=${id}`, method: 'GET' }, setHistorique);
+const majUser = () => {
+    Fetch.requete(
+        {
+            url: `/users/historique/${props.type}/${props.userId}`,
+            data: {page: page.value, nombre: nombreParPage.value},
+            method: 'POST',
+        },
+        setHistorique)
+}
+
+/**
+ * Envoie une requète qui demande le détail d'un élément de l'historique de l'utilisateur
+ * et ouvre le dialog correspondant
+ * @param identifiantHistorique l'identifiant de l'élément à afficher
+ */
+const afficherDetail = (identifiantHistorique: string) => {
+    Fetch.requete({
+        url: `/historique/${identifiantHistorique}`,
+        method: 'GET'
+    }, (resultat: HistoriqueLigneResponseInterface) => {
+        commande.value = resultat.doc
+        openDialog.value = true
+    })
 }
 
 </script>
 
 <style scoped>
 
-@media (max-width: 500px){
-  .disparaitre {
-    display: none !important;
-  }
+@media (max-width: 500px) {
+    .disparaitre {
+        display: none !important;
+    }
 }
 
-th{
-  font-weight: bold !important;
+th {
+    font-weight: bold !important;
 }
 
 </style>
