@@ -53,8 +53,7 @@
             </div>
         </v-form>
 
-        <historique-client v-if="userId" :user-id="userId" type="SOUM"></historique-client>
-        <historique-client v-if="userId" :user-id="userId" type="POT"></historique-client>
+        <historique-client v-if="userId" :user-id="userId"></historique-client>
         <ModalConfirmation v-model="openConfirmationDialog"
                            @confirmer="envoyerNouveauPwd"
                            titre="Envoyer nouveau mot de passe"

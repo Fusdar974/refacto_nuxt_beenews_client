@@ -4,38 +4,38 @@
       <v-card-title>Détail commande</v-card-title>
       <v-container>
         <v-row>
-            <v-col sm="3">Date:</v-col>
-            <v-col sm="9">{{ new Date(commande.date).toLocaleString() }}</v-col>
-            <v-col sm="3">Nom:</v-col>
-            <v-col sm="9">{{ commande.nom }}</v-col>
-            <v-row v-if="commande.historique?.length > 0">
-                <v-col sm="12">Articles</v-col>
-                <ligne-article v-if="commande.historique" :items="commande.historique"/>
-                <v-divider/>
-            </v-row>
-            <v-row>
-            <v-col sm="12">Paiement</v-col>
-          </v-row>
-          <v-row v-if="commande.paiementCompte">
-            <v-col sm="6">Compte</v-col>
-            <v-col sm="6">{{commande.paiementCompte}} BN</v-col>
-          </v-row>
-          <v-row v-if="commande.paiementEspece">
-            <v-col sm="6">Espèce</v-col>
-            <v-col sm="6">{{commande.paiementEspece}} €</v-col>
-          </v-row>
-          <v-row v-if="commande.paiementCheque">
-            <v-col sm="6">Espèce</v-col>
-            <v-col sm="6">{{commande.paiementCheque}} €</v-col>
-          </v-row>
-          <v-row v-if="commande.paiementVirement">
-            <v-col sm="6">Espèce</v-col>
-            <v-col sm="6">{{commande.paiementVirement}} €</v-col>
-          </v-row>
-          <v-row>
-            <v-col sm="6">Monnaie rendue</v-col>
-            <v-col sm="6">{{commande.rendreMonnaie}} €</v-col>
-          </v-row>
+          <v-col sm="3">Date:</v-col>
+          <v-col sm="9">{{ new Date(commande.date).toLocaleString() }}</v-col>
+          <v-col sm="3">Nom:</v-col>
+          <v-col sm="9">{{ commande.nom }}</v-col>
+        </v-row>
+        <v-row v-if="commande.historique?.length > 0">
+          <v-col sm="12">Articles</v-col>
+          <ligne-article v-if="commande.historique" :items="commande.historique"/>
+          <v-divider/>
+        </v-row>
+        <v-row>
+          <v-col sm="12">Paiement</v-col>
+        </v-row>
+        <v-row v-if="commande.paiementCompte && commande.paiementCompte > 0">
+          <v-col sm="6">Compte</v-col>
+          <v-col sm="6">{{commande.paiementCompte}} BN</v-col>
+        </v-row>
+        <v-row v-if="commande.paiementEspece  && commande.paiementEspece > 0">
+          <v-col sm="6">Espèce</v-col>
+          <v-col sm="6">{{commande.paiementEspece}} €</v-col>
+        </v-row>
+        <v-row v-if="commande.paiementCheque  && commande.paiementCheque > 0">
+          <v-col sm="6">Espèce</v-col>
+          <v-col sm="6">{{commande.paiementCheque}} €</v-col>
+        </v-row>
+        <v-row v-if="commande.paiementVirement  && commande.paiementVirement > 0">
+          <v-col sm="6">Espèce</v-col>
+          <v-col sm="6">{{commande.paiementVirement}} €</v-col>
+        </v-row>
+        <v-row>
+          <v-col sm="6">Monnaie rendue</v-col>
+          <v-col sm="6">{{commande.rendreMonnaie}} €</v-col>
         </v-row>
       </v-container>
       <v-card-actions class="justify-end">
