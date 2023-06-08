@@ -50,8 +50,7 @@
         </v-col>
       </v-row>
     </v-container>
-    <historique-client v-if="user" :userId="user._id" type="SOUM" />
-    <historique-client v-if="user" :userId="user._id" type="POT"/>
+    <historique-client v-if="user" :userId="user._id"/>
   </private-route>
 </template>
 
