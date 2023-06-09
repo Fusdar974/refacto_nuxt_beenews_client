@@ -121,6 +121,7 @@ const {
     totalPanierBeeNews
 } = storeToRefs(usePanierStore())
 
+
 const {formatToNumber, $reset} = usePanierStore()
 
 const {putSnackBarMessage} = useSnackbarStore()
@@ -132,6 +133,19 @@ const clientBNComputed = computed(() => {
         paiementCompte.value = clientBN
     }
     return clientBN
+})
+
+/** WATCHES */
+
+/**
+ * Modifie le step en cas de modification du panier
+ * Modifie la valeur du champ compte en cas de modification du panier ou du client
+ */
+watch([utilisateur, totalPanierBeeNews], (newValue, oldValue) => {
+    if (newValue[0] === oldValue[0]) {
+        stepPaiement.value = false
+    }
+    paiementCompte.value = totalPanierBeeNews.value
 })
 
 /** LIFECYCLE */
