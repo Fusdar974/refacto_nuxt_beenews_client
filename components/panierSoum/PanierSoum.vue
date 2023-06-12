@@ -23,14 +23,6 @@
                         prepend-avatar="/192.png"
                         :title="stepPaiement?'Paiement panier':'Détail panier'"
                         subtitle="Soum">
-                        <template v-slot:append>
-                            <v-btn-group density="compact">
-                                <v-btn v-if="utilisateur" class="font-weight-bold"
-                                       prepend-icon="mdi:mdi-cash-multiple">
-                                    {{ clientBNComputed }} BN
-                                </v-btn>
-                            </v-btn-group>
-                        </template>
                     </v-list-item>
                 </v-list>
             </v-card-title>
@@ -50,8 +42,11 @@
                                       :client-bn="clientBNComputed"
                                       @valide="(payable) => panierPayable = payable">
                 <v-select v-model="utilisateur"
+                          variant="outlined"
                           :items="utilisateurs"
-                          :item-title="(user) => `${user.nom}  ${user.prenom}`"
+                          :item-title="(user) => `${capitalize(user.nom)}  ${capitalize(user.prenom)}`"
+                          :suffix="`${clientBNComputed} BN`"
+                          class="mt-2"
                           return-object
                           label="Client"/>
             </panier-soum-paiment-step>
@@ -100,6 +95,7 @@ import UsersResponseInterface from "~/interfaces/UsersResponseInterface";
 import UserInterface from "~/interfaces/UserInterface";
 import ValeurBNResponseInterface from "~/interfaces/ValeurBNResponseInterface";
 import PanierSoumPaimentStep from "~/components/panierSoum/PanierSoumPaimentStep.vue";
+import capitalize from "~/functions/capitalize";
 
 /** DATAS */
 const menu = ref<boolean>(false)
@@ -125,6 +121,7 @@ const {
     totalPanierBeeNews
 } = storeToRefs(usePanierStore())
 
+
 const {formatToNumber, $reset} = usePanierStore()
 
 const {putSnackBarMessage} = useSnackbarStore()
@@ -136,6 +133,19 @@ const clientBNComputed = computed(() => {
         paiementCompte.value = clientBN
     }
     return clientBN
+})
+
+/** WATCHES */
+
+/**
+ * Modifie le step en cas de modification du panier
+ * Modifie la valeur du champ compte en cas de modification du panier ou du client
+ */
+watch([utilisateur, totalPanierBeeNews], (newValue, oldValue) => {
+    if (newValue[0] === oldValue[0]) {
+        stepPaiement.value = false
+    }
+    paiementCompte.value = totalPanierBeeNews.value
 })
 
 /** LIFECYCLE */
