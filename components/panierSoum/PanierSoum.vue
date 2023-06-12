@@ -161,6 +161,7 @@ onBeforeMount(() => {
             isLoading.value = false
         }, () => isLoading.value = false)
     }, () => isLoading.value = false)
+    paiementCompte.value = totalPanierBeeNews.value  
 })
 
 /** METHODS */
