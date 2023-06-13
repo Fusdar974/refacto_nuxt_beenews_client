@@ -101,6 +101,7 @@ const konami: Ref<boolean> = ref(false)
 
 const {mdAndUp} = useDisplay()
 const {panierVide} = storeToRefs(usePanierStore())
+const {resetPanier: $reset} = usePanierStore()
 
 const {
     open: snackbarStoreOpen,
@@ -142,6 +143,7 @@ const logout = () => {
     isLoading.value = true
     setAuthenticate(false, initMenu);
     useRouter().push('/');
+    resetPanier();
     localStorage.clear();
 }
 
