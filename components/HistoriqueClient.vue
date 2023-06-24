@@ -14,7 +14,6 @@
           <generic-table :objects="historique"
                          :attributes="attributesComputed"
                          :actions-td="true"
-                         :dialog="true"
                          v-model:pagination-size="paginationSize"
                          v-model:page="page"
                          v-model:nb-par-page="nombreParPage"

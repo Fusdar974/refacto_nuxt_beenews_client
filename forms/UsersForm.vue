@@ -24,14 +24,12 @@
                 </v-btn>
             </div>
             <h4>Profils</h4>
-            <div v-for="(profil, index) in profils" :key="index">
-                <v-checkbox
-                        v-model="selectedUser.profils"
-                        :label="profil.nom"
-                        :value="profil"
-                        color="indigo"
+                <v-checkbox v-for="(profil, index) in profils" :key="index"
+                            v-model="selectedUser.profils"
+                            :label="profil.nom"
+                            :value="profil"
+                            color="primary"
                 ></v-checkbox>
-            </div>
             <v-checkbox label="Compte désactivé"
                         v-model="selectedUser.isDesactive"
                         color="red"
@@ -117,6 +115,7 @@ titleAppBar.value = props.action === 'edit' && "Modification du client"
     || props.action === 'add' && "Ajout d'un client"
     || "Informations du client"
 
+watch(() => selectedUser.value.profils, newValue => console.log(newValue))
 /**
  * avant que la page soit montée dans le DOM
  * si le mode n'est pas en création, charge l'utilisateur sélectionné
