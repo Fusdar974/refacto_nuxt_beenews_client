@@ -123,6 +123,12 @@ const panierPayable = computed(() => manqueEuro.value <= 0 && manqueBeeNews.valu
  */
 watch(() => panierPayable.value, newValue => emit('valide', newValue))
 
+/** LIFECYCLE */
+
+onMounted(() => {
+    emit('valide', panierPayable.value)
+})
+
 /** METHODS */
 
 /**

@@ -1,7 +1,7 @@
 <template>
     <v-container>
         <v-row class="align-center justify-space-between">
-            {{ `${article.quantite}x ${article.nom}` }}
+            {{ `${article.quantite} x ${article.nom}` }}
             <v-btn-group>
                 <v-btn icon="mdi:mdi-plus"
                        :disabled="!articleExists(article)"

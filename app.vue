@@ -4,10 +4,10 @@
         <v-layout v-if="isAuthenticated" class="root">
             <drawer v-model="mobileOpen">
                 <v-container style="height: calc(100% - 65px)" class="pb-1">
-                    <v-row class="flex-column h-100">
+                    <v-row class="h-100">
                         <v-col>
                             <v-list>
-                                <v-list-item v-for="(menu, index) in menus as Array<MenuInterface>"
+                                <v-list-item v-for="(menu, index) in menus"
                                              :key="index"
                                              :value="menu"
                                              @click="handleOnClick(menu)"
@@ -19,9 +19,9 @@
                                 </v-list-item>
                             </v-list>
                         </v-col>
-                        <v-spacer/>
-                        <disconnect-button :fonc-deco="logout"
-                                           class="mr-2"/>
+                        <v-col class="d-flex align-end justify-center mr-0">
+                            <disconnect-button :fonc-deco="logout"/>
+                        </v-col>
                     </v-row>
                 </v-container>
             </drawer>
@@ -73,18 +73,14 @@
 </template>
 
 <script setup lang="ts">
-import jwtDecode from "jwt-decode";
 import {useRouter} from "#app";
-import {onMounted} from "#imports";
 import MenuInterface from "~/interfaces/MenuInterface";
-import JwtPayloadInterface from "~/interfaces/JwtPayloadInterface";
 import DisconnectButton from "~/components/DisconnectButton.vue";
 import Drawer from "~/components/Drawer.vue"
 import LoginForm from "~/forms/LoginForm.vue";
 import {useDisplay} from "vuetify";
 import {useSnackbarStore} from "~/stores/snackbarStore";
 import {storeToRefs} from "pinia";
-import Fetch from "~/services/FetchService";
 import {useAuthenticateStore} from "~/stores/authenticateStore";
 import {useMenuStore} from "~/stores/menuStore";
 import PanierSoum from "~/components/panierSoum/PanierSoum.vue";
