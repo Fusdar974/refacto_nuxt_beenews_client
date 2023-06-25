@@ -7,6 +7,7 @@ import {useRouter} from "#app";
 import Fetch from "~/services/FetchService";
 import {onMounted} from "#imports";
 import UserResponseInterface from "~/interfaces/UserResponseInterface";
+import ConnectedUserInterface from "~/interfaces/ConnectedUserInterface";
 
 export const useAuthenticateStore = defineStore('authenticate', () => {
 
@@ -32,13 +33,19 @@ export const useAuthenticateStore = defineStore('authenticate', () => {
     /** Computed */
 
     const userComputed = computed(() => {
-        const user = {
+        const user: ConnectedUserInterface = {
             _id: tokenDecode.value?.userId,
             nom: capitalyze(tokenDecode.value?.nom),
             prenom: capitalyze(tokenDecode.value?.prenom),
             initiales: `${tokenDecode.value?.nom.slice(0, 1)}${tokenDecode.value?.prenom.slice(0, 1)}`.toUpperCase()
         }
-        return tokenDecode.value ? user : {_id: undefined, nom: undefined, prenom: undefined, compte: undefined}
+        return tokenDecode.value ? user : {
+            _id: undefined,
+            nom: undefined,
+            prenom: undefined,
+            compte: undefined,
+            initiales: undefined
+        }
     })
 
     const isAdminComputed = computed(() =>
