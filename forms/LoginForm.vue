@@ -62,13 +62,13 @@
           <v-btn-group>
             <v-btn @click="handleSubmit"
                    color="secondary"
+                   :loading="!!enCoursDeConnexion"
                    class="mt-2">Consommer</v-btn>
             <v-btn @click="handleClose"
                    variant="outlined"
                    color="primary"
                    class="mt-2 ma-0">Annuler</v-btn>
           </v-btn-group>
-
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -95,14 +95,20 @@ const connexionServeur = () =>{
     login: login.value,
     password: password.value,
   }
-  const reussite = (retour: LoginResponseInterface) => {
-    enCoursDeConnexion.value = false
-    if(retour){
-        localStorage.setItem("token", retour.token)
-        submit()
-    }else message.value = "Login/Password incorrect"
-  }
-  Fetch.requete({ url: "/login", data: identification }, reussite)
+    const reussite = (retour: LoginResponseInterface) => {
+        enCoursDeConnexion.value = false
+        if (retour) {
+            localStorage.setItem("token", retour.token)
+            submit()
+        } else message.value = "Login/Password incorrect"
+    }
+    Fetch.requete(
+        {url: "/login", data: identification},
+        reussite,
+        () => {
+            message.value = "Login/Password incorrect"
+            enCoursDeConnexion.value = false
+        })
 }
 
 interface TextField {
