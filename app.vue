@@ -7,7 +7,7 @@
                     <v-row class="h-100">
                         <v-col>
                             <v-list>
-                                <v-list-item v-for="(menu, index) in menus"
+                                <v-list-item v-for="(menu, index) in menus as Array<MenuInterface>"
                                              :key="index"
                                              :value="menu"
                                              @click="handleOnClick(menu)"
@@ -40,16 +40,18 @@
             </v-main>
             <v-snackbar v-model="snackbarStoreOpen"
                         :color="snackbarStoreCouleur"
-                        timeout="3000">
-                <v-container class="pa-0">
+                        variant="elevated"
+                        timeout="30000">
+                <v-container class="pa-3">
                     <v-row class="align-center">
                         <v-col cols="2">
                             <v-icon
+                                size="26"
                                 :icon="`mdi:mdi-${
-                                snackbarStoreCouleur==='success'?'check':'close'
+                                snackbarStoreCouleur==='success'?'check':'alert'}
                             }-circle-outline`"/>
                         </v-col>
-                        <v-col>{{ snackbarStoreMessage }}</v-col>
+                        <v-col style="font-size: 1rem">{{ snackbarStoreMessage }}</v-col>
                     </v-row>
                 </v-container>
             </v-snackbar>
