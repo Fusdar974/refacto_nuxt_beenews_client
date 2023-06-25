@@ -17,7 +17,11 @@
                     <p>{{ userComputed.prenom }}</p>
                 </v-col>
                 <v-col cols="3" class="pa-1">
-                    <v-btn variant="text" size="40" style="font-size: 0.9rem">{{ userComputed.compte }} BN</v-btn>
+                    <v-btn variant="text"
+                           size="40"
+                           style="font-size: 0.9rem"
+                           @click="calculateUserBn">{{ userBn }} BN
+                    </v-btn>
                 </v-col>
             </v-row>
         </v-container>
@@ -38,7 +42,8 @@ const props = defineProps({
 
 const {mdAndUp} = useDisplay()
 
-const {userComputed} = storeToRefs(useAuthenticateStore())
+const {userComputed, userBn} = storeToRefs(useAuthenticateStore())
+const {calculateUserBn} = useAuthenticateStore()
 
 const emit = defineEmits(['update:modelValue'])
 

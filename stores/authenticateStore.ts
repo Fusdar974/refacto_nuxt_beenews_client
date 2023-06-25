@@ -6,10 +6,14 @@ import jwtDecode from "jwt-decode";
 import {useRouter} from "#app";
 import Fetch from "~/services/FetchService";
 import {onMounted} from "#imports";
+import UserResponseInterface from "~/interfaces/UserResponseInterface";
 
 export const useAuthenticateStore = defineStore('authenticate', () => {
+
+    /** Reference */
     const isAuthenticated: Ref<boolean> = ref(false)
     const isLoading: Ref<boolean> = ref(false)
+
 
     const initMenu = <Array<MenuInterface>>[{
         _id: 1,
@@ -21,50 +25,32 @@ export const useAuthenticateStore = defineStore('authenticate', () => {
 
     const tokenDecode = ref<JwtPayloadInterface>()
 
+    const profils = ref<Array<string>>([])
+
+    const userBn = ref<number>(0)
+
+    /** Computed */
+
     const userComputed = computed(() => {
         const user = {
+            _id: tokenDecode.value?.userId,
             nom: capitalyze(tokenDecode.value?.nom),
             prenom: capitalyze(tokenDecode.value?.prenom),
-            compte: tokenDecode.value?.compte,
             initiales: `${tokenDecode.value?.nom.slice(0, 1)}${tokenDecode.value?.prenom.slice(0, 1)}`.toUpperCase()
         }
-        return tokenDecode.value ? user : {}
+        return tokenDecode.value ? user : {_id: undefined, nom: undefined, prenom: undefined, compte: undefined}
     })
 
-    const capitalyze = (s: string = '') =>
-        `${s.slice(0, 1).toUpperCase()}${s.slice(1, s.length).toLowerCase()}`
+    const isAdminComputed = computed(() =>
+        profils.value.includes('Admin'))
 
-    const setAuthenticate = (boolAuth: boolean, newMenus: Array<MenuInterface>) => {
-        isAuthenticated.value = boolAuth
-        menus.value = newMenus
-        isLoading.value = false
-    }
-    const login = () => {
-        isLoading.value = true
-        const token = localStorage.getItem('token');
-        if (token) {
-            tokenDecode.value = jwtDecode(token);
-        }
-    }
+    const isOpenSoumComputed = computed(() =>
+        profils.value.includes('OpenSoum'))
 
-    const logout = () => {
-        isLoading.value = true
-        setAuthenticate(false, initMenu);
-        useRouter().push('/').then(() => localStorage.clear())
-    }
-
-    Fetch.setFonctionDeco(logout);
-
-    onMounted(() => {
-        if (typeof localStorage.getItem('token') === 'string') {
-            login();
-        }
-    })
-
+    /** Watches */
     watch(tokenDecode, newTokenDecode => {
         if (newTokenDecode) {
             localStorage.setItem('idCompte', newTokenDecode.userId);
-            console.log(userComputed.value)
             const expire = new Date((newTokenDecode.exp || 0) * 1000) < new Date();
             if (!expire) {
                 setAuthenticate(true, newTokenDecode.droits);
@@ -76,5 +62,81 @@ export const useAuthenticateStore = defineStore('authenticate', () => {
         }
     })
 
-    return {isAuthenticated, login, logout, menus, userComputed}
+    /** LifeCycle */
+    onMounted(() => {
+        if (typeof localStorage.getItem('token') === 'string') {
+            login();
+        }
+    })
+
+    /** Methods */
+    /**
+     * Permet de mettre la première lettre d'un mot en majuscule
+     * @param s
+     */
+    const capitalyze = (s: string = '') =>
+        `${s.slice(0, 1).toUpperCase()}${s.slice(1, s.length).toLowerCase()}`
+
+    /**
+     * Met à jour l'autentification de l'application
+     * @param boolAuth
+     * @param newMenus
+     */
+    const setAuthenticate = (boolAuth: boolean, newMenus: Array<MenuInterface>) => {
+        isAuthenticated.value = boolAuth
+        menus.value = newMenus
+        isLoading.value = false
+    }
+
+    /**
+     * Décode le token de l'utilisateur
+     */
+    const login = () => {
+        isLoading.value = true
+        const token = localStorage.getItem('token');
+        if (token) {
+            tokenDecode.value = jwtDecode(token);
+            userBn.value = tokenDecode.value?.compte ?? 0
+            Fetch.requete({
+                url: `/users/${tokenDecode.value?.userId}`,
+                method: 'GET'
+            }, (resultUser: UserResponseInterface) => {
+                profils.value = resultUser.user.profils?.map(profil => profil.nom) ?? []
+            })
+        }
+    }
+
+    /**
+     * Met en place la déconnection de l'utilisateur
+     */
+    const logout = () => {
+        isLoading.value = true
+        setAuthenticate(false, initMenu);
+        useRouter().push('/').then(() => localStorage.clear())
+    }
+
+    /**
+     * Récupère en BDD les BN de l'utilisateur
+     */
+    const calculateUserBn = () => {
+        Fetch.requete({url: `/users/${userComputed.value._id}`, method: 'GET'},
+            (resultUser: UserResponseInterface) => {
+                userBn.value = resultUser.user.compte ?? 0
+            })
+    }
+
+    Fetch.setFonctionDeco(logout);
+
+
+    return {
+        isAuthenticated,
+        login,
+        logout,
+        menus,
+        userComputed,
+        isAdminComputed,
+        isOpenSoumComputed,
+        userBn,
+        calculateUserBn
+    }
 })
