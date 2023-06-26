@@ -1,5 +1,5 @@
 <template>
-    <div class="produit-card-container ma-5">
+    <div class="produit-card-container ma-0">
         <produit-card v-for="(a, index) in articles"
                       :key="a._id"
                       :shown="isShownArticle(a)"
