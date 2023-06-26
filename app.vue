@@ -41,7 +41,7 @@
             <v-snackbar v-model="snackbarStoreOpen"
                         :color="snackbarStoreCouleur"
                         variant="elevated"
-                        timeout="30000">
+                        :timeout="snackbarStoreCouleur === 'error' ? 10000 : 5000">
                 <v-container class="pa-3">
                     <v-row class="align-center">
                         <v-col cols="2">
