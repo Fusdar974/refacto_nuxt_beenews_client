@@ -1,4 +1,5 @@
 <template>
+    <LazyVitePwaManifest/>
     <NuxtLayout>
         <!--        <div class="imageFondChargement"/>-->
         <v-layout v-if="isAuthenticated" class="root">

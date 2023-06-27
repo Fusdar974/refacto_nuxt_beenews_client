@@ -1,4 +1,4 @@
-import { defineNuxtConfig } from 'nuxt/config'
+import {defineNuxtConfig} from 'nuxt/config'
 import vuetify from 'vite-plugin-vuetify'
 
 // https://v3.nuxtjs.org/api/configuration/nuxt.config
@@ -21,21 +21,70 @@ export default defineNuxtConfig({
         },
     },
     modules: [
+        '@vite-pwa/nuxt',
         '@pinia/nuxt',
         // @ts-ignore
         // this adds the vuetify vite plugin
         // also produces type errors in the current beta release
-        async (options, nuxt) => { nuxt.hooks.hook('vite:extendConfig', config => config.plugins.push(vuetify()))}
+        async (options, nuxt) => {
+            nuxt.hooks.hook('vite:extendConfig', config => config.plugins.push(vuetify()))
+        }
     ],
     buildModules: [
         '@nuxtjs/composition-api/module',
         ['@pinia/nuxt'],
     ],
-    pinia:{
-        autoImports:[
+    pinia: {
+        autoImports: [
             // automatically imports `defineStore`
             'defineStore', // import { defineStore } from 'pinia'
             ['defineStore', 'definePiniaStore'], // import { defineStore as definePiniaStore } from 'pinia'
         ]
+    },
+    pwa: {
+        manifest: {
+            name: 'Beenews',
+            short_name: 'Beenews',
+            description: 'Application de l\'association Beenews',
+            icons: [
+                {
+                    src: 'icons/icon_48x48.png',
+                    sizes: '48x48',
+                    type: 'image/png',
+                },
+                {
+                    src: 'icons/icon_72x72.png',
+                    sizes: '72x72',
+                    type: 'image/png',
+                },
+                {
+                    src: 'icons/icon_96x96.png',
+                    sizes: '96x96',
+                    type: 'image/png',
+                },
+                {
+                    src: 'icons/icon_144x144.png',
+                    sizes: '144x144',
+                    type: 'image/png',
+                },
+                {
+                    src: 'icons/icon_192x192.png',
+                    sizes: '192x192',
+                    type: 'image/png',
+                },
+                {
+                    src: 'icons/icon_512x512.png',
+                    sizes: '512x512',
+                    type: 'image/png',
+                }
+            ]
+        },
+        workbox: {
+            navigateFallback: '/',
+        },
+        devOptions: {
+            enabled: true,
+            type: 'module',
+        }
     }
 })
