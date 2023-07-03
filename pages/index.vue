@@ -38,17 +38,17 @@ const majUser = (id: string | null) => {
   if (typeof id !== "undefined" && id !== "" && id) {
     Fetch.requete({ url: `/users/${id}`, method: 'GET' }, (resultUser: UserResponseInterface) => {
       user.value = resultUser.user
-      if (resultUser.user.compte >= 100) {
-        messageHumourMylene.value = "Il y a urgence, je peux être volontaire désigné pour t'aider à utiliser tes BNs. Signé: little gecko";
-      } else if (resultUser.user.compte >= 50 && resultUser.user.compte < 100) {
-        messageHumourMylene.value = "Pour information le SOUM se trouve au milieu du bâtiment, ne stocke pas les BNs on n'est pas dans une banque."
-      } else if (resultUser.user.compte >= 40 && resultUser.user.compte < 50) {
-        messageHumourMylene.value = "Purée tu es riche. Pense à payer ton coup pour fêter ça !";
-      } else if (resultUser.user.compte >= 30 && resultUser.user.compte < 40) {
-        messageHumourMylene.value = "Tu consommes c'est bien, continue sur ta lancée.";
-      } else if (resultUser.user.compte >= 20 && resultUser.user.compte < 30) {
-        messageHumourMylene.value = "Tu tiens le ryhtme, tu fais vivre le SOUM je te félicite.";
-      } else if (resultUser.user.compte >= 10 && resultUser.user.compte < 20) {
+        if (resultUser.user.compte >= 100) {
+            messageHumourMylene.value = "Il y a urgence, je peux être volontaire désigné pour t'aider à utiliser tes BNs. Signé: little gecko";
+        } else if (resultUser.user.compte >= 50 && resultUser.user.compte < 100) {
+            messageHumourMylene.value = "Pour information le SOUM se trouve au milieu du bâtiment, ne stocke pas les BNs on n'est pas dans une banque."
+        } else if (resultUser.user.compte >= 40 && resultUser.user.compte < 50) {
+            messageHumourMylene.value = "Purée tu es riche. Pense à payer ton coup pour fêter ça !";
+        } else if (resultUser.user.compte >= 30 && resultUser.user.compte < 40) {
+            messageHumourMylene.value = "Tu consommes c'est bien, continue sur ta lancée.";
+        } else if (resultUser.user.compte >= 20 && resultUser.user.compte < 30) {
+            messageHumourMylene.value = "Tu tiens le ryhtme, tu fais vivre le SOUM je te félicite.";
+        } else if (resultUser.user.compte >= 10 && resultUser.user.compte < 20) {
         messageHumourMylene.value = "Mangez bougez ... vu ton compte c'est plus \"buvez mangez\" ! ";
       } else if (resultUser.user.compte >= 0 && resultUser.user.compte < 10) {
         messageHumourMylene.value = "Il faut penser à ramener des sous ou taxer les autres pour consommer. Super PROMO pour une carte achetée = une carte achetée.";

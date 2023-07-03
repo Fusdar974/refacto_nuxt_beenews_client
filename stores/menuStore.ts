@@ -1,8 +1,7 @@
-import { defineStore } from 'pinia'
-import {Ref} from "vue";
+import {defineStore} from 'pinia'
 
 export const useMenuStore = defineStore('menu', () => {
-    const titleAppBar: Ref<string> = ref('Accueil')
+    const titleAppBar = ref<string>('Accueil')
 
     return{titleAppBar}
 })

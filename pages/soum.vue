@@ -38,6 +38,7 @@ import ProduitsListFilterInterface from "~/interfaces/ProduitsListFilterInterfac
 import {useMenuStore} from "~/stores/menuStore";
 import {storeToRefs} from "pinia";
 import {usePanierStore} from "~/stores/panierStore";
+import {Ref} from "vue";
 
 /** REFS */
 const typeproduits = ref<Array<TypeProduitInterface>>([])
