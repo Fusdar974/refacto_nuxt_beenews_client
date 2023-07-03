@@ -12,14 +12,19 @@ export default defineNuxtConfig({
     build: {
         transpile: ['vuetify'],
     },
+    vite: {
+        vue: {
+            script: {
+                defineModel: true,
+                propsDestructure: true,
+            },
+        }
+    },
     modules: [
         '@vite-pwa/nuxt',
         '@pinia/nuxt'
     ],
-    buildModules: [
-        '@nuxtjs/composition-api/module',
-        ['@pinia/nuxt'],
-    ],
+    buildModules: ['@nuxtjs/composition-api/module'],
     pinia: {
         autoImports: [
             // automatically imports `defineStore`
