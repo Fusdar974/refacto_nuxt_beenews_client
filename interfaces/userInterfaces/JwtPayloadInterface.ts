@@ -1,5 +1,5 @@
 import {JwtPayload} from "jwt-decode";
-import MenuInterface from "@/interfaces/MenuInterface";
+import MenuInterface from "~/interfaces/MenuInterface";
 
 interface JwtPayloadInterface extends JwtPayload {
     compte: number,

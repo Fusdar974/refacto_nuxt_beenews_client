@@ -5,10 +5,10 @@
         <template v-slot:activator="{ props }">
             <v-btn class="text-none"
                    :disabled="isLoading"
-                   stacked
+                   :stacked="true"
                    v-bind="props">
                 <v-badge color="secondary"
-                         inline
+                         :inline="true"
                          :model-value="!!nombreTotalArticles"
                          max="99"
                          :content="nombreTotalArticles">
@@ -94,12 +94,12 @@ import {storeToRefs} from "pinia";
 import {useSnackbarStore} from "~/stores/snackbarStore";
 import ArticlePotInterface from "~/interfaces/potsInterfaces/ArticlePotInterface";
 import Fetch from "~/services/FetchService";
-import UsersResponseInterface from "~/interfaces/UsersResponseInterface";
-import UserInterface from "~/interfaces/UserInterface";
+import UserInterface from "~/interfaces/userInterfaces/UserInterface";
 import ValeurBNResponseInterface from "~/interfaces/ValeurBNResponseInterface";
 import PanierSoumPaimentStep from "~/components/panierSoum/PanierSoumPaimentStep.vue";
 import capitalize from "~/functions/capitalize";
 import {useAuthenticateStore} from "~/stores/authenticateStore";
+import ResponseListInterface from "~/interfaces/ResponseListInterface";
 
 /** DATAS */
 const menu = ref<boolean>(false)
@@ -174,7 +174,7 @@ onBeforeMount(() => {
         Fetch.requete({
             url: '/users',
             data: {page: 1, nombre: 1000, isDesactive: false}
-        }, (resultUtil: UsersResponseInterface) => {
+        }, (resultUtil: ResponseListInterface<UserInterface>) => {
             utilisateurs.value = resultUtil.documents
             if (!isOpenSoumComputed.value) {
                 utilisateur.value = utilisateurs.value?.find(u =>

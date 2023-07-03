@@ -1,13 +1,12 @@
 import {defineStore} from 'pinia'
-import {Ref} from "vue";
 import MenuInterface from "~/interfaces/MenuInterface";
-import JwtPayloadInterface from "~/interfaces/JwtPayloadInterface";
+import JwtPayloadInterface from "~/interfaces/userInterfaces/JwtPayloadInterface";
 import jwtDecode from "jwt-decode";
 import {useRouter} from "#app";
 import Fetch from "~/services/FetchService";
 import {onMounted} from "#imports";
-import UserResponseInterface from "~/interfaces/UserResponseInterface";
-import ConnectedUserInterface from "~/interfaces/ConnectedUserInterface";
+import ConnectedUserInterface from "~/interfaces/userInterfaces/ConnectedUserInterface";
+import UserInterface from "~/interfaces/userInterfaces/UserInterface";
 
 export const useAuthenticateStore = defineStore('authenticate', () => {
 
@@ -107,7 +106,7 @@ export const useAuthenticateStore = defineStore('authenticate', () => {
             Fetch.requete({
                 url: `/users/${tokenDecode.value?.userId}`,
                 method: 'GET'
-            }, (resultUser: UserResponseInterface) => {
+            }, (resultUser: { user: UserInterface }) => {
                 profils.value = resultUser.user.profils?.map(profil => profil.nom) ?? []
             })
         }
@@ -127,7 +126,7 @@ export const useAuthenticateStore = defineStore('authenticate', () => {
      */
     const calculateUserBn = () => {
         Fetch.requete({url: `/users/${userComputed.value._id}`, method: 'GET'},
-            (resultUser: UserResponseInterface) => {
+            (resultUser: { user: UserInterface }) => {
                 userBn.value = resultUser.user.compte ?? 0
             })
     }

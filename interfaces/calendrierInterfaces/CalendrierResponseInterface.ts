@@ -1,4 +1,4 @@
-import CalendrierJourInterface from "@/interfaces/CalendrierInterfaces/CalendrierJourInterface";
+import CalendrierJourInterface from "~/interfaces/calendrierInterfaces/CalendrierJourInterface";
 
 interface CalendrierResponseInterface{
     calendrier: Array<CalendrierJourInterface>

@@ -35,7 +35,7 @@
 
 <script setup lang="ts">
 
-import CalendrierJourInterface from "~/interfaces/CalendrierInterfaces/CalendrierJourInterface";
+import CalendrierJourInterface from "~/interfaces/calendrierInterfaces/CalendrierJourInterface";
 import {useDisplay} from "vuetify";
 
 const props = defineProps({

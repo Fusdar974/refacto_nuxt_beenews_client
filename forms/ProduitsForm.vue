@@ -79,10 +79,9 @@ import {storeToRefs} from "pinia"
 import {useSnackbarStore} from "~/stores/snackbarStore"
 import {useVuelidate} from '@vuelidate/core'
 import {required} from '@vuelidate/validators'
-import ProduitResponseInterface from "~/interfaces/ProduitResponseInterface"
-import ProduitInterface from "~/interfaces/ProduitInterface"
-import TypeProduitInterface from "~/interfaces/TypeProduitInterface"
-import TypeInterface from "~/interfaces/TypeProduitInterface"
+import ProduitInterface from "~/interfaces/produitInterfaces/ProduitInterface"
+import TypeProduitInterface from "~/interfaces/produitInterfaces/TypeProduitInterface"
+import TypeInterface from "~/interfaces/produitInterfaces/TypeProduitInterface"
 import ImageResultInterface from "~/interfaces/ImageResultInterface";
 import serverconfig from "~/serverconfig";
 import {useMenuStore} from "~/stores/menuStore";
@@ -151,9 +150,14 @@ watch(selectedProduit, newValue => console.log(newValue))
  */
 onBeforeMount(() => {
   if (mode.value !== CREATE) {
-    Fetch.requete({url: `/produits/${props.produitId}`, method: 'GET'}, (resultProduits: ProduitResponseInterface) => {
-      selectedProduit.value = resultProduits.produit
-    })
+      Fetch.requete(
+          {
+              url: `/produits/${props.produitId}`,
+              method: 'GET'
+          },
+          (resultProduits: { produit: ProduitInterface }) => {
+              selectedProduit.value = resultProduits.produit
+          })
   } else {
     selectedProduit.value = {
       nom: "",

@@ -1,40 +1,40 @@
 <template>
-  <v-container class="ma-1">
-    <v-row>
-      <v-col  sm="12">
-        <v-tabs v-model="type"
-                center-active
-                color="primary"
-                slider-color="secondary"
-                align-tabs="center ma-3">
-          <v-tab :value="'SOUM'">HISTORIQUE SOUM</v-tab>
-          <v-tab v-if="hasPot" :value="'POT'">HISTORIQUE POT</v-tab>
-        </v-tabs>
-        <div v-if="historique && historique.length > 0">
-          <generic-table :objects="historique"
-                         :attributes="attributesComputed"
-                         :actions-td="true"
-                         v-model:pagination-size="paginationSize"
-                         v-model:page="page"
-                         v-model:nb-par-page="nombreParPage"
-                         @consulter="afficherDetail">
-            <template v-slot:default="slotProps">
-              <td>
-                <v-btn-group variant="tonal">
-                  <v-btn icon="mdi:mdi-eye" variant="text"/>
-                </v-btn-group>
-              </td>
-            </template>
-          </generic-table>
-        </div>
-      </v-col>
-    </v-row>
-  </v-container>
+    <v-container class="ma-1">
+        <v-row>
+            <v-col sm="12">
+                <v-tabs v-model="type"
+                        center-active
+                        color="primary"
+                        slider-color="secondary"
+                        align-tabs="center ma-3">
+                    <v-tab :value="'SOUM'">HISTORIQUE SOUM</v-tab>
+                    <v-tab v-if="hasPot" :value="'POT'">HISTORIQUE POT</v-tab>
+                </v-tabs>
+                <div v-if="historique && historique.length > 0">
+                    <generic-table :objects="historique"
+                                   :attributes="attributesComputed"
+                                   :actions-td="true"
+                                   v-model:pagination-size="paginationSize"
+                                   v-model:page="page"
+                                   v-model:nb-par-page="nombreParPage"
+                                   @consulter="afficherDetail">
+                        <template v-slot:default="slotProps">
+                            <td>
+                                <v-btn-group variant="tonal">
+                                    <v-btn icon="mdi:mdi-eye" variant="text"/>
+                                </v-btn-group>
+                            </td>
+                        </template>
+                    </generic-table>
+                </div>
+            </v-col>
+        </v-row>
+    </v-container>
 
-  <historique-soum-dialog v-model:open-dialog="openDialog" v-if="type === 'SOUM'"
-                          :commande="commande"></historique-soum-dialog>
-  <historique-pot-dialog v-model:open-dialog="openDialog" v-if="type === 'POT'"
-                         :commande="commande"></historique-pot-dialog>
+    <historique-soum-dialog v-model:open-dialog="openDialog" v-if="type === 'SOUM'"
+                            :commande="commande"></historique-soum-dialog>
+    <historique-pot-dialog v-model:open-dialog="openDialog" v-if="type === 'POT'"
+                           :commande="commande"></historique-pot-dialog>
 
 </template>
 
@@ -42,9 +42,8 @@
 
 import Fetch from "~/services/FetchService";
 import {onMounted, watch} from "#imports";
-import HistoriqueInterface from "~/interfaces/HistoriqueInterface";
-import HistoriqueLigneInterface from "~/interfaces/HistoriqueLigneInterface";
-import HistoriqueLigneResponseInterface from "~/interfaces/HistoriqueLigneResponseInterface";
+import HistoriqueInterface from "~/interfaces/historiqueInterfaces/HistoriqueInterface";
+import HistoriqueLigneInterface from "~/interfaces/historiqueInterfaces/HistoriqueLigneInterface";
 import HistoriquePotDialog from "~/components/HistoriquePotDialog.vue";
 import {Ref} from "vue";
 import AttributeInterface from "~/interfaces/AttributeInterface";
@@ -95,13 +94,13 @@ const attributesComputed = computed(() =>
 
 onMounted(() => {
     majUser()
-  Fetch.requete(
-      {
-        url: `/users/historique/POT/${props.userId}`,
-        data: {page: page.value, nombre: nombreParPage.value},
-        method: 'POST',
-      },
-      setHasPot)
+    Fetch.requete(
+        {
+            url: `/users/historique/POT/${props.userId}`,
+            data: {page: page.value, nombre: nombreParPage.value},
+            method: 'POST',
+        },
+        setHasPot)
 })
 
 /** METHODS */
@@ -121,12 +120,7 @@ const setHistorique = (histo: HistoriqueInterface) => {
  * @param histo l'historique de l'utilisateur
  */
 const setHasPot = (histo: HistoriqueInterface) => {
-  if (histo.histo && histo.histo.length > 0){
-    hasPot.value = true
-  }
-  else{
-    hasPot.value = false
-  }
+    hasPot.value = histo.histo && histo.histo.length > 0;
 }
 
 /**
@@ -151,7 +145,7 @@ const afficherDetail = (identifiantHistorique: string) => {
     Fetch.requete({
         url: `/historique/${identifiantHistorique}`,
         method: 'GET'
-    }, (resultat: HistoriqueLigneResponseInterface) => {
+    }, (resultat: { doc: HistoriqueLigneInterface }) => {
         commande.value = resultat.doc
         openDialog.value = true
     })

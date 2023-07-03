@@ -102,9 +102,8 @@
 <script setup lang="ts">
 import {watch} from "#imports";
 import Fetch from "~/services/FetchService";
-import ProduitInterface from "~/interfaces/ProduitInterface";
-import TypeInterface from "~/interfaces/TypeProduitInterface";
-import ProduitsResponseInterface from "~/interfaces/ProduitsResponseInterface";
+import ProduitInterface from "~/interfaces/produitInterfaces/ProduitInterface";
+import TypeInterface from "~/interfaces/produitInterfaces/TypeProduitInterface";
 import AttributeInterface from "~/interfaces/AttributeInterface";
 import serverconfig from "~/serverconfig";
 import {useDisplay} from "vuetify";
@@ -112,6 +111,7 @@ import {Ref} from "vue";
 import {useSnackbarStore} from "~/stores/snackbarStore";
 import {storeToRefs} from "pinia";
 import {useMenuStore} from "~/stores/menuStore";
+import ResponseListInterface from "~/interfaces/ResponseListInterface";
 
 
 const loading: Ref<boolean> = ref(false)
@@ -172,14 +172,26 @@ onMounted(()=>{
  * la liste des produits est mises à jour ainsi que la pagination
  */
 const recharger = () => {
-  loading.value = true
-  Fetch.requete({ url: '/produits', data: { page: page.value, nombre: nombreParPage.value ,recherche: champRecherche.value } }, (result : ProduitsResponseInterface) => {
-    paginationSize.value = Math.ceil(result.total / parseInt(nombreParPage.value));
-    produits.value = result.documents
-
-    total.value = result.total
-    page.value = result.page > paginationSize.value ? paginationSize.value: result.page
-    loading.value = false}, () => {loading.value = false} );
+    loading.value = true
+    Fetch.requete(
+        {
+            url: '/produits',
+            data: {
+                page: page.value,
+                nombre: nombreParPage.value,
+                recherche: champRecherche.value
+            }
+        },
+        (result: ResponseListInterface<ProduitInterface>) => {
+            paginationSize.value = Math.ceil(result.total / parseInt(nombreParPage.value));
+            produits.value = result.documents
+            total.value = result.total
+            page.value = result.page > paginationSize.value ? paginationSize.value : result.page
+            loading.value = false
+        },
+        () => {
+            loading.value = false
+        });
 }
 
 /**

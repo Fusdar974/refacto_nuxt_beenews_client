@@ -1,4 +1,4 @@
-import GenericInterface from "./GenericInterface";
+import GenericInterface from "../GenericInterface";
 
 interface ConnectedUserInterface extends GenericInterface {
     nom: string

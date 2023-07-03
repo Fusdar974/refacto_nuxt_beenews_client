@@ -1,84 +1,86 @@
 <template>
-  <div>
-      <v-btn size="small"
-             v-if="!enCoursDeConnexion"
-             color="primary"
-             prepend-icon="mdi:mdi-login"
-             @click="saisirIdentifiant"
-      >Se connecter</v-btn>
-      <div v-else>Connexion en cours </div>
-    <v-dialog v-model="openDialog"
-              @close="handleClose"
-              max-width="500px">
-      <v-card>
-        <v-card-title id="max-width-dialog-title"
-                      class="text-center">
-          Connexion à l'application
-        </v-card-title>
-        <v-divider/>
-        <v-card-text>
-          <v-form @submit="handleSubmit($event)">
-              <v-container>
-                  <v-row align="center"
-                         justify="center">
-                      <v-col>
-                          <v-text-field
-                                  v-model="login"
-                                  variant="outlined"
-                                  density="compact"
-                                  type="text"
-                                  label="Login"
-                      name="login"
-                      @change="handleChange"
-                      @keydown="keyPress"/>
-                </v-col>
-              </v-row>
-              <v-row align="center"
-                     justify="center">
-                <v-col>
-                  <v-text-field
-                      v-model="password"
-                      variant="outlined"
-                      density="compact"
-                      type="password"
-                      label="Password"
-                      name="password"
-                      @change="handleChange"
-                      @keydown="keyPress"/>
-                </v-col>
-              </v-row>
-              <v-row v-if="message"
-                     align="center"
-                     justify="center">
-                <v-col>
-                  <v-alert color="error">{{ message }}</v-alert>
-                </v-col>
-              </v-row>
-            </v-container>
-          </v-form>
-        </v-card-text>
-        <v-divider/>
-        <v-card-actions class="justify-center">
-          <v-btn-group>
-            <v-btn @click="handleSubmit"
-                   color="secondary"
-                   :loading="!!enCoursDeConnexion"
-                   class="mt-2">Consommer</v-btn>
-            <v-btn @click="handleClose"
-                   variant="outlined"
-                   color="primary"
-                   class="mt-2 ma-0">Annuler</v-btn>
-          </v-btn-group>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+    <div>
+        <v-btn size="small"
+               v-if="!enCoursDeConnexion"
+               color="primary"
+               prepend-icon="mdi:mdi-login"
+               @click="saisirIdentifiant"
+        >Se connecter
+        </v-btn>
+        <div v-else>Connexion en cours</div>
+        <v-dialog v-model="openDialog"
+                  @close="handleClose"
+                  max-width="500px">
+            <v-card>
+                <v-card-title id="max-width-dialog-title"
+                              class="text-center">
+                    Connexion à l'application
+                </v-card-title>
+                <v-divider/>
+                <v-card-text>
+                    <v-form @submit="handleSubmit($event)">
+                        <v-container>
+                            <v-row align="center"
+                                   justify="center">
+                                <v-col>
+                                    <v-text-field
+                                        v-model="login"
+                                        variant="outlined"
+                                        density="compact"
+                                        type="text"
+                                        label="Login"
+                                        name="login"
+                                        @change="handleChange"
+                                        @keydown="keyPress"/>
+                                </v-col>
+                            </v-row>
+                            <v-row align="center"
+                                   justify="center">
+                                <v-col>
+                                    <v-text-field
+                                        v-model="password"
+                                        variant="outlined"
+                                        density="compact"
+                                        type="password"
+                                        label="Password"
+                                        name="password"
+                                        @change="handleChange"
+                                        @keydown="keyPress"/>
+                                </v-col>
+                            </v-row>
+                            <v-row v-if="message"
+                                   align="center"
+                                   justify="center">
+                                <v-col>
+                                    <v-alert color="error">{{ message }}</v-alert>
+                                </v-col>
+                            </v-row>
+                        </v-container>
+                    </v-form>
+                </v-card-text>
+                <v-divider/>
+                <v-card-actions class="justify-center">
+                    <v-btn-group>
+                        <v-btn @click="handleSubmit"
+                               color="secondary"
+                               :loading="!!enCoursDeConnexion"
+                               class="mt-2">Consommer
+                        </v-btn>
+                        <v-btn @click="handleClose"
+                               variant="outlined"
+                               color="primary"
+                               class="mt-2 ma-0">Annuler
+                        </v-btn>
+                    </v-btn-group>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
 
-  </div>
+    </div>
 </template>
 
 <script setup lang="ts">
-import LoginResponseInterface from "~/interfaces/LoginResponseInterface";
-import IdentificationInterface from "~/interfaces/IdentificationInterface";
+import IdentificationInterface from "~/interfaces/userInterfaces/IdentificationInterface";
 import Fetch from "~/services/FetchService";
 import {useAuthenticateStore} from "~/stores/authenticateStore";
 
@@ -90,12 +92,12 @@ const message: Ref<string> = ref('')
 
 const {login: submit} = useAuthenticateStore()
 
-const connexionServeur = () =>{
-  const identification: IdentificationInterface = {
-    login: login.value,
-    password: password.value,
-  }
-    const reussite = (retour: LoginResponseInterface) => {
+const connexionServeur = () => {
+    const identification: IdentificationInterface = {
+        login: login.value,
+        password: password.value,
+    }
+    const reussite = (retour: { token: string }) => {
         enCoursDeConnexion.value = false
         if (retour) {
             localStorage.setItem("token", retour.token)
@@ -112,59 +114,59 @@ const connexionServeur = () =>{
 }
 
 interface TextField {
-  name: string,
-  value: string,
+    name: string,
+    value: string,
 }
 
 const handleChange = (e: Event) => {
-  const textField: TextField = <Object> e.target as TextField
-  if(textField.name === 'login'){
-    login.value = textField.value
-  }else password.value = textField.value
-  message.value = ''
+    const textField: TextField = <Object>e.target as TextField
+    if (textField.name === 'login') {
+        login.value = textField.value
+    } else password.value = textField.value
+    message.value = ''
 }
 
 const handleSubmit = (e: Event) => {
-  e.preventDefault()
-  enCoursDeConnexion.value = true
-  connexionServeur()
+    e.preventDefault()
+    enCoursDeConnexion.value = true
+    connexionServeur()
 }
 
 const handleClose = () => {
-  openDialog.value = false
+    openDialog.value = false
 }
 
 const saisirIdentifiant = () => {
-  openDialog.value = true
+    openDialog.value = true
 }
 
 const keyPress = (e: KeyboardEvent) => {
-  if (e.key === 'Enter') {
-    handleSubmit(e);
-  }
+    if (e.key === 'Enter') {
+        handleSubmit(e);
+    }
 }
 
 </script>
 
 <style scoped>
-.couleur-or{
-  background-color: rgba(255, 206, 28, 0.8);
-  color: black;
+.couleur-or {
+    background-color: rgba(255, 206, 28, 0.8);
+    color: black;
 }
 
 .couleur-or:hover {
-  background-color: rgba(255,206,28,1)
+    background-color: rgba(255, 206, 28, 1)
 }
 
 .image {
-  position: relative;
-  height: 200px;
-  width: 200px;
-  /*background-image: url(v-bind(imageAbeille));*/
-  background-size: 200px 200px;
-  background-repeat: no-repeat;
-  background-position: center;
-  opacity: 0.2;
+    position: relative;
+    height: 200px;
+    width: 200px;
+    /*background-image: url(v-bind(imageAbeille));*/
+    background-size: 200px 200px;
+    background-repeat: no-repeat;
+    background-position: center;
+    opacity: 0.2;
 }
 
 </style>

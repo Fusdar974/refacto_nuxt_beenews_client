@@ -1,4 +1,4 @@
-import ProduitInterface from "@/interfaces/ProduitInterface";
+import ProduitInterface from "~/interfaces/produitInterfaces/ProduitInterface";
 
 interface ArticlePotInterface extends ProduitInterface{
     quantite: number,

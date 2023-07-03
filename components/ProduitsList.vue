@@ -9,8 +9,8 @@
 
 <script setup lang="ts">
 import ArticlePotInterface from "~/interfaces/potsInterfaces/ArticlePotInterface"
-import ProduitInterface from "~/interfaces/ProduitInterface"
-import ProduitsListFilterInterface from "~/interfaces/ProduitsListFilterInterface";
+import ProduitInterface from "~/interfaces/produitInterfaces/ProduitInterface"
+import ProduitsListFilterInterface from "~/interfaces/produitInterfaces/ProduitsListFilterInterface";
 
 const props = defineProps({
     modelValue: {type: Object as () => Array<ArticlePotInterface>, required: true},
