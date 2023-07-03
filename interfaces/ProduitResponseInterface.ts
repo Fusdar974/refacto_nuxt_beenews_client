@@ -1,5 +1,4 @@
-
-import ProduitInterface from "~/interfaces/ProduitInterface";
+import ProduitInterface from "@/interfaces/ProduitInterface";
 
 interface ProduitResponseInterface {
     produit: ProduitInterface,

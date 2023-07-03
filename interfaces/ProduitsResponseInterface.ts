@@ -1,4 +1,4 @@
-import ProduitInterface from "~/interfaces/ProduitInterface";
+import ProduitInterface from "@/interfaces/ProduitInterface";
 
 interface ProduitsResponseInterface {
     documents: ProduitInterface[],

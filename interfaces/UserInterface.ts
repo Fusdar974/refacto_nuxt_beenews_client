@@ -1,4 +1,4 @@
-import ProfilInterface from "~/interfaces/ProfilInterface";
+import ProfilInterface from "@/interfaces/ProfilInterface";
 import GenericInterface from "./GenericInterface";
 
 interface UserInterface extends GenericInterface {

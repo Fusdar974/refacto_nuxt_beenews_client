@@ -1,4 +1,4 @@
-import HistoriqueLigneInterface from "~/interfaces/HistoriqueLigneInterface";
+import HistoriqueLigneInterface from "@/interfaces/HistoriqueLigneInterface";
 
 interface HistoriqueInterface {
     page: number,

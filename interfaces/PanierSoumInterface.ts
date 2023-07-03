@@ -1,5 +1,5 @@
-import ArticlePotInterface from "~/interfaces/potsInterfaces/ArticlePotInterface";
-import UserInterface from "~/interfaces/UserInterface";
+import ArticlePotInterface from "@/interfaces/potsInterfaces/ArticlePotInterface";
+import UserInterface from "@/interfaces/UserInterface";
 
 interface PanierSoumInterface {
     articles: Array<ArticlePotInterface>

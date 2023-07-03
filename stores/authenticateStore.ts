@@ -12,8 +12,8 @@ import ConnectedUserInterface from "~/interfaces/ConnectedUserInterface";
 export const useAuthenticateStore = defineStore('authenticate', () => {
 
     /** Reference */
-    const isAuthenticated: Ref<boolean> = ref(false)
-    const isLoading: Ref<boolean> = ref(false)
+    const isAuthenticated = ref<boolean>(false)
+    const isLoading = ref<boolean>(false)
 
 
     const initMenu = <Array<MenuInterface>>[{
