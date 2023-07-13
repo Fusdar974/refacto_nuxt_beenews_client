@@ -94,10 +94,10 @@ const CREATE = 'add'
  * userId : l'id de l'utilisateur à consulter/modifier
  * action : string qui détermine le mode du UserForm
  */
-const props = defineProps({
-    produitId: {type: String},
-    action: {type: String, required: true},
-})
+const props = defineProps<{
+  action: string
+  produitId?: string
+}>()
 
 const imgChanged: Ref<boolean> = ref(false)
 const selectedProduit: Ref<ProduitInterface> = ref({} as ProduitInterface)
