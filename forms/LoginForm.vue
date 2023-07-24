@@ -23,12 +23,12 @@
                      justify="center">
                 <v-col>
                   <v-text-field
-                      v-model="login"
+                      v-model="email"
                       variant="outlined"
                       density="compact"
                       type="text"
-                      label="Login"
-                      name="login"
+                      label="email"
+                      name="email"
                       @change="handleChange"
                       @keydown="keyPress"/>
                 </v-col>
@@ -81,7 +81,7 @@ import LoginResponseInterface from "~/interfaces/LoginResponseInterface";
 import IdentificationInterface from "~/interfaces/IdentificationInterface";
 import Fetch from "~/services/FetchService";
 
-const login: Ref<string> = ref('')
+const email: Ref<string> = ref('')
 const password: Ref<string> = ref('')
 const enCoursDeConnexion: Ref<boolean> = ref(false)
 const openDialog: Ref<boolean> = ref(false)
@@ -93,17 +93,19 @@ const props = defineProps({
 
 const connexionServeur = () =>{
   const identification: IdentificationInterface = {
-    login: login.value,
+    email: email.value,
     password: password.value,
   }
   const reussite = (retour: LoginResponseInterface) => {
     enCoursDeConnexion.value = false
     if(retour){
-      localStorage.setItem("token", retour.token)
+      localStorage.setItem("token", retour.bearer)
+      localStorage.setItem("rights", retour.rights.toString())
+      console.log("token",retour.bearer, "rights", retour.rights)
       props.submit()
-    }else message.value = "Login/Password incorrect"
+    }else message.value = "Email/Password incorrect"
   }
-  Fetch.requete({ url: "/login", data: identification }, reussite)
+  Fetch.requete({ url: "/auth/login", data: identification }, reussite)
 }
 
 interface TextField {
@@ -113,8 +115,8 @@ interface TextField {
 
 const handleChange = (e: Event) => {
   const textField: TextField = <Object> e.target as TextField
-  if(textField.name === 'login'){
-    login.value = textField.value
+  if(textField.name === 'email'){
+    email.value = textField.value
   }else password.value = textField.value
   message.value = ''
 }
