@@ -1,5 +1,8 @@
+import menuInterface from "~/interfaces/MenuInterface";
+
 interface LoginResponseInterface {
-    token:string,
+    bearer:string,
+    rights: Array<menuInterface>
 }
 
 export default LoginResponseInterface
