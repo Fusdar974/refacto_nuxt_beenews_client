@@ -1,5 +1,5 @@
 interface IdentificationInterface {
-    login: string,
+    email: string,
     password: string,
 }
 
