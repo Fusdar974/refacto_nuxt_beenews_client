@@ -16,7 +16,7 @@ class Fetch {
         const myHeaders = new Headers({
             'Accept': 'application/json',
             "Content-Type": "application/json",
-            'Authorization': `BEARER ${localStorage.getItem('token') || ''}`
+            'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
         });
 
         const myInit = {
@@ -29,12 +29,12 @@ class Fetch {
         }
 
 
-        fetch(`${serverconfig}v1${data.url}`, myInit)
+        fetch(`${serverconfig}${data.url}`, myInit)
             .then(response => {
                 if (response.ok) {
                     return response.json()
                 } else {
-                    console.error(`${serverconfig}v1${data.url}`, response);
+                    console.error(`${serverconfig}${data.url}`, response);
                     throw (response);
                 }
             })
