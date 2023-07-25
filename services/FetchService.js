@@ -12,11 +12,12 @@ class Fetch {
     }
 
     static requete(data, reussite, echec = ()=>{}) {
+        const token = localStorage.getItem('token');
 
         const myHeaders = new Headers({
             'Accept': 'application/json',
             "Content-Type": "application/json",
-            'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
+            'Authorization': `Bearer ${token || ""}`
         });
 
         const myInit = {
@@ -24,13 +25,13 @@ class Fetch {
             headers: myHeaders
         };
 
-        if (myInit.method !== 'GET') {
+        if (token !== "Bearer ") {
             myInit.body = JSON.stringify(data.data || {});
         }
 
-
         fetch(`${serverconfig}${data.url}`, myInit)
             .then(response => {
+                console.log(response)
                 if (response.ok) {
                     return response.json()
                 } else {
@@ -53,7 +54,6 @@ class Fetch {
                 }
 
             });
-
     }
 }
 

@@ -80,6 +80,7 @@
 import LoginResponseInterface from "~/interfaces/LoginResponseInterface";
 import IdentificationInterface from "~/interfaces/IdentificationInterface";
 import Fetch from "~/services/FetchService";
+import {useRouter} from "#app";
 
 const email: Ref<string> = ref('')
 const password: Ref<string> = ref('')
@@ -98,14 +99,14 @@ const connexionServeur = () =>{
   }
   const reussite = (retour: LoginResponseInterface) => {
     enCoursDeConnexion.value = false
-    if(retour){
+    if (retour.bearer) {
       localStorage.setItem("token", retour.bearer)
       localStorage.setItem("rights", retour.rights.toString())
-      console.log("token",retour.bearer, "rights", retour.rights)
+      useRouter().push('/users')
       props.submit()
-    }else message.value = "Email/Password incorrect"
+    } else message.value = "Email/Password incorrect"
   }
-  Fetch.requete({ url: "/auth/login", data: identification }, reussite)
+  Fetch.requete({url: "/auth/login", data: identification}, reussite)
 }
 
 interface TextField {

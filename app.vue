@@ -143,7 +143,6 @@ const logout = () => {
     isLoading.value = true
     setAuthenticate(false, initMenu);
     useRouter().push('/');
-    resetPanier();
     localStorage.clear();
 }
 

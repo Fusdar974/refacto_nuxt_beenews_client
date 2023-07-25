@@ -10,7 +10,7 @@
 
 const props = defineProps({
     foncDeco: {type: Function, required: true},
-})
+});
 
 </script>
 

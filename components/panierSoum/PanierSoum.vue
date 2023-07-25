@@ -128,7 +128,7 @@ const {putSnackBarMessage} = useSnackbarStore()
 
 /** COMPUTED */
 const clientBNComputed = computed(() => {
-    const clientBN = (utilisateur.value?.compte ?? 0) + (totalPanierEuros.value / valeurPoint.value)
+    const clientBN = (utilisateur.value?.wallet ?? 0) + (totalPanierEuros.value / valeurPoint.value)
     if (clientBN < formatToNumber(paiementCompte.value)) {
         paiementCompte.value = clientBN
     }
