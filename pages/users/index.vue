@@ -50,7 +50,7 @@
                             <v-btn @click="handleModifier($event,slotProps.obj._id)" class="ma-1">
                                 <v-icon icon="mdi mdi_small mdi-pencil"></v-icon>
                             </v-btn>
-                            <v-btn v-if="(slotProps.obj as UserInterface).supprimable"
+                            <v-btn v-if="(slotProps.obj as UserInterface).isArchived"
                                    @click="handleSupprimer($event, slotProps.obj._id)" class="ma-1">
                                 <v-icon icon="mdi mdi_small mdi-delete"></v-icon>
                             </v-btn>
@@ -139,7 +139,8 @@ const attributesComputed = computed(() => mdAndUp.value ? attributesMdandUp.valu
       loading.value = true
       Fetch.requete({
           url: '/users',
-          data: { page: page.value, nombre: nombreParPage.value ,recherche: champRecherche.value }
+          method: 'GET',
+          data: { page: page.value, limit: nombreParPage.value ,search: champRecherche.value }
       }, (result : UsersResponseInterface) => {
         paginationSize.value = Math.ceil(result.total / parseInt(nombreParPage.value));
         users.value = result.documents

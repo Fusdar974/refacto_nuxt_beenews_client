@@ -4,7 +4,7 @@
     <v-container v-if="user" class="ma-1">
       <v-row>
         <v-col cols="12">
-          <h3>Il te reste {{ user.compte }} BN(s) sur ton compte.</h3>
+          <h3>Il te reste {{ user.wallet }} BN(s) sur ton compte.</h3>
         </v-col>
       </v-row>
       <v-row>
@@ -79,7 +79,7 @@ titleAppBar.value = 'Mon Compte'
 
 const majUser = (id: string) => {
   if (typeof id !== "undefined" && id !== "" && id) {
-    Fetch.requete({url: `/users/${id}`, method: 'GET'}, (resultUser: UserResponseInterface) => {
+    Fetch.requete({method: "GET", url: `/users/${id}`}, (resultUser: UserResponseInterface) => {
       user.value = resultUser.user
     })
   }
@@ -98,7 +98,7 @@ const valider = () => {
   const correctPassword = password.value !== newpassword.value && newpassword.value === confirmpassword.value && newpassword.value !== ""
   if (user.value && correctPassword) {
     Fetch.requete({
-      url: `/users/changepwd/${user.value._id}`, method: 'POST', data: {
+      url: `/users/changepwd/${user.value._id}`, method: 'PATCH', data: {
         password: password.value,
         newpassword: newpassword.value
       }

@@ -11,7 +11,7 @@ class Fetch {
         this.deco();
     }
 
-    static requete(data, reussite, echec = ()=>{}) {
+    static requete(data, reussite, echec ) {
         const token = localStorage.getItem('token');
 
         const myHeaders = new Headers({
@@ -24,14 +24,28 @@ class Fetch {
             method: data.method || "POST",
             headers: myHeaders
         };
-
-        if (token !== "Bearer ") {
+        if (myInit.method === "POST" || myInit.method === "PATCH") {
             myInit.body = JSON.stringify(data.data || {});
         }
+        let filters = '';
+        if (myInit.method === "GET" && data.data) {
+            filters = `?`;
+            for (const key in data.data) {
+                if (key !== "undefined"
+                    && key !== undefined
+                    && key !== ''
+                    && data.data[key] !== "undefined"
+                    && data.data[key] !== undefined
+                    && data.data[key] !== '') {
+                    filters += `${key}=${data.data[key]}&`;
+                }
 
-        fetch(`${serverconfig}${data.url}`, myInit)
+            }
+            filters.substring(0, filters.length - 1);
+        }
+
+        fetch(`${serverconfig}${data.url}${filters}`, myInit)
             .then(response => {
-                console.log(response)
                 if (response.ok) {
                     return response.json()
                 } else {
@@ -45,6 +59,7 @@ class Fetch {
                 }
             })
             .catch(function (err) {
+                console.log("data : ", data, err);
                 console.error(`Erreur ${data.url} ${err.status} ${err.statusText}`);
 
                 if (err.status === 401) {

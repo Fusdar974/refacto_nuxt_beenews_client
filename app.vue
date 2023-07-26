@@ -125,12 +125,13 @@ const setAuthenticate = (boolAuth: boolean, newMenus: Array<MenuInterface>) => {
 const login = () => {
     isLoading.value = true
     const token = localStorage.getItem('token');
+    const rights = JSON.parse(localStorage.getItem('rights') || '[]');
     if (token) {
         const tokenDecode: JwtPayloadInterface = jwtDecode(token);
         localStorage.setItem('idCompte', tokenDecode.userId);
         const expire = new Date((tokenDecode.exp || 0) * 1000) < new Date();
         if (!expire) {
-            setAuthenticate(true, tokenDecode.droits);
+            setAuthenticate(true, rights);
         } else {
             console.error('Token expiré');
             console.error("Connecté...:", new Date((tokenDecode.iat || 0) * 1000));

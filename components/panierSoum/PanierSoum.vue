@@ -155,7 +155,7 @@ onBeforeMount(() => {
         valeurPoint.value = Number(resultBN.valeur)
         Fetch.requete({
             url: '/users',
-            data: {page: 1, nombre: 1000, isDesactive: false}
+            data: {page: 1, limit: 1000, isArchived: false}, method: 'GET'
         }, (resultUtil: UsersResponseInterface) => {
             utilisateurs.value = resultUtil.documents
             isLoading.value = false

@@ -81,6 +81,7 @@ import LoginResponseInterface from "~/interfaces/LoginResponseInterface";
 import IdentificationInterface from "~/interfaces/IdentificationInterface";
 import Fetch from "~/services/FetchService";
 import {useRouter} from "#app";
+import {tryCatch} from "standard-as-callback/built/utils";
 
 const email: Ref<string> = ref('')
 const password: Ref<string> = ref('')
@@ -99,14 +100,17 @@ const connexionServeur = () =>{
   }
   const reussite = (retour: LoginResponseInterface) => {
     enCoursDeConnexion.value = false
-    if (retour.bearer) {
+    if (retour) {
       localStorage.setItem("token", retour.bearer)
-      localStorage.setItem("rights", retour.rights.toString())
+      localStorage.setItem("rights", JSON.stringify(retour.rights))
       useRouter().push('/users')
       props.submit()
     } else message.value = "Email/Password incorrect"
   }
-  Fetch.requete({url: "/auth/login", data: identification}, reussite)
+  const echec = (e: Error) => {
+      message.value = "Email/Password incorrect"
+  }
+  Fetch.requete({url: "/auth/login", data: identification}, reussite, echec)
 }
 
 interface TextField {
