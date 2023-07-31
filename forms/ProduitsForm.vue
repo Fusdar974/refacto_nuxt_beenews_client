@@ -79,10 +79,9 @@ import {storeToRefs} from "pinia"
 import {useSnackbarStore} from "~/stores/snackbarStore"
 import {useVuelidate} from '@vuelidate/core'
 import {required} from '@vuelidate/validators'
-import ProduitResponseInterface from "~/interfaces/ProduitResponseInterface"
-import ProduitInterface from "~/interfaces/ProduitInterface"
-import TypeProduitInterface from "~/interfaces/TypeProduitInterface"
-import TypeInterface from "~/interfaces/TypeProduitInterface"
+import ProduitInterface from "~/interfaces/produitInterfaces/ProduitInterface"
+import TypeProduitInterface from "~/interfaces/produitInterfaces/TypeProduitInterface"
+import TypeInterface from "~/interfaces/produitInterfaces/TypeProduitInterface"
 import ImageResultInterface from "~/interfaces/ImageResultInterface";
 import serverconfig from "~/serverconfig";
 import {useMenuStore} from "~/stores/menuStore";
@@ -95,10 +94,10 @@ const CREATE = 'add'
  * userId : l'id de l'utilisateur à consulter/modifier
  * action : string qui détermine le mode du UserForm
  */
-const props = defineProps({
-    produitId: {type: String},
-    action: {type: String, required: true},
-})
+const props = defineProps<{
+  action: string
+  produitId?: string
+}>()
 
 const imgChanged: Ref<boolean> = ref(false)
 const selectedProduit: Ref<ProduitInterface> = ref({} as ProduitInterface)
@@ -151,9 +150,14 @@ watch(selectedProduit, newValue => console.log(newValue))
  */
 onBeforeMount(() => {
   if (mode.value !== CREATE) {
-    Fetch.requete({url: `/produits/${props.produitId}`, method: 'GET'}, (resultProduits: ProduitResponseInterface) => {
-      selectedProduit.value = resultProduits.produit
-    })
+      Fetch.requete(
+          {
+              url: `/produits/${props.produitId}`,
+              method: 'GET'
+          },
+          (resultProduits: { produit: ProduitInterface }) => {
+              selectedProduit.value = resultProduits.produit
+          })
   } else {
     selectedProduit.value = {
       nom: "",

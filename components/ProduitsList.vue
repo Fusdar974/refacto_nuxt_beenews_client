@@ -1,5 +1,5 @@
 <template>
-    <div class="produit-card-container ma-5">
+    <div class="produit-card-container ma-0">
         <produit-card v-for="(a, index) in articles"
                       :key="a._id"
                       :shown="isShownArticle(a)"
@@ -9,8 +9,8 @@
 
 <script setup lang="ts">
 import ArticlePotInterface from "~/interfaces/potsInterfaces/ArticlePotInterface"
-import ProduitInterface from "~/interfaces/ProduitInterface"
-import ProduitsListFilterInterface from "~/interfaces/ProduitsListFilterInterface";
+import ProduitInterface from "~/interfaces/produitInterfaces/ProduitInterface"
+import ProduitsListFilterInterface from "~/interfaces/produitInterfaces/ProduitsListFilterInterface";
 
 const props = defineProps({
     modelValue: {type: Object as () => Array<ArticlePotInterface>, required: true},
