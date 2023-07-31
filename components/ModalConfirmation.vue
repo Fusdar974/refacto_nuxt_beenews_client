@@ -14,7 +14,7 @@
 
 <script setup lang="ts">
 
-/**REFS*/
+/**PROPS*/
 
 const props = defineProps({
     modelValue: Boolean,

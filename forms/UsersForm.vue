@@ -24,14 +24,12 @@
                 </v-btn>
             </div>
             <h4>Profils</h4>
-            <div v-for="(profil, index) in profils" :key="index">
-                <v-checkbox
+            <v-checkbox v-for="(profil, index) in profils" :key="index"
                         v-model="selectedUser.profils"
                         :label="profil.nom"
                         :value="profil"
-                        color="indigo"
-                ></v-checkbox>
-            </div>
+                        color="primary"
+            ></v-checkbox>
             <v-checkbox label="Compte désactivé"
                         v-model="selectedUser.isDesactive"
                         color="red"
@@ -69,12 +67,10 @@
 
 <script setup lang="ts">
 
-import UserInterface from "~/interfaces/UserInterface"
+import UserInterface from "~/interfaces/userInterfaces/UserInterface"
 import Fetch from "~/services/FetchService"
-import PasswordChangeResponseInterface from "~/interfaces/PasswordChangeResponseInterface"
-import ProfilInterface from "~/interfaces/ProfilInterface"
-import UserResponseInterface from "~/interfaces/UserResponseInterface"
-import ProfilsResponseInterface from "~/interfaces/ProfilsResponseInterface"
+import PasswordChangeResponseInterface from "~/interfaces/userInterfaces/PasswordChangeResponseInterface"
+import ProfilInterface from "~/interfaces/userInterfaces/ProfilInterface"
 import {storeToRefs} from "pinia"
 import {useSnackbarStore} from "~/stores/snackbarStore"
 import {useVuelidate} from '@vuelidate/core'
@@ -117,6 +113,7 @@ titleAppBar.value = props.action === 'edit' && "Modification du client"
     || props.action === 'add' && "Ajout d'un client"
     || "Informations du client"
 
+watch(() => selectedUser.value.profils, newValue => console.log(newValue))
 /**
  * avant que la page soit montée dans le DOM
  * si le mode n'est pas en création, charge l'utilisateur sélectionné
@@ -124,9 +121,14 @@ titleAppBar.value = props.action === 'edit' && "Modification du client"
  */
 onBeforeMount(() => {
     if (mode.value !== CREATE) {
-        Fetch.requete({url: `/users/${props.userId}`, method: 'GET'}, (resultUser: UserResponseInterface) => {
-            selectedUser.value = resultUser.user
-        })
+        Fetch.requete(
+            {
+                url: `/users/${props.userId}`,
+                method: 'GET'
+            },
+            (resultUser: { user: UserInterface }) => {
+                selectedUser.value = resultUser.user
+            })
     } else {
         selectedUser.value = {
             isDesactive: false,
@@ -140,11 +142,16 @@ onBeforeMount(() => {
             supprimable: true,
         }
     }
-    Fetch.requete({url: `/users/profils`, method: 'POST'}, (resultProfils: ProfilsResponseInterface) => {
-        if (selectedUser !== null) {
-            profils.value = resultProfils.profils.map(profil => ({...profil, isValid: true}))
-        }
-    },)
+    Fetch.requete(
+        {
+            url: `/users/profils`,
+            method: 'POST'
+        },
+        (resultProfils: { profils: Array<ProfilInterface> }) => {
+            if (selectedUser !== null) {
+                profils.value = resultProfils.profils.map(profil => ({...profil, isValid: true}))
+            }
+        },)
 })
 
 /**

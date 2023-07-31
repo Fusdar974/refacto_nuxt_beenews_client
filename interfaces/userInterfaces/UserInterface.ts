@@ -1,5 +1,5 @@
-import ProfilInterface from "~/interfaces/ProfilInterface";
-import GenericInterface from "./GenericInterface";
+import ProfilInterface from "~/interfaces/userInterfaces/ProfilInterface";
+import GenericInterface from "../GenericInterface";
 
 interface UserInterface extends GenericInterface {
     compte?: number

@@ -41,13 +41,13 @@
 
 <script setup lang="ts">
 import Fetch from "~/services/FetchService";
-import PotsResponseInterface from "~/interfaces/potsInterfaces/PotsResponseInterface";
 import PotInterface from "~/interfaces/potsInterfaces/PotInterface";
 import {storeToRefs} from "pinia";
 import {useSnackbarStore} from "~/stores/snackbarStore";
 import {useMenuStore} from "~/stores/menuStore";
 import {Ref} from "vue/dist/vue";
 import AttributeInterface from "~/interfaces/AttributeInterface";
+import ResponseListInterface from "~/interfaces/ResponseListInterface";
 
 /** REFS */
 const loading: Ref<boolean> = ref(false)
@@ -94,7 +94,7 @@ const rechargerPotsList = () => {
     Fetch.requete({
         url: '/pots',
         data: {page: page.value, nombre: nombreParPage.value}
-    }, (reponse: PotsResponseInterface) => {
+    }, (reponse: ResponseListInterface<PotInterface>) => {
         paginationSize.value = nombreParPage.value !== 'all' ?
             Math.ceil(reponse.total / parseInt(nombreParPage.value)) : 1
         pots.value = reponse.documents

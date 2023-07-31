@@ -1,4 +1,4 @@
-import TypeProduitInterface from "~/interfaces/TypeProduitInterface";
+import TypeProduitInterface from "~/interfaces/produitInterfaces/TypeProduitInterface";
 import GenericInterface from "~/interfaces/GenericInterface";
 
 interface ProduitInterface extends GenericInterface {

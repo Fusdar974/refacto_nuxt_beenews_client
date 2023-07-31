@@ -31,13 +31,14 @@
 
 <script setup lang="ts">
 
-import TypeProduitInterface from "~/interfaces/TypeProduitInterface";
-import ProduitInterface from "~/interfaces/ProduitInterface";
+import TypeProduitInterface from "~/interfaces/produitInterfaces/TypeProduitInterface";
+import ProduitInterface from "~/interfaces/produitInterfaces/ProduitInterface";
 import Fetch from "~/services/FetchService";
-import ProduitsListFilterInterface from "~/interfaces/ProduitsListFilterInterface";
+import ProduitsListFilterInterface from "~/interfaces/produitInterfaces/ProduitsListFilterInterface";
 import {useMenuStore} from "~/stores/menuStore";
 import {storeToRefs} from "pinia";
 import {usePanierStore} from "~/stores/panierStore";
+import {Ref} from "vue";
 
 /** REFS */
 const typeproduits = ref<Array<TypeProduitInterface>>([])

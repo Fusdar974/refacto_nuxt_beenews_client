@@ -78,8 +78,7 @@
 
 <script setup lang="ts">
 
-import UserInterface from "~/interfaces/UserInterface";
-import UsersResponseInterface from "~/interfaces/UsersResponseInterface";
+import UserInterface from "~/interfaces/userInterfaces/UserInterface";
 import AttributeInterface from "~/interfaces/AttributeInterface";
 import GenericTable from "~/components/GenericTable.vue";
 import Fetch from "~/services/FetchService";
@@ -89,6 +88,7 @@ import {useMenuStore} from "~/stores/menuStore";
 import {useSnackbarStore} from "~/stores/snackbarStore";
 import {useDisplay} from "vuetify";
 import {Ref} from "vue";
+import ResponseListInterface from "~/interfaces/ResponseListInterface";
 
 const loading: Ref<boolean> = ref(false)
 const users: Ref<Array<UserInterface>> = ref([])
@@ -139,14 +139,16 @@ const attributesComputed = computed(() => mdAndUp.value ? attributesMdandUp.valu
       loading.value = true
       Fetch.requete({
           url: '/users',
-          data: { page: page.value, nombre: nombreParPage.value ,recherche: champRecherche.value }
-      }, (result : UsersResponseInterface) => {
-        paginationSize.value = Math.ceil(result.total / parseInt(nombreParPage.value));
-        users.value = result.documents
-        total.value = result.total
-        page.value = result.page > paginationSize.value ? paginationSize.value: result.page
-        loading.value = false
-      }, () => {loading.value = false} );
+          data: {page: page.value, nombre: nombreParPage.value, recherche: champRecherche.value}
+      }, (result: ResponseListInterface<UserInterface>) => {
+          paginationSize.value = Math.ceil(result.total / parseInt(nombreParPage.value));
+          users.value = result.documents
+          total.value = result.total
+          page.value = result.page > paginationSize.value ? paginationSize.value : result.page
+          loading.value = false
+      }, () => {
+          loading.value = false
+      });
     }
 
 /**

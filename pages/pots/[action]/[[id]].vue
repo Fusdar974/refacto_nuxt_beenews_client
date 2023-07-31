@@ -29,7 +29,7 @@
                                   :disabled="action === SHOW"
                                   return-object
                                   multiple
-                                  chips
+                                  :chips="true"
                                   @blur="v$.participants.$touch"
                                   label="Clients"/>
                     </v-row>
@@ -124,9 +124,8 @@
 <script setup lang="ts">
 import ParticipantPotInterface from "~/interfaces/potsInterfaces/ParticipantPotInterface";
 import PotInterface from "~/interfaces/potsInterfaces/PotInterface";
-import ProduitInterface from "~/interfaces/ProduitInterface";
-import UserInterface from "~/interfaces/UserInterface";
-import UsersResponseInterface from "~/interfaces/UsersResponseInterface";
+import ProduitInterface from "~/interfaces/produitInterfaces/ProduitInterface";
+import UserInterface from "~/interfaces/userInterfaces/UserInterface";
 import ValeurBNResponseInterface from "~/interfaces/ValeurBNResponseInterface";
 
 import Fetch from "~/services/FetchService";
@@ -140,8 +139,9 @@ import {useVuelidate} from "@vuelidate/core";
 import {storeToRefs} from "pinia";
 import {useSnackbarStore} from "~/stores/snackbarStore";
 import {useMenuStore} from "~/stores/menuStore";
-import TypeProduitInterface from "~/interfaces/TypeProduitInterface";
-import ProduitsListFilterInterface from "~/interfaces/ProduitsListFilterInterface";
+import TypeProduitInterface from "~/interfaces/produitInterfaces/TypeProduitInterface";
+import ProduitsListFilterInterface from "~/interfaces/produitInterfaces/ProduitsListFilterInterface";
+import ResponseListInterface from "~/interfaces/ResponseListInterface";
 
 definePageMeta({
     /** teste la route avant la céation de la page */
@@ -278,7 +278,7 @@ onMounted(() => {
     Fetch.requete({
         url: '/users',
         data: {page: 1, nombre: 1000, isDesactive: false}
-    }, (resultUtil: UsersResponseInterface) => {
+    }, (resultUtil: ResponseListInterface<UserInterface>) => {
         users.value = resultUtil.documents.map(user =>
             pot.value.participants.find(participant => participant._id === user._id)
             ?? {
