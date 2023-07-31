@@ -8,7 +8,7 @@
                     <v-row class="h-100">
                         <v-col>
                             <v-list>
-                                <v-list-item v-for="(menu, index) in menus as Array<MenuInterface>"
+                                <v-list-item v-for="(menu, index) in menus"
                                              :key="index"
                                              :value="menu"
                                              @click="handleOnClick(menu)"
@@ -16,7 +16,7 @@
                                     <template v-slot:prepend>
                                         <v-icon v-if="menu.icone" :icon="menu.icone.replace(' ',':')"></v-icon>
                                     </template>
-                                    <v-list-item-title v-if="menu.libelle" v-text="menu.libelle"></v-list-item-title>
+                                    <v-list-item-title v-if="menu.libelle">{{menu.libelle}}</v-list-item-title>
                                 </v-list-item>
                             </v-list>
                         </v-col>

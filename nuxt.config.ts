@@ -24,7 +24,6 @@ export default defineNuxtConfig({
         '@vite-pwa/nuxt',
         '@pinia/nuxt'
     ],
-    buildModules: ['@nuxtjs/composition-api/module'],
     pinia: {
         autoImports: [
             // automatically imports `defineStore`
