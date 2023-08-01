@@ -36,7 +36,6 @@ const user: Ref<UserInterface> = ref({} as UserInterface)
 const majUser = (id: string | null) => {
   if (typeof id !== "undefined" && id !== "" && id) {
     Fetch.requete({ url: `/users/${id}`, method: 'GET' }, (resultUser: UserInterface) => {
-        console.log(resultUser.wallet)
       user.value = resultUser
       if (resultUser.wallet >= 100) {
         messageHumourMylene.value = "Il y a urgence, je peux être volontaire désigné pour t'aider à utiliser tes BNs. Signé: little gecko";
