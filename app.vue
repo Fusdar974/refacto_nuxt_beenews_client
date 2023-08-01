@@ -1,4 +1,5 @@
 <template>
+    <LazyVitePwaManifest/>
     <NuxtLayout>
         <!--        <div class="imageFondChargement"/>-->
         <v-layout v-if="isAuthenticated" class="root">
@@ -15,7 +16,7 @@
                                     <template v-slot:prepend>
                                         <v-icon v-if="menu.icone" :icon="menu.icone.replace(' ',':')"></v-icon>
                                     </template>
-                                    <v-list-item-title v-if="menu.libelle" v-text="menu.libelle"></v-list-item-title>
+                                    <v-list-item-title v-if="menu.libelle">{{menu.libelle}}</v-list-item-title>
                                 </v-list-item>
                             </v-list>
                         </v-col>
@@ -40,16 +41,18 @@
             </v-main>
             <v-snackbar v-model="snackbarStoreOpen"
                         :color="snackbarStoreCouleur"
-                        timeout="3000">
-                <v-container class="pa-0">
+                        variant="elevated"
+                        :timeout="snackbarStoreCouleur === 'error' ? 10000 : 5000">
+                <v-container class="pa-3">
                     <v-row class="align-center">
                         <v-col cols="2">
                             <v-icon
+                                size="26"
                                 :icon="`mdi:mdi-${
-                                snackbarStoreCouleur==='success'?'check':'close'
+                                snackbarStoreCouleur==='success'?'check':'alert'}
                             }-circle-outline`"/>
                         </v-col>
-                        <v-col>{{ snackbarStoreMessage }}</v-col>
+                        <v-col style="font-size: 1rem">{{ snackbarStoreMessage }}</v-col>
                     </v-row>
                 </v-container>
             </v-snackbar>
@@ -65,7 +68,7 @@
                     </v-col>
                 </v-row>
                 <v-row class="flex-grow-0">
-                    <login-form :submit="login"/>
+                    <login-form/>
                 </v-row>
             </v-container>
         </v-layout>
@@ -91,9 +94,7 @@ import jwtDecode from "jwt-decode";
 
 const konamiChaine1 = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65].join('/')
 const konamiChaine2 = [38, 38, 40, 40, 37, 39, 37, 39, 98, 97].join('/')
-const initMenu: Array<MenuInterface> = [{_id: 1, to: "/", libelle: 'Accueil', auth: false}]
 
-const menus: Ref<Array<MenuInterface>> = ref(initMenu)
 const mobileOpen: Ref<boolean> = ref(false)
 const isLoading: Ref<boolean> = ref(false)
 const lettres: Ref<Array<number>> = ref([])
@@ -101,7 +102,6 @@ const konami: Ref<boolean> = ref(false)
 
 const {mdAndUp} = useDisplay()
 const {panierVide} = storeToRefs(usePanierStore())
-const {resetPanier: $reset} = usePanierStore()
 
 const {
     open: snackbarStoreOpen,
@@ -109,7 +109,8 @@ const {
     couleur: snackbarStoreCouleur
 } = storeToRefs(useSnackbarStore())
 
-const {isAuthenticated} = storeToRefs(useAuthenticateStore())
+const {isAuthenticated, menus} = storeToRefs(useAuthenticateStore())
+const {logout} = useAuthenticateStore()
 const {titleAppBar} = storeToRefs(useMenuStore())
 // const {isLoading} = useLoadingStore()
 

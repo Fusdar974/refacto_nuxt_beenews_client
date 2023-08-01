@@ -72,14 +72,13 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-
   </div>
 </template>
 
 <script setup lang="ts">
-import LoginResponseInterface from "~/interfaces/LoginResponseInterface";
-import IdentificationInterface from "~/interfaces/IdentificationInterface";
+import IdentificationInterface from "~/interfaces/userInterfaces/IdentificationInterface";
 import Fetch from "~/services/FetchService";
+import {useAuthenticateStore} from "~/stores/authenticateStore";
 import {useRouter} from "#app";
 import {tryCatch} from "standard-as-callback/built/utils";
 
@@ -89,9 +88,7 @@ const enCoursDeConnexion: Ref<boolean> = ref(false)
 const openDialog: Ref<boolean> = ref(false)
 const message: Ref<string> = ref('')
 
-const props = defineProps({
-  submit: {type: Function, required: true}, //TODO:: a retirer
-})
+const {login: submit} = useAuthenticateStore()
 
 const connexionServeur = () =>{
   const identification: IdentificationInterface = {

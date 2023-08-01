@@ -42,11 +42,10 @@
 
 <script setup lang="ts">
 
-import UserInterface from "~/interfaces/UserInterface";
-import CalendrierJourInterface from "~/interfaces/CalendrierInterfaces/CalendrierJourInterface";
+import UserInterface from "~/interfaces/userInterfaces/UserInterface";
+import CalendrierJourInterface from "~/interfaces/calendrierInterfaces/CalendrierJourInterface";
 import Fetch from "~/services/FetchService";
-import CalendrierResponseInterface from "~/interfaces/CalendrierInterfaces/CalendrierResponseInterface";
-import BarmansResponseInterface from "~/interfaces/BarmansResponseInterface";
+import CalendrierResponseInterface from "~/interfaces/calendrierInterfaces/CalendrierResponseInterface";
 import {Ref} from "vue";
 import {useSnackbarStore} from "~/stores/snackbarStore";
 import {storeToRefs} from "pinia";
@@ -85,10 +84,15 @@ const recupererMois = () => {
 }
 
 const recupererBarman = () => {
-    Fetch.requete({url: `/planning/barmans`, method: 'GET'}, (resultat: BarmansResponseInterface) => {
-        barmans.value = resultat.barmans
-        barmanSelectionne.value = resultat.barmans?.[0]
-    })
+    Fetch.requete(
+        {
+            url: `/planning/barmans`,
+            method: 'GET'
+        },
+        (resultat: { barmans: Array<UserInterface> }) => {
+            barmans.value = resultat.barmans
+            barmanSelectionne.value = resultat.barmans?.[0]
+        })
 }
 
 const moisPrecedent = () => {

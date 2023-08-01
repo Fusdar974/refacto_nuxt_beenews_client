@@ -11,9 +11,9 @@
                     <v-divider/>
                 </v-row>
 
-                <v-row v-if="commande.historique.length > 0">
+                <v-row v-if="(commande.historique?.length ?? 0) > 0">
                     <v-col sm="12">Articles</v-col>
-                    <ligne-article :items="commande.historique"/>
+                    <ligne-article :items="commande.historique ?? []"/>
                     <v-divider/>
                 </v-row>
                 <v-row>
@@ -62,7 +62,7 @@
 
 <script setup lang="ts">
 
-import HistoriqueLigneInterface from "~/interfaces/HistoriqueLigneInterface";
+import HistoriqueLigneInterface from "~/interfaces/historiqueInterfaces/HistoriqueLigneInterface";
 
 /** REFS */
 

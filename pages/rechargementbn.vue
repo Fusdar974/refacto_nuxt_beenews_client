@@ -61,7 +61,7 @@
 </template>
 
 <script setup lang="ts">
-import UserInterface from "~/interfaces/UserInterface";
+import UserInterface from "~/interfaces/userInterfaces/UserInterface";
 import {useSnackbarStore} from "~/stores/snackbarStore";
 import Fetch from "~/services/FetchService";
 import {storeToRefs} from "pinia";

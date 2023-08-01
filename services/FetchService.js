@@ -1,4 +1,4 @@
-import serverconfig from "~/serverconfig";
+import serverconfig from "@/serverconfig";
 
 
 class Fetch {

@@ -5,10 +5,10 @@
         <template v-slot:activator="{ props }">
             <v-btn class="text-none"
                    :disabled="isLoading"
-                   stacked
+                   :stacked="true"
                    v-bind="props">
                 <v-badge color="secondary"
-                         inline
+                         :inline="true"
                          :model-value="!!nombreTotalArticles"
                          max="99"
                          :content="nombreTotalArticles">
@@ -41,14 +41,16 @@
                                       :valeur-point="valeurPoint"
                                       :client-bn="clientBNComputed"
                                       @valide="(payable) => panierPayable = payable">
-                <v-select v-model="utilisateur"
-                          variant="outlined"
-                          :items="utilisateurs"
-                          :item-title="(user) => `${capitalize(user.nom)}  ${capitalize(user.prenom)}`"
-                          :suffix="`${clientBNComputed} BN`"
-                          class="mt-2"
-                          return-object
-                          label="Client"/>
+                <div v-if="isAdminComputed || isOpenSoumComputed">
+                    <v-select v-model="utilisateur"
+                              variant="outlined"
+                              :items="utilisateurs"
+                              :item-title="(user) => `${capitalize(user.nom)}  ${capitalize(user.prenom)}`"
+                              :suffix="`${clientBNComputed} BN`"
+                              class="mt-2"
+                              return-object
+                              label="Client"/>
+                </div>
             </panier-soum-paiment-step>
             <v-divider></v-divider>
             <v-card-actions class="pa-4">
@@ -71,8 +73,9 @@
                 <v-btn
                     color="primary"
                     variant="text"
-                    :disabled="!panierPayable&&stepPaiement"
-                    @click="()=> stepPaiement?validationPaiementPanier():stepPaiement=true">
+                    :disabled="(!panierPayable && (stepPaiement ||  !(isAdminComputed || isOpenSoumComputed)))"
+                    @click="()=>
+                    (stepPaiement || !(isOpenSoumComputed || isAdminComputed)) ? validationPaiementPanier() : stepPaiement = true">
                     {{ stepPaiement ? 'Valider' : 'Payer' }}
                 </v-btn>
             </v-card-actions>
@@ -91,11 +94,12 @@ import {storeToRefs} from "pinia";
 import {useSnackbarStore} from "~/stores/snackbarStore";
 import ArticlePotInterface from "~/interfaces/potsInterfaces/ArticlePotInterface";
 import Fetch from "~/services/FetchService";
-import UsersResponseInterface from "~/interfaces/UsersResponseInterface";
-import UserInterface from "~/interfaces/UserInterface";
+import UserInterface from "~/interfaces/userInterfaces/UserInterface";
 import ValeurBNResponseInterface from "~/interfaces/ValeurBNResponseInterface";
 import PanierSoumPaimentStep from "~/components/panierSoum/PanierSoumPaimentStep.vue";
 import capitalize from "~/functions/capitalize";
+import {useAuthenticateStore} from "~/stores/authenticateStore";
+import ResponseListInterface from "~/interfaces/ResponseListInterface";
 
 /** DATAS */
 const menu = ref<boolean>(false)
@@ -121,6 +125,14 @@ const {
     totalPanierBeeNews
 } = storeToRefs(usePanierStore())
 
+const {
+    userComputed,
+    isOpenSoumComputed,
+    isAdminComputed,
+    userBn,
+} = storeToRefs(useAuthenticateStore())
+
+const {calculateUserBn} = useAuthenticateStore()
 
 const {formatToNumber, $reset} = usePanierStore()
 
@@ -140,12 +152,17 @@ const clientBNComputed = computed(() => {
 /**
  * Modifie le step en cas de modification du panier
  * Modifie la valeur du champ compte en cas de modification du panier ou du client
+ * Calcul panier payable si CLient connecté
  */
-watch([utilisateur, totalPanierBeeNews], (newValue, oldValue) => {
+watch([utilisateur, totalPanierBeeNews, userBn], (newValue, oldValue) => {
     if (newValue[0] === oldValue[0]) {
         stepPaiement.value = false
     }
     paiementCompte.value = totalPanierBeeNews.value
+
+    if (!stepPaiement.value && !(isAdminComputed.value || isOpenSoumComputed.value)) {
+        panierPayable.value = (userBn.value ?? 0) >= newValue[1]
+    }
 })
 
 /** LIFECYCLE */
@@ -156,12 +173,16 @@ onBeforeMount(() => {
         Fetch.requete({
             url: '/users',
             data: {page: 1, limit: 1000, isArchived: false}, method: 'GET'
-        }, (resultUtil: UsersResponseInterface) => {
+        }, (resultUtil: ResponseListInterface<UserInterface>) => {
             utilisateurs.value = resultUtil.documents
+            if (!isOpenSoumComputed.value) {
+                utilisateur.value = utilisateurs.value?.find(u =>
+                    u._id === userComputed.value._id ?? false)
+            }
             isLoading.value = false
         }, () => isLoading.value = false)
     }, () => isLoading.value = false)
-    paiementCompte.value = totalPanierBeeNews.value  
+    paiementCompte.value = totalPanierBeeNews.value
 })
 
 /** METHODS */
@@ -169,7 +190,12 @@ onBeforeMount(() => {
 /**
  * Ouvre la modale de validation si le panier est payable
  */
-const validationPaiementPanier = () => openConfirmationPaiement.value = panierPayable.value
+const validationPaiementPanier = () => {
+    if (!isOpenSoumComputed.value && (utilisateur.value?._id === userComputed.value._id)) {
+        calculateUserBn()
+    }
+    openConfirmationPaiement.value = panierPayable.value
+}
 
 /**
  * Transmet le paiement au Back
@@ -187,12 +213,17 @@ const payerPanier = () => {
         }
 
         Fetch.requete({url: '/soum/panier', data: {panier}}, () => {
+            putSnackBarMessage('Paiement effectué.')
+            if (!isOpenSoumComputed.value && (utilisateur.value?._id === userComputed.value._id)) {
+                calculateUserBn()
+            }
             $reset()
             openConfirmationPaiement.value = false
-            putSnackBarMessage('Paiement effectué.')
         }, () => {
             putSnackBarMessage('Erreur dans le paiement.', 'error')
         });
+    } else {
+        putSnackBarMessage('Vous n\'avez plus assez de BN.', 'error')
     }
 }
 

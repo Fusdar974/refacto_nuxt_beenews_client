@@ -57,11 +57,10 @@
 <script setup lang="ts">
 
 import Fetch from "~/services/FetchService";
-import UserInterface from "~/interfaces/UserInterface";
-import UserResponseInterface from "~/interfaces/UserResponseInterface";
+import UserInterface from "~/interfaces/userInterfaces/UserInterface";
 import {onMounted} from "#imports";
 import PrivateRoute from "~/components/PrivateRoute.vue";
-import PasswordChangeResponseInterface from "~/interfaces/PasswordChangeResponseInterface";
+import PasswordChangeResponseInterface from "~/interfaces/userInterfaces/PasswordChangeResponseInterface";
 import HistoriqueClient from "~/components/HistoriqueClient.vue";
 import {storeToRefs} from "pinia";
 import {useMenuStore} from "~/stores/menuStore";
@@ -78,11 +77,16 @@ const {titleAppBar} = storeToRefs(useMenuStore())
 titleAppBar.value = 'Mon Compte'
 
 const majUser = (id: string) => {
-  if (typeof id !== "undefined" && id !== "" && id) {
-    Fetch.requete({method: "GET", url: `/users/${id}`}, (resultUser: UserResponseInterface) => {
-      user.value = resultUser.user
-    })
-  }
+    if (typeof id !== "undefined" && id !== "" && id) {
+        Fetch.requete(
+            {
+                url: `/users/${id}`,
+                method: 'GET'
+            },
+            (resultUser: { user: UserInterface }) => {
+                user.value = resultUser.user
+            })
+    }
 }
 
 onMounted(() => {

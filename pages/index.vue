@@ -1,26 +1,25 @@
 <template>
-  <PrivateRoute>
-    <div class="imageFond"></div>
-    <v-container class="ma-1">
-        <v-row v-if="isAuthenticated">
-          <v-col cols="12" class="text-center">
-            <h2>Bonjour {{user.name}} {{user.firstname}}, tu as {{ user.wallet }} BN(s) sur ton compte.</h2>
-          </v-col>
-          <v-col cols="12" class="text-center">
-            <h3 class="texteHumourMylene" >
-              {{messageHumourMylene}}
-            </h3>
-          </v-col>
-        </v-row>
-    </v-container>
-  </PrivateRoute>
+    <PrivateRoute>
+        <div class="imageFond"></div>
+        <v-container class="ma-1">
+            <v-row v-if="isAuthenticated">
+                <v-col cols="12" class="text-center">
+                    <h2>Bonjour {{ user.name }} {{ user.firstname }}, tu as {{ user.wallet }} BN(s) sur ton compte.</h2>
+                </v-col>
+                <v-col cols="12" class="text-center">
+                    <h3 class="texteHumourMylene">
+                        {{ messageHumourMylene }}
+                    </h3>
+                </v-col>
+            </v-row>
+        </v-container>
+    </PrivateRoute>
 </template>
 
 <script setup lang="ts">
 import PrivateRoute from "~/components/PrivateRoute.vue";
-import UserInterface from "~/interfaces/UserInterface";
+import UserInterface from "~/interfaces/userInterfaces/UserInterface";
 import Fetch from "~/services/FetchService";
-import UserResponseInterface from "~/interfaces/UserResponseInterface";
 import {onMounted} from "#imports";
 import {storeToRefs} from "pinia";
 import {useAuthenticateStore} from "~/stores/authenticateStore";
@@ -30,7 +29,7 @@ const {isAuthenticated} = storeToRefs(useAuthenticateStore())
 const {titleAppBar} = storeToRefs(useMenuStore())
 titleAppBar.value = 'Accueil'
 
-const messageHumourMylene: Ref<string> =  ref('')
+const messageHumourMylene: Ref<string> = ref('')
 const user: Ref<UserInterface> = ref({} as UserInterface)
 
 
@@ -58,8 +57,8 @@ const majUser = (id: string | null) => {
   }
 }
 
-onMounted(()=>{
-  majUser(localStorage.getItem('idCompte'))
+onMounted(() => {
+    majUser(localStorage.getItem('idCompte'))
 })
 
 
@@ -69,6 +68,7 @@ onMounted(()=>{
   display: flex;
   height: 100vh;
 }
+
 .appBar{
   width: 100%;
 }

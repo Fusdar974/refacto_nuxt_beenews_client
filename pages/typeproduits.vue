@@ -165,14 +165,14 @@
 
 <script setup lang="ts">
 import Fetch from "~/services/FetchService";
-import { Ref } from "vue";
+import {Ref} from "vue";
 import serverconfig from "~/serverconfig";
-import UserInterface from "~/interfaces/UserInterface";
-import TypeProduitInterface from "~/interfaces/TypeProduitInterface";
-import ValeurBnInterface from "~/interfaces/ValeurBnInterface";
+import UserInterface from "~/interfaces/userInterfaces/UserInterface";
+import TypeProduitInterface from "~/interfaces/produitInterfaces/TypeProduitInterface";
 import {useSnackbarStore} from "~/stores/snackbarStore";
 import {storeToRefs} from "pinia";
 import {useMenuStore} from "~/stores/menuStore";
+import ValeurBNResponseInterface from "~/interfaces/ValeurBNResponseInterface";
 
 const types: Ref<Array<TypeProduitInterface>> = ref([]);
 const dateDebutConsoSoum: Ref<string> = ref(new Date().toISOString());
@@ -363,12 +363,12 @@ const getUsers = () => {
 };
 const getValeurBn = () => {
   Fetch.requete(
-    { url: "/parametre/valeurBN", method: "GET" },
-    (resultat: ValeurBnInterface) => {
-      valeurBnActuelle.value = resultat.valeur
-      valeurBn.value = resultat.valeur
-    },() => {
-          putSnackBarMessage("erreur serveur lors de la récupération de la valeur du BN","error")
+      {url: "/parametre/valeurBN", method: "GET"},
+      (resultat: ValeurBNResponseInterface) => {
+          valeurBnActuelle.value = resultat.valeur
+          valeurBn.value = resultat.valeur
+      }, () => {
+          putSnackBarMessage("erreur serveur lors de la récupération de la valeur du BN", "error")
       }
   );
 };

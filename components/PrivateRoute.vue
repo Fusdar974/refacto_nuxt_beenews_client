@@ -1,10 +1,12 @@
 <template>
     <slot v-if="rights"/>
-    <v-progress-linear v-else indeterminate :height="5"></v-progress-linear>
+    <v-progress-linear v-else :indeterminate="true" :height="5"></v-progress-linear>
 </template>
 
 <script setup lang="ts">
 
+import jwtDecode from "jwt-decode";
+import JwtPayloadInterface from "~/interfaces/userInterfaces/JwtPayloadInterface";
 import {navigateTo, useRouter} from "#app";
 import {onBeforeMount} from "#imports";
 import MenuInterface from "~/interfaces/MenuInterface";
@@ -18,7 +20,6 @@ const privateRoute = () => {
         if (!autorizedComponent) return navigateTo('/')
     } else return navigateTo('/')
 }
-
 
 onBeforeMount(() => privateRoute())
 </script>
