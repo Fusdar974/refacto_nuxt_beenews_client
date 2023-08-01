@@ -1,4 +1,4 @@
-import GenericInterface from "./GenericInterface";
+import GenericInterface from "~/interfaces/GenericInterface";
 
 interface UserInterface extends GenericInterface {
     wallet: number

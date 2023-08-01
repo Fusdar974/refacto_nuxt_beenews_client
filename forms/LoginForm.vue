@@ -79,8 +79,9 @@
 import IdentificationInterface from "~/interfaces/userInterfaces/IdentificationInterface";
 import Fetch from "~/services/FetchService";
 import {useAuthenticateStore} from "~/stores/authenticateStore";
+import LoginResponseInterface from "~/interfaces/LoginResponseInterface";
 import {useRouter} from "#app";
-import {tryCatch} from "standard-as-callback/built/utils";
+import {Ref} from "vue";
 
 const email: Ref<string> = ref('')
 const password: Ref<string> = ref('')
@@ -100,8 +101,8 @@ const connexionServeur = () =>{
     if (retour) {
       localStorage.setItem("token", retour.bearer)
       localStorage.setItem("rights", JSON.stringify(retour.rights))
-      useRouter().push('/users')
-      props.submit()
+      useRouter().push('/')
+      submit()
     } else message.value = "Email/Password incorrect"
   }
   const echec = (e: Error) => {
