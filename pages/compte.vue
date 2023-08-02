@@ -94,10 +94,7 @@ const majUser = (id: string | null) => {
 }
 
 onMounted(() => {
-  const identifiant = localStorage.getItem('idCompte')
-  if (identifiant) {
-    majUser(identifiant)
-  }
+  majUser(localStorage.getItem('idCompte'))
 })
 
 // modification? v-model?
