@@ -107,8 +107,6 @@ export const useAuthenticateStore = defineStore('authenticate', () => {
             Fetch.requete({
                 url: `/users/${tokenDecode.value?.userId}`,
                 method: 'GET'
-            }, (resultUser: { user: UserInterface }) => {
-                //profils.value = resultUser.user.profils?.map(profil => profil.nom) ?? []
             })
         }
     }

@@ -4,7 +4,7 @@
     <v-container v-if="user" class="ma-1">
       <v-row>
         <v-col cols="12">
-          <h3>Il te reste {{ user.wallet }} BN(s) sur ton compte.</h3>
+          <h3>Il te reste {{ user.compte }} BN(s) sur ton compte.</h3>
         </v-col>
       </v-row>
       <v-row>
@@ -36,7 +36,9 @@
             <v-col sm="12" md="7">
               <v-btn-group density="compact">
                 <v-btn density="compact" class="couleur-or" @click="valider">Valider</v-btn>
-                <v-btn density="compact" variant="outlined" color="primary" @click="changerMotDePasse = !changerMotDePasse">Annuler</v-btn>
+                <v-btn density="compact" variant="outlined" color="primary"
+                       @click="changerMotDePasse = !changerMotDePasse">Annuler
+                </v-btn>
               </v-btn-group>
             </v-col>
             <v-col v-if="message" sm="12" md="7">
@@ -77,16 +79,16 @@ const {titleAppBar} = storeToRefs(useMenuStore())
 titleAppBar.value = 'Mon Compte'
 
 const majUser = (id: string) => {
-    if (typeof id !== "undefined" && id !== "" && id) {
-        Fetch.requete(
-            {
-                url: `/users/${id}`,
-                method: 'GET'
-            },
-            (resultUser: { user: UserInterface }) => {
-                user.value = resultUser.user
-            })
-    }
+  if (typeof id !== "undefined" && id !== "" && id) {
+    Fetch.requete(
+        {
+          url: `/users/${id}`,
+          method: 'GET'
+        },
+        (resultUser: { user: UserInterface }) => {
+          user.value = resultUser.user
+        })
+  }
 }
 
 onMounted(() => {
@@ -102,7 +104,7 @@ const valider = () => {
   const correctPassword = password.value !== newpassword.value && newpassword.value === confirmpassword.value && newpassword.value !== ""
   if (user.value && correctPassword) {
     Fetch.requete({
-      url: `/users/changepwd/${user.value._id}`, method: 'PATCH', data: {
+      url: `/users/changepwd/${user.value._id}`, method: 'POST', data: {
         password: password.value,
         newpassword: newpassword.value
       }
@@ -134,13 +136,13 @@ const valider = () => {
 </script>
 
 <style scoped>
-.couleur-or{
+.couleur-or {
   background-color: rgba(255, 206, 28, 0.8);
   color: black;
 }
 
 .couleur-or:hover {
-  background-color: rgba(255,206,28,1)
+  background-color: rgba(255, 206, 28, 1)
 }
 
 </style>
