@@ -2,8 +2,8 @@
   <private-route>
     <div class="imageFond"></div>
     <v-container v-if="user" class="ma-1">
-      <v-row>
-        <v-col cols="12">
+      <v-row v-if="isAuthenticated">
+        <v-col cols="12" class="text-center">
           <h3>Il te reste {{ user.wallet }} BN(s) sur ton compte.</h3>
         </v-col>
       </v-row>
@@ -64,8 +64,10 @@ import PasswordChangeResponseInterface from "~/interfaces/userInterfaces/Passwor
 import HistoriqueClient from "~/components/HistoriqueClient.vue";
 import {storeToRefs} from "pinia";
 import {useMenuStore} from "~/stores/menuStore";
+import {useAuthenticateStore} from "~/stores/authenticateStore";
 
-const user: Ref<UserInterface | null> = ref(null)
+const {isAuthenticated} = storeToRefs(useAuthenticateStore())
+const user: Ref<UserInterface> = ref({} as UserInterface)
 const changerMotDePasse: Ref<boolean> = ref(false)
 const password: Ref<string> = ref('')
 const newpassword: Ref<string> = ref('')
@@ -76,15 +78,15 @@ const message: Ref<string> = ref('')
 const {titleAppBar} = storeToRefs(useMenuStore())
 titleAppBar.value = 'Mon Compte'
 
-const majUser = (id: string) => {
+const majUser = (id: string | null) => {
     if (typeof id !== "undefined" && id !== "" && id) {
         Fetch.requete(
             {
                 url: `/users/${id}`,
                 method: 'GET'
             },
-            (resultUser: { user: UserInterface }) => {
-                user.value = resultUser.user
+            (resultUser: UserInterface ) => {
+                user.value = resultUser
             })
     }
 }
