@@ -37,20 +37,28 @@ const majUser = (id: string | null) => {
   if (typeof id !== "undefined" && id !== "" && id) {
     Fetch.requete({ url: `/users/${id}`, method: 'GET' }, (resultUser: UserInterface) => {
       user.value = resultUser
-      if (resultUser.wallet >= 100) {
-        messageHumourMylene.value = "Il y a urgence, je peux être volontaire désigné pour t'aider à utiliser tes BNs. Signé: little gecko";
-      } else if (resultUser.wallet >= 50 && resultUser.wallet < 100) {
-        messageHumourMylene.value = "Pour information le SOUM se trouve au milieu du bâtiment, ne stocke pas les BNs on n'est pas dans une banque."
-      } else if (resultUser.wallet >= 40 && resultUser.wallet < 50) {
-        messageHumourMylene.value = "Purée tu es riche. Pense à payer ton coup pour fêter ça !";
-      } else if (resultUser.wallet >= 30 && resultUser.wallet < 40) {
-        messageHumourMylene.value = "Tu consommes c'est bien, continue sur ta lancée.";
-      } else if (resultUser.wallet >= 20 && resultUser.wallet < 30) {
-        messageHumourMylene.value = "Tu tiens le ryhtme, tu fais vivre le SOUM je te félicite.";
-      } else if (resultUser.wallet >= 10 && resultUser.wallet < 20) {
-        messageHumourMylene.value = "Mangez bougez ... vu ton wallet c'est plus \"buvez mangez\" ! ";
-      } else if (resultUser.wallet >= 0 && resultUser.wallet < 10) {
-        messageHumourMylene.value = "Il faut penser à ramener des sous ou taxer les autres pour consommer. Super PROMO pour une carte achetée = une carte achetée.";
+      switch ( Math.trunc(resultUser.wallet/10) ) {
+         case 5:
+             messageHumourMylene.value = "Pour information le SOUM se trouve au milieu du bâtiment, ne stocke pas les BNs on n'est pas dans une banque.";
+             break;
+         case 4:
+             messageHumourMylene.value = "Purée tu es riche. Pense à payer ton coup pour fêter ça !";
+             break;
+         case 3:
+             messageHumourMylene.value = "Tu consommes c'est bien, continue sur ta lancée.";
+             break;
+         case 2:
+             messageHumourMylene.value = "Tu tiens le ryhtme, tu fais vivre le SOUM je te félicite.";
+             break;
+         case 1:
+             messageHumourMylene.value = "Mangez bougez ... vu ton wallet c'est plus \"buvez mangez\" !";
+             break;
+         case 0:
+             messageHumourMylene.value = "Il faut penser à ramener des sous ou taxer les autres pour consommer. Super PROMO pour une carte achetée = une carte achetée.";
+             break;
+         default: 
+             messageHumourMylene.value = "Il y a urgence, je peux être volontaire désigné pour t'aider à utiliser tes BNs. Signé: little gecko"; 
+             break;
       }
     });
   }
