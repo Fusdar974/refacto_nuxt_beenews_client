@@ -112,7 +112,6 @@ const {
 
 const {isAuthenticated, menus} = storeToRefs(useAuthenticateStore())
 const {titleAppBar} = storeToRefs(useMenuStore())
-// const {isLoading} = useLoadingStore()
 
 const handleDrawerToggle = () => {
     mobileOpen.value = !mobileOpen.value

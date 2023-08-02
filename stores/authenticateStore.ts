@@ -34,16 +34,16 @@ export const useAuthenticateStore = defineStore('authenticate', () => {
     const userComputed = computed(() => {
         const user: ConnectedUserInterface = {
             _id: tokenDecode.value?.userId,
-            nom: capitalyze(tokenDecode.value?.name),
-            prenom: capitalyze(tokenDecode.value?.firstname),
-            initiales: `${tokenDecode.value?.name.slice(0, 1)}${tokenDecode.value?.firstname.slice(0, 1)}`.toUpperCase()
+            name: capitalyze(tokenDecode.value?.name),
+            firstname: capitalyze(tokenDecode.value?.firstname),
+            initials: `${tokenDecode.value?.name.slice(0, 1)}${tokenDecode.value?.firstname.slice(0, 1)}`.toUpperCase()
         }
         return tokenDecode.value ? user : {
             _id: undefined,
-            nom: undefined,
-            prenom: undefined,
-            compte: undefined,
-            initiales: undefined
+            name: undefined,
+            firstname: undefined,
+            wallet: undefined,
+            initials: undefined
         }
     })
 

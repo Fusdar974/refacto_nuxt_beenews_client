@@ -1,9 +1,9 @@
 import GenericInterface from "../GenericInterface";
 
 interface ConnectedUserInterface extends GenericInterface {
-    nom: string
-    prenom: string
-    initiales: string
+    name: string
+    firstname: string
+    initials: string
 }
 
 export default ConnectedUserInterface

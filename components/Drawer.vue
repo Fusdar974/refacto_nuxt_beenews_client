@@ -9,12 +9,12 @@
             <v-row align="center">
                 <v-col cols="2" class="pa-1">
                     <div style="height: 40px; width: 40px; background-color: #3f51b5; color: white; border-radius: 20px; text-align: center; line-height: 40px; font-size: 1.3rem">
-                        {{ userComputed.initiales }}
+                        {{ userComputed.initials }}
                     </div>
                 </v-col>
                 <v-col cols="6" class="pb-1 pt-1">
-                    <p class="noLongWord">{{ userComputed.nom }}</p>
-                    <p class="noLongWord">{{ userComputed.prenom }}</p>
+                    <p class="noLongWord">{{ userComputed.name }}</p>
+                    <p class="noLongWord">{{ userComputed.firstname }}</p>
                 </v-col>
                 <v-col cols="3" class="pa-1">
                     <v-btn variant="text"
