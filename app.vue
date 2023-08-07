@@ -89,64 +89,42 @@ import {useMenuStore} from "~/stores/menuStore";
 import PanierSoum from "~/components/panierSoum/PanierSoum.vue";
 import {usePanierStore} from "~/stores/panierStore";
 import Fetch from "~/services/FetchService";
-import JwtPayloadInterface from "~/interfaces/userInterfaces/JwtPayloadInterface";
-import jwtDecode from "jwt-decode";
+import {Ref} from "vue";
 
 const konamiChaine1 = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65].join('/')
 const konamiChaine2 = [38, 38, 40, 40, 37, 39, 37, 39, 98, 97].join('/')
 const initMenu: Array<MenuInterface> = [{_id: 1, to: "/", libelle: 'Accueil', auth: false}]
 
 const mobileOpen: Ref<boolean> = ref(false)
-const isLoading: Ref<boolean> = ref(false)
 const lettres: Ref<Array<number>> = ref([])
 const konami: Ref<boolean> = ref(false)
 
+/** STORES */
+
 const {mdAndUp} = useDisplay()
 const {panierVide} = storeToRefs(usePanierStore())
-
+const {isAuthenticated, menus} = storeToRefs(useAuthenticateStore())
+const {login, logout, setAuthenticate} = useAuthenticateStore()
+const {titleAppBar} = storeToRefs(useMenuStore())
 const {
     open: snackbarStoreOpen,
     message: snackbarStoreMessage,
     couleur: snackbarStoreCouleur
 } = storeToRefs(useSnackbarStore())
 
-const {isAuthenticated, menus} = storeToRefs(useAuthenticateStore())
-const {titleAppBar} = storeToRefs(useMenuStore())
-// const {isLoading} = useLoadingStore()
 
 const handleDrawerToggle = () => {
     mobileOpen.value = !mobileOpen.value
 }
 
-const setAuthenticate = (boolAuth: boolean, newMenus: Array<MenuInterface>) => {
-    isAuthenticated.value = boolAuth
-    menus.value = newMenus
-    isLoading.value = false
-}
-const login = () => {
-    isLoading.value = true
-    const token = localStorage.getItem('token');
-    const rights = JSON.parse(localStorage.getItem('rights') || '[]');
-    if (token) {
-        const tokenDecode: JwtPayloadInterface = jwtDecode(token);
-        localStorage.setItem('idCompte', tokenDecode.userId);
-        const expire = new Date((tokenDecode.exp || 0) * 1000) < new Date();
-        if (!expire) {
-            setAuthenticate(true, rights);
-        } else {
-            console.error('Token expiré');
-            console.error("Connecté...:", new Date((tokenDecode.iat || 0) * 1000));
-            console.error("Expire.....:", new Date((tokenDecode.exp || 0) * 1000));
-        }
-    }
-}
+//Met à jour l'autentification de l'application.
+setAuthenticate( false, initMenu)
 
-const logout = () => {
-    isLoading.value = true
-    setAuthenticate(false, initMenu);
-    useRouter().push('/');
-    localStorage.clear();
-}
+//Décode le token de l'utilisateur
+login()
+
+//Met en place la déconnection de l'utilisateur
+logout()
 
 Fetch.setFonctionDeco(logout);
 

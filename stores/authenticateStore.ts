@@ -134,6 +134,7 @@ export const useAuthenticateStore = defineStore('authenticate', () => {
 
     return {
         isAuthenticated,
+        setAuthenticate,
         login,
         logout,
         menus,
