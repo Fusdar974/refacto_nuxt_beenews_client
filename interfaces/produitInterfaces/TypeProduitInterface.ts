@@ -1,9 +1,10 @@
+import ProduitInterface from "~/interfaces/produitInterfaces/ProduitInterface";
+
 interface TypeProduitInterface{
     _id?: string
-    nom: string
-    proposablePot: boolean
-    proposableSoum: boolean
-    nombreProduits?: number
-    selectionne?: boolean
+    name: string
+    isSuggestablePot: boolean
+    isSuggestableSoum: boolean
+    items: ProduitInterface
 }
 export default TypeProduitInterface

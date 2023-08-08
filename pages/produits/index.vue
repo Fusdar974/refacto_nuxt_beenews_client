@@ -88,8 +88,7 @@
         <v-card-actions>
           <v-checkbox v-for="(type,index) in types"
                       :key="index"
-                      v-model="type.selectionne"
-                      :label="type.nom"
+                      :label="type.name"
                       :value="type"
                       color="indigo" ></v-checkbox>
         </v-card-actions>
@@ -103,7 +102,7 @@
 import {watch} from "#imports";
 import Fetch from "~/services/FetchService";
 import ProduitInterface from "~/interfaces/produitInterfaces/ProduitInterface";
-import TypeInterface from "~/interfaces/produitInterfaces/TypeProduitInterface";
+import TypeProduitInterface from "~/interfaces/produitInterfaces/TypeProduitInterface";
 import AttributeInterface from "~/interfaces/AttributeInterface";
 import serverconfig from "~/serverconfig";
 import {useDisplay} from "vuetify";
@@ -112,12 +111,14 @@ import {useSnackbarStore} from "~/stores/snackbarStore";
 import {storeToRefs} from "pinia";
 import {useMenuStore} from "~/stores/menuStore";
 import ResponseListInterface from "~/interfaces/ResponseListInterface";
+import items from "ajv/lib/vocabularies/applicator/items";
+
 
 
 const loading: Ref<boolean> = ref(false)
 const produits: Ref<Array<ProduitInterface>> = ref([])
 const nombreParPage: Ref<string> = ref('10')
-const types: Ref<Array<TypeInterface>> = ref([{}] as TypeInterface[])
+const types: Ref<Array<TypeProduitInterface>> = ref([{}] as TypeProduitInterface[])
 
 const attributes: Ref<Array<AttributeInterface>> = ref([
     {header: 'Nom', attr: 'nom'},
@@ -160,9 +161,9 @@ const attributesComputed = computed(() => mdAndUp.value ? attributesMdandUp.valu
  * recharge la liste des produits lorsque la page est créée
  */
 onMounted(()=>{
-  Fetch.requete({ url: '/typeproduits' }, (result: [TypeInterface]) =>
-      types.value = result.map(item => ({
-        _id: item._id, nom: item.nom, proposablePot: item.proposablePot, proposableSoum: item.proposableSoum, nombreProduits: item.nombreProduits,  selectionne: false
+  Fetch.requete({ url: '/typeproduits' }, (result: [TypeProduitInterface]) =>
+      items.value = result.map(item => ({
+        _id: item._id, nom: item.name, proposablePot: item.isSuggestablePot, proposableSoum: item.isSuggestableSoum, nombreProduits: item.items.stock
       })));
   recharger();
 })
@@ -244,7 +245,7 @@ const handleConfirmerSuppression = () => {
  * et ferme le dialog de sélection des types à filtrer
  */
 const confirmerInventairePartiel = () => {
-  Fetch.requete({ url: '/produits/pdf', method: 'POST', data: { types:  types.value.filter(item => item.selectionne).map(item => item._id) } }, result => {
+  Fetch.requete({ url: '/produits/pdf', method: 'POST', data: { types:  types.value.filter(item => item._id).map(item => item._id) } }, (result: { ticket: any; }) => {
     window.open(`${serverconfig}v1/pdf/pdf?token=${result.ticket}`, '_blanck');
   });
   openInventairePartiel.value = !openInventairePartiel.value
@@ -255,7 +256,7 @@ const confirmerInventairePartiel = () => {
  * télécharge cette liste sous forme d'un tableau en PDF
  */
 const afficherPDF = () => {
-  Fetch.requete({ url: '/produits/pdf', method: 'POST' }, result => {
+  Fetch.requete({ url: '/produits/pdf', method: 'POST' }, (result: { ticket: any; }) => {
     window.open(`${serverconfig}v1/pdf/pdf?token=${result.ticket}`, '_blanck');
   });
 }

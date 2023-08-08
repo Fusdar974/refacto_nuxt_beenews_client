@@ -1,16 +1,11 @@
-import TypeProduitInterface from "~/interfaces/produitInterfaces/TypeProduitInterface";
 import GenericInterface from "~/interfaces/GenericInterface";
 
 interface ProduitInterface extends GenericInterface {
-    nom: string
+    name: string
     image: string
-    imageBnr?: string | ArrayBuffer
-    type: TypeProduitInterface | string
-    prix: number
-    prixEuros: number
-    nombre: number
-    credit: number
-    effacable: boolean
-    archive: boolean
+    price: number
+    stock: number
+    dispo: number
+    isArchived: boolean
 }
 export default  ProduitInterface
