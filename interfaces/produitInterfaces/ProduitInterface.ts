@@ -1,5 +1,5 @@
-import TypeProduitInterface from "~/interfaces/produitInterfaces/TypeProduitInterface";
 import GenericInterface from "~/interfaces/GenericInterface";
+import TypeProduitInterface from "~/interfaces/produitInterfaces/TypeProduitInterface";
 
 interface ProduitInterface extends GenericInterface {
     nom: string

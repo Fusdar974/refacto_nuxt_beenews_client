@@ -10,7 +10,6 @@
                           :error-messages="v$.prenom.$errors.map(e => e.$message) as string[]"
                           required
                           @blur="v$.prenom.$touch"/>
-            <v-text-field v-model="selectedUser.surnom" type="text" label="surnom"/>
             <v-text-field v-model="selectedUser.mail" type="text" label="mail" :error="erreurMail.value"
                           :error-messages="v$.mail.$errors.map(e => e.$message) as string[]"
                           required
@@ -31,7 +30,7 @@
                         color="primary"
             ></v-checkbox>
             <v-checkbox label="Compte désactivé"
-                        v-model="selectedUser.isDesactive"
+                        v-model="selectedUser.value.isArchived"
                         color="red"
             ></v-checkbox>
             <div>
@@ -113,7 +112,7 @@ titleAppBar.value = props.action === 'edit' && "Modification du client"
     || props.action === 'add' && "Ajout d'un client"
     || "Informations du client"
 
-watch(() => selectedUser.value.profils, newValue => console.log(newValue))
+watch(() => selectedUser.value.name, newValue => console.log(newValue))
 /**
  * avant que la page soit montée dans le DOM
  * si le mode n'est pas en création, charge l'utilisateur sélectionné
@@ -236,7 +235,7 @@ const envoyerNouveauPwd = () => {
         url: `/users/genererNewPwd/${selectedUser.value!._id}`,
         method: 'POST',
         data: {
-            mail: selectedUser.value!.mail
+            mail: selectedUser.value!.email
         }
     }, (reussite: PasswordChangeResponseInterface) => {
 

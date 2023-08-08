@@ -244,7 +244,7 @@ const handleConfirmerSuppression = () => {
  * et ferme le dialog de sélection des types à filtrer
  */
 const confirmerInventairePartiel = () => {
-  Fetch.requete({ url: '/produits/pdf', method: 'POST', data: { types:  types.value.filter(item => item.selectionne).map(item => item._id) } }, result => {
+  Fetch.requete({ url: '/produits/pdf', method: 'POST', data: { types:  types.value.filter(item => item.selectionne).map(item => item._id) } }, (result: { ticket: any; }) => {
     window.open(`${serverconfig}v1/pdf/pdf?token=${result.ticket}`, '_blanck');
   });
   openInventairePartiel.value = !openInventairePartiel.value
@@ -255,7 +255,7 @@ const confirmerInventairePartiel = () => {
  * télécharge cette liste sous forme d'un tableau en PDF
  */
 const afficherPDF = () => {
-  Fetch.requete({ url: '/produits/pdf', method: 'POST' }, result => {
+  Fetch.requete({ url: '/produits/pdf', method: 'POST' }, (result: { ticket: any; }) => {
     window.open(`${serverconfig}v1/pdf/pdf?token=${result.ticket}`, '_blanck');
   });
 }

@@ -8,19 +8,20 @@ import {onMounted} from "#imports";
 import ConnectedUserInterface from "~/interfaces/userInterfaces/ConnectedUserInterface";
 import UserInterface from "~/interfaces/userInterfaces/UserInterface";
 
+export const initMenu = <Array<MenuInterface>>[{
+    _id: 1,
+    to: "/",
+    libelle: 'Accueil',
+    auth: false
+}]
 export const useAuthenticateStore = defineStore('authenticate', () => {
 
     /** Reference */
     const isAuthenticated = ref<boolean>(false)
     const isLoading = ref<boolean>(false)
+    const userRights = ref<Array<string>>([]);
 
 
-    const initMenu = <Array<MenuInterface>>[{
-        _id: 1,
-        to: "/",
-        libelle: 'Accueil',
-        auth: false
-    }]
     const menus = ref<Array<MenuInterface>>(initMenu)
 
     const tokenDecode = ref<JwtPayloadInterface>()
@@ -60,11 +61,12 @@ export const useAuthenticateStore = defineStore('authenticate', () => {
             const rights = JSON.parse(localStorage.getItem('rights') || '[]');
             const expire = new Date((newTokenDecode.exp || 0) * 1000) < new Date();
             if (!expire) {
-                setAuthenticate(true, rights);
+                setAuthenticate(true, initMenu, rights);
             } else {
                 console.error('Token expiré');
                 console.error("Connecté...:", new Date((newTokenDecode.iat || 0) * 1000));
                 console.error("Expire.....:", new Date((newTokenDecode.exp || 0) * 1000));
+                setAuthenticate(false, [], []) // Réinitialise les droits en cas d'expiration
             }
         }
     })
@@ -88,10 +90,12 @@ export const useAuthenticateStore = defineStore('authenticate', () => {
      * Met à jour l'autentification de l'application
      * @param boolAuth
      * @param newMenus
+     * @param rights
      */
-    const setAuthenticate = (boolAuth: boolean, newMenus: Array<MenuInterface>) => {
+    const setAuthenticate = (boolAuth: boolean, newMenus: Array<MenuInterface>, rights: string[]) => {
         isAuthenticated.value = boolAuth
         menus.value = newMenus
+        userRights.value = rights
         isLoading.value = false
     }
 
@@ -115,8 +119,9 @@ export const useAuthenticateStore = defineStore('authenticate', () => {
      * Met en place la déconnection de l'utilisateur
      */
     const logout = () => {
+        const authenticateStore = useAuthenticateStore();
         isLoading.value = true
-        setAuthenticate(false, initMenu);
+        authenticateStore.setAuthenticate(false, initMenu, []); // Réinitialise les droits
         useRouter().push('/').then(() => localStorage.clear())
     }
 
@@ -142,6 +147,7 @@ export const useAuthenticateStore = defineStore('authenticate', () => {
         isAdminComputed,
         isOpenSoumComputed,
         userBn,
-        calculateUserBn
+        calculateUserBn,
+        userRights,
     }
 })

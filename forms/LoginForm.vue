@@ -78,7 +78,7 @@
 <script setup lang="ts">
 import IdentificationInterface from "~/interfaces/userInterfaces/IdentificationInterface";
 import Fetch from "~/services/FetchService";
-import {useAuthenticateStore} from "~/stores/authenticateStore";
+import { useAuthenticateStore, initMenu } from "~/stores/authenticateStore";
 import LoginResponseInterface from "~/interfaces/LoginResponseInterface";
 import {useRouter} from "#app";
 import {Ref} from "vue";
@@ -97,10 +97,12 @@ const connexionServeur = () =>{
     password: password.value,
   }
   const reussite = (retour: LoginResponseInterface) => {
+    const authenticateStore = useAuthenticateStore();
     enCoursDeConnexion.value = false
     if (retour) {
       localStorage.setItem("token", retour.bearer)
-      localStorage.setItem("rights", JSON.stringify(retour.rights))
+      const rights = retour.rights.map(item => item.nom);
+      authenticateStore.setAuthenticate(true, initMenu, rights);
       useRouter().push('/')
       submit()
     } else message.value = "Email/Password incorrect"

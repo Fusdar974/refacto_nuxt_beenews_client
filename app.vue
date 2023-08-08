@@ -118,7 +118,7 @@ const handleDrawerToggle = () => {
 }
 
 //Met à jour l'autentification de l'application.
-setAuthenticate( false, initMenu)
+setAuthenticate( false, initMenu, [])
 
 //Décode le token de l'utilisateur
 login()
