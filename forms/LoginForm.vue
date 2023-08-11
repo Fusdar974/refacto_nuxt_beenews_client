@@ -78,7 +78,7 @@
 <script setup lang="ts">
 import IdentificationInterface from "~/interfaces/userInterfaces/IdentificationInterface";
 import Fetch from "~/services/FetchService";
-import { useAuthenticateStore, initMenu } from "~/stores/authenticateStore";
+import {useAuthenticateStore} from "~/stores/authenticateStore";
 import LoginResponseInterface from "~/interfaces/LoginResponseInterface";
 import {useRouter} from "#app";
 import {Ref} from "vue";
@@ -88,27 +88,29 @@ const password: Ref<string> = ref('')
 const enCoursDeConnexion: Ref<boolean> = ref(false)
 const openDialog: Ref<boolean> = ref(false)
 const message: Ref<string> = ref('')
+const authenticateStore = useAuthenticateStore()
 
-const {login: submit} = useAuthenticateStore()
 
-const connexionServeur = () =>{
+/**
+ * Fonction de connexion
+ */
+const connexionServeur = () => {
   const identification: IdentificationInterface = {
     email: email.value,
     password: password.value,
   }
   const reussite = (retour: LoginResponseInterface) => {
-    const authenticateStore = useAuthenticateStore();
     enCoursDeConnexion.value = false
     if (retour) {
       localStorage.setItem("token", retour.bearer)
-      const rights = retour.rights.map(item => item.nom);
-      authenticateStore.setAuthenticate(true, initMenu, rights);
+      authenticateStore.login()
       useRouter().push('/')
-      submit()
-    } else message.value = "Email/Password incorrect"
+    } else {
+      echec()
+    }
   }
-  const echec = (e: Error) => {
-      message.value = "Email/Password incorrect"
+  const echec = (e?: Error) => {
+    message.value = "Email/Password incorrect"
   }
   Fetch.requete({url: "/auth/login", data: identification}, reussite, echec)
 }
@@ -119,19 +121,26 @@ interface TextField {
 }
 
 const handleChange = (e: Event) => {
-  const textField: TextField = <Object> e.target as TextField
-  if(textField.name === 'email'){
+  const textField: TextField = <Object>e.target as TextField
+  if (textField.name === 'email') {
     email.value = textField.value
-  }else password.value = textField.value
+  } else password.value = textField.value
   message.value = ''
 }
 
+/**
+ * Catch submit event
+ * @param e event
+ */
 const handleSubmit = (e: Event) => {
   e.preventDefault()
   enCoursDeConnexion.value = true
   connexionServeur()
 }
 
+/**
+ * catch close event
+ */
 const handleClose = () => {
   openDialog.value = false
 }
@@ -149,13 +158,13 @@ const keyPress = (e: KeyboardEvent) => {
 </script>
 
 <style scoped>
-.couleur-or{
+.couleur-or {
   background-color: rgba(255, 206, 28, 0.8);
   color: black;
 }
 
 .couleur-or:hover {
-  background-color: rgba(255,206,28,1)
+  background-color: rgba(255, 206, 28, 1)
 }
 
 .image {
