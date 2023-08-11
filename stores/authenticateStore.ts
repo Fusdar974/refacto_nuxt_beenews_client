@@ -8,21 +8,13 @@ import {onMounted} from "#imports";
 import ConnectedUserInterface from "~/interfaces/userInterfaces/ConnectedUserInterface";
 import UserInterface from "~/interfaces/userInterfaces/UserInterface";
 
-export const initMenu = <Array<MenuInterface>>[{
-    _id: 1,
-    to: "/",
-    libelle: 'Accueil',
-    auth: false
-}]
 export const useAuthenticateStore = defineStore('authenticate', () => {
 
     /** Reference */
     const isAuthenticated = ref<boolean>(false)
     const isLoading = ref<boolean>(false)
-    const userRights = ref<Array<string>>([]);
 
-
-    const menus = ref<Array<MenuInterface>>(initMenu)
+    const menus = ref<Array<MenuInterface>>()
 
     const tokenDecode = ref<JwtPayloadInterface>()
 
@@ -58,15 +50,12 @@ export const useAuthenticateStore = defineStore('authenticate', () => {
     watch(tokenDecode, newTokenDecode => {
         if (newTokenDecode) {
             localStorage.setItem('idCompte', newTokenDecode.userId);
-            const rights = JSON.parse(localStorage.getItem('rights') || '[]');
             const expire = new Date((newTokenDecode.exp || 0) * 1000) < new Date();
-            if (!expire) {
-                setAuthenticate(true, initMenu, rights);
-            } else {
+            if (expire) {
                 console.error('Token expiré');
                 console.error("Connecté...:", new Date((newTokenDecode.iat || 0) * 1000));
                 console.error("Expire.....:", new Date((newTokenDecode.exp || 0) * 1000));
-                setAuthenticate(false, [], []) // Réinitialise les droits en cas d'expiration
+                logout(2) // Réinitialise les droits en cas d'expiration
             }
         }
     })
@@ -87,42 +76,56 @@ export const useAuthenticateStore = defineStore('authenticate', () => {
         `${s.slice(0, 1).toUpperCase()}${s.slice(1, s.length).toLowerCase()}`
 
     /**
-     * Met à jour l'autentification de l'application
+     * Met à jour l'authentification de l'application
      * @param boolAuth
      * @param newMenus
-     * @param rights
      */
-    const setAuthenticate = (boolAuth: boolean, newMenus: Array<MenuInterface>, rights: string[]) => {
+    const setAuthenticate = (boolAuth: boolean, newMenus?: Array<MenuInterface>) => {
         isAuthenticated.value = boolAuth
-        menus.value = newMenus
-        userRights.value = rights
+        menus.value = newMenus || []
         isLoading.value = false
     }
 
     /**
-     * Décode le token de l'utilisateur
+     * Permet d'authentifier l'utilisateur et de récupérer sa liste de menus
      */
     const login = () => {
         isLoading.value = true
         const token = localStorage.getItem('token');
         if (token) {
-            tokenDecode.value = jwtDecode(token);
+            try {
+                tokenDecode.value = jwtDecode(token);
+            } catch (e) {
+                logout(3)
+                return
+            }
             userBn.value = tokenDecode.value?.wallet ?? 0
             Fetch.requete({
-                url: `/users/${tokenDecode.value?.userId}`,
+                url: `/users/${tokenDecode.value?.userId}/menus`,
                 method: 'GET'
+            }, (result : Array<MenuInterface>) => {
+                setAuthenticate(true, result)
+            }, (result: any) => {
+                logout(1)
             })
+        }else{
+            logout(0)
         }
     }
 
     /**
-     * Met en place la déconnection de l'utilisateur
+     * Met en place la déconnexion de l'utilisateur
+     * Step: 0 = empty token
+     *       1 = Error GetMenus
+     *       2 = token expire
+     *       3 = invalide token
      */
-    const logout = () => {
-        const authenticateStore = useAuthenticateStore();
+    const logout = (step?:number) => {
+        console.info("logout - "+step||'other');
         isLoading.value = true
-        authenticateStore.setAuthenticate(false, initMenu, []); // Réinitialise les droits
-        useRouter().push('/').then(() => localStorage.clear())
+        localStorage.clear()
+        setAuthenticate(false); // Réinitialise les droits
+        useRouter().push('/')
     }
 
     /**
@@ -139,7 +142,6 @@ export const useAuthenticateStore = defineStore('authenticate', () => {
 
     return {
         isAuthenticated,
-        setAuthenticate,
         login,
         logout,
         menus,
@@ -148,6 +150,5 @@ export const useAuthenticateStore = defineStore('authenticate', () => {
         isOpenSoumComputed,
         userBn,
         calculateUserBn,
-        userRights,
     }
 })
