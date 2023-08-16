@@ -153,7 +153,7 @@ onBeforeMount(() => {
 
 /**
  * ferme le formulaire et renvoie sur la page des clients, si un message est passé en paramètre
- * celui-ci est stocké dans le store ainsi qu'un booléen qui permet d'activer le snackbar de la page principale est afficher le message
+ * celui-ci est stocké dans le store ainsi qu'un booléen qui permet d'activer le snackbar de la page principale et afficher le message
  * @param messageAfficher message à afficher
  */
 const fermer = (messageAfficher: string | undefined) => {

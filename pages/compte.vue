@@ -1,10 +1,9 @@
 <template>
-  <private-route>
     <div class="imageFond"></div>
-    <v-container v-if="user" class="ma-1">
+    <v-container v-if="isAuthenticated" class="ma-1">
       <v-row>
         <v-col cols="12">
-          <h3>Il te reste {{ user.compte }} BN(s) sur ton compte.</h3>
+          <h3>Il te reste {{ user.wallet }} BN(s) sur ton compte.</h3>
         </v-col>
       </v-row>
       <v-row>
@@ -52,8 +51,7 @@
         </v-col>
       </v-row>
     </v-container>
-    <historique-client v-if="user" :userId="user._id"/>
-  </private-route>
+    <historique-client v-if="user._id" :user-id=user._id />
 </template>
 
 <script setup lang="ts">
@@ -66,8 +64,11 @@ import PasswordChangeResponseInterface from "~/interfaces/userInterfaces/Passwor
 import HistoriqueClient from "~/components/HistoriqueClient.vue";
 import {storeToRefs} from "pinia";
 import {useMenuStore} from "~/stores/menuStore";
+import {Ref} from "vue/dist/vue";
+import {useAuthenticateStore} from "~/stores/authenticateStore";
 
-const user: Ref<UserInterface | null> = ref(null)
+const {isAuthenticated} = storeToRefs(useAuthenticateStore())
+const user: Ref<UserInterface> = ref({} as UserInterface)
 const changerMotDePasse: Ref<boolean> = ref(false)
 const password: Ref<string> = ref('')
 const newpassword: Ref<string> = ref('')
@@ -80,14 +81,12 @@ titleAppBar.value = 'Mon Compte'
 
 const majUser = (id: string) => {
   if (typeof id !== "undefined" && id !== "" && id) {
-    Fetch.requete(
-        {
-          url: `/users/${id}`,
-          method: 'GET'
-        },
-        (resultUser: { user: UserInterface }) => {
-          user.value = resultUser.user
+      Fetch.requete({url: `/users/${id}`, method: 'GET'},
+        (resultUser: UserInterface ) => {
+          user.value = resultUser
+            console.log("user", user.value)
         })
+
   }
 }
 
@@ -104,9 +103,8 @@ const valider = () => {
   const correctPassword = password.value !== newpassword.value && newpassword.value === confirmpassword.value && newpassword.value !== ""
   if (user.value && correctPassword) {
     Fetch.requete({
-      url: `/users/changepwd/${user.value._id}`, method: 'POST', data: {
-        password: password.value,
-        newpassword: newpassword.value
+      url: `/users/${user.value._id}`, method: 'PATCH', data: {
+        password: newpassword.value
       }
     }, (reponse: PasswordChangeResponseInterface) => {
       if (reponse.data === 'nok') {
