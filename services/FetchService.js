@@ -11,7 +11,7 @@ class Fetch {
         this.deco();
     }
 
-    static requete(data, reussite, echec ) {
+    static requete(data, reussite, echec) {
         const token = localStorage.getItem('token');
 
         const myHeaders = new Headers({
@@ -27,9 +27,8 @@ class Fetch {
         if (myInit.method === "POST" || myInit.method === "PATCH") {
             myInit.body = JSON.stringify(data.data || {});
         }
-        let filters = '';
+        let filters = [];
         if (myInit.method === "GET" && data.data) {
-            filters = `?`;
             for (const key in data.data) {
                 if (key !== "undefined"
                     && key !== undefined
@@ -37,14 +36,12 @@ class Fetch {
                     && data.data[key] !== "undefined"
                     && data.data[key] !== undefined
                     && data.data[key] !== '') {
-                    filters += `${key}=${data.data[key]}&`;
+                    filters.push(`${key}=${data.data[key]}`);
                 }
-
             }
-            filters.substring(0, filters.length - 1);
         }
-
-        fetch(`${serverconfig}${data.url}${filters}`, myInit)
+        const filterString = filters.length > 0 ? `?${filters.join('&')}` : ''
+        fetch(`${serverconfig}${data.url}${filterString}`, myInit)
             .then(response => {
                 if (response.ok) {
                     return response.json()
