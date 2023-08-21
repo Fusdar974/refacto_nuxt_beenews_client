@@ -30,17 +30,9 @@ class Fetch {
         let filters = '';
         if (myInit.method === "GET" && data.data) {
             filters = `?`;
-            for (const key in data.data) {
-                if (key !== "undefined"
-                    && key !== undefined
-                    && key !== ''
-                    && data.data[key] !== "undefined"
-                    && data.data[key] !== undefined
-                    && data.data[key] !== '') {
-                    filters += `${key}=${data.data[key]}&`;
-                }
-
-            }
+            data.data.forEach((value, key) => {
+                filters += `${key}=${value}&`;
+            })
             filters.substring(0, filters.length - 1);
         }
 
