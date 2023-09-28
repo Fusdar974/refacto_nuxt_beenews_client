@@ -277,14 +277,14 @@ onMounted(() => {
     }
     Fetch.requete({
         url: '/users',
-        data: {page: 1, nombre: 1000, isDesactive: false}
+        data: {page: 1, limit: 1000, isArchived: false}
     }, (resultUtil: ResponseListInterface<UserInterface>) => {
         users.value = resultUtil.documents.map(user =>
             pot.value.participants.find(participant => participant._id === user._id)
             ?? {
                 _id: user._id,
-                nom: user.nom,
-                prenom: user.prenom,
+                nom: user.name,
+                prenom: user.firstname,
                 paiementVirement: 0,
                 paiementCheque: 0,
                 paiementEspece: 0,

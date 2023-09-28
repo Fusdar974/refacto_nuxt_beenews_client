@@ -34,9 +34,9 @@ export const useAuthenticateStore = defineStore('authenticate', () => {
     const userComputed = computed(() => {
         const user: ConnectedUserInterface = {
             _id: tokenDecode.value?.userId,
-            nom: capitalyze(tokenDecode.value?.nom),
-            prenom: capitalyze(tokenDecode.value?.prenom),
-            initiales: `${tokenDecode.value?.nom.slice(0, 1)}${tokenDecode.value?.prenom.slice(0, 1)}`.toUpperCase()
+            nom: capitalyze(tokenDecode.value?.name),
+            prenom: capitalyze(tokenDecode.value?.firstname),
+            initiales: `${tokenDecode.value?.name.slice(0, 1)}${tokenDecode.value?.firstname.slice(0, 1)}`.toUpperCase()
         }
         return tokenDecode.value ? user : {
             _id: undefined,
@@ -57,9 +57,10 @@ export const useAuthenticateStore = defineStore('authenticate', () => {
     watch(tokenDecode, newTokenDecode => {
         if (newTokenDecode) {
             localStorage.setItem('idCompte', newTokenDecode.userId);
+            const rights = JSON.parse(localStorage.getItem('rights') || '[]');
             const expire = new Date((newTokenDecode.exp || 0) * 1000) < new Date();
             if (!expire) {
-                setAuthenticate(true, newTokenDecode.droits);
+                setAuthenticate(true, rights);
             } else {
                 console.error('Token expiré');
                 console.error("Connecté...:", new Date((newTokenDecode.iat || 0) * 1000));
@@ -102,12 +103,10 @@ export const useAuthenticateStore = defineStore('authenticate', () => {
         const token = localStorage.getItem('token');
         if (token) {
             tokenDecode.value = jwtDecode(token);
-            userBn.value = tokenDecode.value?.compte ?? 0
+            userBn.value = tokenDecode.value?.wallet ?? 0
             Fetch.requete({
                 url: `/users/${tokenDecode.value?.userId}`,
                 method: 'GET'
-            }, (resultUser: { user: UserInterface }) => {
-                profils.value = resultUser.user.profils?.map(profil => profil.nom) ?? []
             })
         }
     }
@@ -127,12 +126,11 @@ export const useAuthenticateStore = defineStore('authenticate', () => {
     const calculateUserBn = () => {
         Fetch.requete({url: `/users/${userComputed.value._id}`, method: 'GET'},
             (resultUser: { user: UserInterface }) => {
-                userBn.value = resultUser.user.compte ?? 0
+                userBn.value = resultUser.user.wallet ?? 0
             })
     }
 
     Fetch.setFonctionDeco(logout);
-
 
     return {
         isAuthenticated,

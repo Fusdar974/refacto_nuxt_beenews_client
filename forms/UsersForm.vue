@@ -131,15 +131,13 @@ onBeforeMount(() => {
             })
     } else {
         selectedUser.value = {
-            isDesactive: false,
-            nom: "",
-            prenom: "",
-            surnom: "",
-            profils: [],
-            mail: "",
-            compte: 0,
+            isArchived: false,
+            name: "",
+            firstname: "",
+            email: "",
+            role: "",
+            wallet: 0,
             password: "",
-            supprimable: true,
         }
     }
     Fetch.requete(

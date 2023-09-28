@@ -140,7 +140,7 @@ const {putSnackBarMessage} = useSnackbarStore()
 
 /** COMPUTED */
 const clientBNComputed = computed(() => {
-    const clientBN = (utilisateur.value?.compte ?? 0) + (totalPanierEuros.value / valeurPoint.value)
+    const clientBN = (utilisateur.value?.wallet ?? 0) + (totalPanierEuros.value / valeurPoint.value)
     if (clientBN < formatToNumber(paiementCompte.value)) {
         paiementCompte.value = clientBN
     }
@@ -152,7 +152,7 @@ const clientBNComputed = computed(() => {
 /**
  * Modifie le step en cas de modification du panier
  * Modifie la valeur du champ compte en cas de modification du panier ou du client
- * Calcule panier payable si CLient connecté
+ * Calcul panier payable si CLient connecté
  */
 watch([utilisateur, totalPanierBeeNews, userBn], (newValue, oldValue) => {
     if (newValue[0] === oldValue[0]) {
@@ -165,7 +165,6 @@ watch([utilisateur, totalPanierBeeNews, userBn], (newValue, oldValue) => {
     }
 })
 
-
 /** LIFECYCLE */
 onBeforeMount(() => {
     isLoading.value = true
@@ -173,7 +172,7 @@ onBeforeMount(() => {
         valeurPoint.value = Number(resultBN.valeur)
         Fetch.requete({
             url: '/users',
-            data: {page: 1, nombre: 1000, isDesactive: false}
+            data: {page: 1, limit: 1000, isArchived: false}, method: 'GET'
         }, (resultUtil: ResponseListInterface<UserInterface>) => {
             utilisateurs.value = resultUtil.documents
             if (!isOpenSoumComputed.value) {
